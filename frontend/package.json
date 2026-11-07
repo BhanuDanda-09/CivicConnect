@@ -1,5 +1,5 @@
 {
-  "name": "smart-civic-complaint-frontend",
+  "name": "civicconnect-frontend",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -15,6 +15,7 @@
     "lucide-react": "^0.460.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-hot-toast": "^2.4.1",
     "react-leaflet": "^4.2.1",
     "react-router-dom": "^6.27.0",
     "recharts": "^2.13.3"
