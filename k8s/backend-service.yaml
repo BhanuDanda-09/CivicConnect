@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: civic-backend-service
+  labels:
+    app: civic-complaint
+    tier: backend
+spec:
+  type: ClusterIP
+  selector:
+    app: civic-complaint
+    tier: backend
+  ports:
+    - name: http
+      port: 5000
+      targetPort: 5000
