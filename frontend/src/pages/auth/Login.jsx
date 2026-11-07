@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/common/Button';
-import { Mail, Lock, Eye, EyeOff, Shield, User, HardHat, AlertCircle } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, Shield, User, HardHat, AlertCircle, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Login() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const sessionExpired = searchParams.get('sessionExpired') === 'true';
 
   const [formData, setFormData] = useState({
     email: '',
@@ -35,33 +37,76 @@ export default function Login() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleLoginSuccess = (user, isDemo = false) => {
+    if (isDemo) {
+      toast.success(`Welcome back, ${user.name}! (Offline Demo Mode)`);
+    } else {
+      toast.success(`Welcome back, ${user.name}!`);
+    }
+
+    if (user.role === 'admin') {
+      navigate('/admin/dashboard');
+    } else if (user.role === 'worker') {
+      navigate('/worker/dashboard');
+    } else {
+      navigate('/citizen/dashboard');
+    }
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const res = login(formData.email, formData.password);
-      setIsSubmitting(false);
-      toast.success(`Welcome back, ${res.user.name}! (Demo Mode)`);
+    setErrors({});
 
-      if (res.user.role === 'admin') navigate('/admin/dashboard');
-      else if (res.user.role === 'worker') navigate('/worker/dashboard');
-      else navigate('/citizen/dashboard');
-    }, 400);
+    try {
+      const res = await login(formData.email, formData.password);
+      if (res.success) {
+        handleLoginSuccess(res.user, res.isDemoFallback);
+      } else {
+        const errorMsg = res.error || 'Invalid email or password';
+        setErrors({ form: errorMsg });
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Login failed';
+      setErrors({ form: errorMsg });
+      toast.error(errorMsg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleQuickDemoLogin = (role) => {
+  const handleQuickDemoLogin = async (role) => {
     let email = 'citizen@civicconnect.org';
-    if (role === 'admin') email = 'admin@civicconnect.org';
-    if (role === 'worker') email = 'worker@civicconnect.org';
+    let password = 'Citizen@12345';
 
-    const res = login(email, 'demo1234', role);
-    toast.success(`Logged in as Demo ${res.user.role.toUpperCase()}!`);
+    if (role === 'admin') {
+      email = 'admin@civicconnect.org';
+      password = 'Admin@12345';
+    } else if (role === 'worker') {
+      email = 'worker@civicconnect.org';
+      password = 'Worker@12345';
+    }
 
-    if (role === 'admin') navigate('/admin/dashboard');
-    else if (role === 'worker') navigate('/worker/dashboard');
-    else navigate('/citizen/dashboard');
+    setFormData({ email, password, rememberMe: true });
+    setIsSubmitting(true);
+    setErrors({});
+
+    try {
+      const res = await login(email, password, role);
+      if (res.success) {
+        handleLoginSuccess(res.user, res.isDemoFallback);
+      } else {
+        setErrors({ form: res.error || 'Authentication failed' });
+        toast.error(res.error || 'Authentication failed');
+      }
+    } catch (err) {
+      toast.error('Quick login failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -84,49 +129,70 @@ export default function Login() {
             Sign in to your account
           </h2>
           <p className="text-xs text-slate-500">
-            Access your personalized municipal dashboard or register a new account.
+            Access your civic complaint dashboard or manage city infrastructure repairs.
           </p>
         </div>
+
+        {/* Session Expired Notice */}
+        {sessionExpired && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start space-x-2 text-amber-800 text-xs">
+            <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+            <span>Your session has expired. Please log in again to continue.</span>
+          </div>
+        )}
+
+        {/* Form-level Error Message */}
+        {errors.form && (
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start space-x-2 text-rose-800 text-xs">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <span>{errors.form}</span>
+          </div>
+        )}
 
         {/* Quick Demo Access Bar */}
         <div className="bg-white rounded-2xl border border-sky-200/80 p-4 shadow-xs space-y-2.5">
           <div className="flex items-center justify-between text-xs">
             <span className="font-bold text-sky-900 flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              One-Click Demo Personas:
+              One-Click Seeded Personas:
             </span>
-            <span className="text-[10px] text-slate-400 font-mono">Phase 2 Demo</span>
+            <span className="text-[10px] bg-sky-100 text-sky-800 px-2 py-0.5 rounded-full font-medium">
+              JWT / RBAC Ready
+            </span>
           </div>
 
           <div className="grid grid-cols-3 gap-2">
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => handleQuickDemoLogin('citizen')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition-all text-center group cursor-pointer"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition-all text-center group cursor-pointer disabled:opacity-50"
             >
               <User className="w-4 h-4 text-sky-600 group-hover:scale-110 transition-transform mb-1" />
               <span className="text-[11px] font-bold text-slate-800">Citizen</span>
-              <span className="text-[9px] text-slate-400">Rahul S.</span>
+              <span className="text-[9px] text-slate-400 font-mono">Citizen@12345</span>
             </button>
 
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => handleQuickDemoLogin('admin')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-center group cursor-pointer"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-indigo-500 hover:bg-indigo-50/50 transition-all text-center group cursor-pointer disabled:opacity-50"
             >
               <Shield className="w-4 h-4 text-indigo-600 group-hover:scale-110 transition-transform mb-1" />
               <span className="text-[11px] font-bold text-slate-800">Admin</span>
-              <span className="text-[9px] text-slate-400">Priya D.</span>
+              <span className="text-[9px] text-slate-400 font-mono">Admin@12345</span>
             </button>
 
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={() => handleQuickDemoLogin('worker')}
-              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 transition-all text-center group cursor-pointer"
+              className="flex flex-col items-center justify-center p-2 rounded-xl border border-slate-200 hover:border-amber-500 hover:bg-amber-50/50 transition-all text-center group cursor-pointer disabled:opacity-50"
             >
               <HardHat className="w-4 h-4 text-amber-600 group-hover:scale-110 transition-transform mb-1" />
               <span className="text-[11px] font-bold text-slate-800">Worker</span>
-              <span className="text-[9px] text-slate-400">Ramesh P.</span>
+              <span className="text-[9px] text-slate-400 font-mono">Worker@12345</span>
             </button>
           </div>
         </div>
@@ -203,7 +269,7 @@ export default function Login() {
               isLoading={isSubmitting}
               className="w-full"
             >
-              Sign In (Demo)
+              Sign In
             </Button>
           </form>
 
@@ -215,10 +281,11 @@ export default function Login() {
           </div>
         </div>
 
-        {/* Security / Phase Notice */}
-        <p className="text-center text-[11px] text-slate-400">
-          Phase 2 Notice: Real JWT and bcrypt verification will be connected in Phase 4.
-        </p>
+        {/* Security / Architecture Notice */}
+        <div className="p-3 bg-slate-100 rounded-xl flex items-center justify-center space-x-2 text-[11px] text-slate-500">
+          <Info className="w-3.5 h-3.5 text-slate-400" />
+          <span>Protected by bcrypt hashing & JWT token-based RBAC verification</span>
+        </div>
       </div>
     </div>
   );

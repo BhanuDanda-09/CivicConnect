@@ -51,3 +51,4 @@ describe('CivicConnect Express Server & Health API Tests', () => {
     expect(res.headers['x-dns-prefetch-control']).toBe('off');
   });
 });
+

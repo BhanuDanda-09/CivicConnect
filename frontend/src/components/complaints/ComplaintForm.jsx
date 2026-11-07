@@ -300,3 +300,4 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     </form>
   );
 }
+

@@ -15,3 +15,4 @@ export default function Loader({ message = 'Loading civic data...', size = 'md' 
     </div>
   );
 }
+

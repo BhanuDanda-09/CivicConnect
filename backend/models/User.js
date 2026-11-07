@@ -3,6 +3,14 @@
 // ==============================================================================
 
 const mongoose = require('mongoose');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+
+const ROLES = {
+  CITIZEN: 'citizen',
+  ADMIN: 'admin',
+  WORKER: 'worker',
+};
 
 const userSchema = new mongoose.Schema(
   {
@@ -29,7 +37,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: [true, 'Password is required'],
       minlength: [6, 'Password must be at least 6 characters long'],
-      select: false, // Prevents password from being returned in normal queries
+      select: false, // Excluded from default Mongoose queries
     },
     mobileNumber: {
       type: String,
@@ -63,6 +71,7 @@ const userSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: true,
+      index: true,
     },
   },
   {
@@ -70,13 +79,49 @@ const userSchema = new mongoose.Schema(
   }
 );
 
-// Method to remove sensitive fields when converting document to JSON
+// Pre-save hook: Hash password with bcryptjs (salt rounds = 12) before saving to MongoDB
+userSchema.pre('save', async function (next) {
+  if (!this.isModified('password')) {
+    return next();
+  }
+
+  try {
+    const salt = await bcrypt.genSalt(12);
+    this.password = await bcrypt.hash(this.password, salt);
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Instance method: Compare plain-text password with stored bcrypt hash
+userSchema.methods.comparePassword = async function (enteredPassword) {
+  return await bcrypt.compare(enteredPassword, this.password);
+};
+
+// Instance method: Generate signed JWT authentication token
+userSchema.methods.generateAuthToken = function () {
+  const payload = {
+    id: this._id,
+    role: this.role,
+    email: this.email,
+  };
+
+  const secret = process.env.JWT_SECRET || 'super_secret_jwt_key_civicconnect_change_in_production';
+  const expiresIn = process.env.JWT_EXPIRES_IN || process.env.JWT_EXPIRE || '1d';
+
+  return jwt.sign(payload, secret, { expiresIn });
+};
+
+// Sanitize user object for JSON serialization (never leaks password or __v)
 userSchema.methods.toJSON = function () {
   const userObject = this.toObject();
   delete userObject.password;
   delete userObject.__v;
   return userObject;
 };
+
+userSchema.statics.ROLES = ROLES;
 
 const User = mongoose.model('User', userSchema);
 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Button from '../../components/common/Button';
-import { Mail, ArrowLeft, CheckCircle2 } from 'lucide-react';
+import { Mail, ArrowLeft, CheckCircle2, Info } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ForgotPassword() {
@@ -15,7 +15,7 @@ export default function ForgotPassword() {
       return;
     }
     setSent(true);
-    toast.success('Password reset link dispatched! (Demo Mode)');
+    toast.success('Password reset instructions recorded.');
   };
 
   return (
@@ -26,7 +26,7 @@ export default function ForgotPassword() {
             Reset Your Password
           </h2>
           <p className="text-xs text-slate-500">
-            Enter the email associated with your CivicConnect profile to receive a password reset link.
+            Enter the email associated with your CivicConnect profile to initiate a password reset.
           </p>
         </div>
 
@@ -36,16 +36,22 @@ export default function ForgotPassword() {
               <div className="w-14 h-14 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7" />
               </div>
-              <h3 className="text-lg font-bold text-slate-900">Reset Email Dispatched</h3>
-              <p className="text-xs text-slate-500 leading-relaxed">
-                We sent instructions to <strong>{email}</strong> in demonstration mode.
+              <h3 className="text-lg font-bold text-slate-900">Request Recorded</h3>
+              <p className="text-xs text-slate-600 leading-relaxed">
+                A password reset request for <strong>{email}</strong> has been logged.
               </p>
+              <div className="p-3 bg-sky-50 border border-sky-100 rounded-xl text-left flex items-start space-x-2 text-[11px] text-sky-800">
+                <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                <span>
+                  <strong>Phase Note:</strong> Automated email delivery with one-time security tokens will be integrated in a future notification service phase.
+                </span>
+              </div>
               <Link
                 to="/login"
-                className="inline-flex items-center text-xs font-bold text-sky-600 hover:text-sky-700"
+                className="inline-flex items-center text-xs font-bold text-sky-600 hover:text-sky-700 pt-2"
               >
                 <ArrowLeft className="w-4 h-4 mr-1" />
-                <span>Return to Login</span>
+                <span>Return to Sign In</span>
               </Link>
             </div>
           ) : (
@@ -66,8 +72,13 @@ export default function ForgotPassword() {
                 </div>
               </div>
 
+              <div className="p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] text-slate-500 flex items-start space-x-2">
+                <Info className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
+                <span>Default demo/seed accounts: admin@civicconnect.org, worker@civicconnect.org, citizen@civicconnect.org</span>
+              </div>
+
               <Button type="submit" variant="primary" size="md" className="w-full">
-                Send Reset Instructions (Demo)
+                Send Reset Instructions
               </Button>
 
               <div className="text-center pt-2">

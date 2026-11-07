@@ -54,3 +54,4 @@ const complaintHistorySchema = new mongoose.Schema(
 const ComplaintHistory = mongoose.model('ComplaintHistory', complaintHistorySchema);
 
 module.exports = ComplaintHistory;
+

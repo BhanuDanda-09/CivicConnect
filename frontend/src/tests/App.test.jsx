@@ -28,3 +28,4 @@ describe('CivicConnect Platform - Core Frontend Tests', () => {
     expect(Object.keys(COMPLAINT_STATUS).length).toBeGreaterThanOrEqual(8);
   });
 });
+

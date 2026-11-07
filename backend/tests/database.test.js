@@ -82,3 +82,4 @@ describe('CivicConnect Database & Mongoose Model Validation Tests', () => {
     expect(errorHigh.errors.rating).toBeDefined();
   });
 });
+

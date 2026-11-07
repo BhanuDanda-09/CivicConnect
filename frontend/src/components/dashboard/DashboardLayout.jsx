@@ -28,3 +28,4 @@ export default function DashboardLayout({ children, title, subtitle, action }) {
     </div>
   );
 }
+

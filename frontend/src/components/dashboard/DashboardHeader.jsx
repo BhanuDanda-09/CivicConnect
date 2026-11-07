@@ -103,3 +103,4 @@ export default function DashboardHeader({ onMenuClick, title, subtitle, action }
     </header>
   );
 }
+

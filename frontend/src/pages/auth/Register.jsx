@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import Button from '../../components/common/Button';
-import { User, Mail, Phone, Lock, MapPin, CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, Mail, Phone, Lock, MapPin, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Register() {
@@ -19,6 +19,7 @@ export default function Register() {
     terms: false,
   });
 
+  const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,7 +36,7 @@ export default function Register() {
     } else if (!/^\+?[0-9\s-]{10,14}$/.test(formData.phone.trim())) {
       errs.phone = 'Please enter a valid 10-digit mobile number';
     }
-    if (!formData.address.trim()) errs.address = 'Residential street address is required';
+    if (!formData.address.trim()) errs.address = 'Residential street address or ward is required';
     if (!formData.password) {
       errs.password = 'Password is required';
     } else if (formData.password.length < 6) {
@@ -52,17 +53,41 @@ export default function Register() {
     return Object.keys(errs).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validate()) return;
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      register(formData);
+    setErrors({});
+
+    try {
+      const res = await register({
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
+        address: formData.address.trim(),
+        password: formData.password,
+      });
+
+      if (res.success) {
+        toast.success(
+          res.isDemoFallback
+            ? 'Account created in offline demo mode! Welcome to CivicConnect.'
+            : 'Registration successful! Welcome to CivicConnect.'
+        );
+        navigate('/citizen/dashboard');
+      } else {
+        const errorMsg = res.error || 'Registration failed. Please try again.';
+        setErrors({ form: errorMsg });
+        toast.error(errorMsg);
+      }
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || err.message || 'Registration failed';
+      setErrors({ form: errorMsg });
+      toast.error(errorMsg);
+    } finally {
       setIsSubmitting(false);
-      toast.success('Registration successful! Welcome to CivicConnect.');
-      navigate('/citizen/dashboard');
-    }, 500);
+    }
   };
 
   return (
@@ -88,6 +113,14 @@ export default function Register() {
             Create an account to report neighborhood problems and receive real-time repair notifications.
           </p>
         </div>
+
+        {/* Form-level Error Message */}
+        {errors.form && (
+          <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl flex items-start space-x-2 text-rose-800 text-xs">
+            <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+            <span>{errors.form}</span>
+          </div>
+        )}
 
         {/* Registration Card */}
         <div className="bg-white rounded-3xl border border-slate-200/90 p-8 shadow-xs">
@@ -174,12 +207,19 @@ export default function Register() {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Min 6 characters"
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full pl-10 pr-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full pl-10 pr-10 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
                 {errors.password && <p className="mt-1 text-xs text-rose-500">{errors.password}</p>}
               </div>
@@ -191,7 +231,7 @@ export default function Register() {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     placeholder="Re-enter password"
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -228,7 +268,7 @@ export default function Register() {
               isLoading={isSubmitting}
               className="w-full"
             >
-              Complete Registration (Demo)
+              Complete Registration
             </Button>
           </form>
 

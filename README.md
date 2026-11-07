@@ -133,9 +133,9 @@ To run and develop this project locally on Windows:
 ## 📋 6. 15-Phase Development Roadmap
 
 - [x] **Phase 1: Project initialization and folder structure** *(Completed)*
-- [ ] **Phase 2: Frontend setup and UI development**
-- [ ] **Phase 3: Backend setup and MongoDB connection**
-- [ ] **Phase 4: Authentication and role-based access**
+- [x] **Phase 2: Frontend setup and UI development** *(Completed)*
+- [x] **Phase 3: Backend setup and MongoDB connection** *(Completed)*
+- [x] **Phase 4: Authentication and role-based access control (RBAC)** *(Completed)*
 - [ ] **Phase 5: Complaint management functionality**
 - [ ] **Phase 6: Admin and worker dashboards**
 - [ ] **Phase 7: Frontend-backend integration**
