@@ -118,3 +118,4 @@ describe('Frontend Authentication & RBAC Suite', () => {
     });
   });
 });
+

@@ -364,3 +364,4 @@ describe('CivicConnect Phase 4 - Authentication & RBAC Test Suite', () => {
     });
   });
 });
+

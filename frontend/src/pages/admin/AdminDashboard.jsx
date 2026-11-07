@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import StatCard from '../../components/dashboard/StatCard';
 import ComplaintTable from '../../components/complaints/ComplaintTable';
 import { getStoredComplaints, MOCK_ANALYTICS } from '../../utils/mockData';
+import { adminComplaintAPI } from '../../services/api';
 import {
   FileText,
   Clock,
@@ -33,7 +34,20 @@ export default function AdminDashboard() {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    setComplaints(getStoredComplaints());
+    const loadComplaints = async () => {
+      try {
+        const res = await adminComplaintAPI.getAll({ limit: 100 });
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setComplaints(res.data.data);
+          return;
+        }
+      } catch (err) {
+        // Fallback
+      }
+      setComplaints(getStoredComplaints());
+    };
+
+    loadComplaints();
   }, []);
 
   const total = complaints.length;

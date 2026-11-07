@@ -45,7 +45,7 @@ const complaintSchema = new mongoose.Schema(
           'DRAINAGE',
           'STREETLIGHTS',
           'PUBLIC_SANITATION',
-          'OTHER'
+          'OTHER',
         ],
         message: '{VALUE} is not a recognized civic category',
       },
@@ -54,6 +54,7 @@ const complaintSchema = new mongoose.Schema(
     categoryLabel: {
       type: String,
       default: '',
+      trim: true,
     },
     location: {
       type: String,
@@ -71,6 +72,19 @@ const complaintSchema = new mongoose.Schema(
       min: [-180, 'Longitude must be between -180 and 180'],
       max: [180, 'Longitude must be between -180 and 180'],
       default: 73.8567, // Default city center
+    },
+    // GeoJSON Point location for 2dsphere indexing and spatial queries
+    // NOTE: GeoJSON coordinate order is [longitude, latitude]
+    locationGeo: {
+      type: {
+        type: String,
+        enum: ['Point'],
+        default: 'Point',
+      },
+      coordinates: {
+        type: [Number], // [longitude, latitude]
+        default: [73.8567, 18.5204],
+      },
     },
     ward: {
       type: String,
@@ -126,9 +140,26 @@ const complaintSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    imageDetails: [
+      {
+        url: { type: String, required: true },
+        publicId: { type: String, default: '' },
+      },
+    ],
     resolutionImages: {
       type: [String],
       default: [],
+    },
+    resolutionImageDetails: [
+      {
+        url: { type: String, required: true },
+        publicId: { type: String, default: '' },
+      },
+    ],
+    resolutionRemarks: {
+      type: String,
+      default: '',
+      trim: true,
     },
     rejectionReason: {
       type: String,
@@ -143,8 +174,35 @@ const complaintSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+// 2dsphere index for geospatial queries
+complaintSchema.index({ locationGeo: '2dsphere' });
+complaintSchema.index({ createdAt: -1 });
+
+// Pre-save hook: Sync GeoJSON coordinates with latitude & longitude fields
+complaintSchema.pre('save', function (next) {
+  if (this.longitude !== undefined && this.latitude !== undefined) {
+    this.locationGeo = {
+      type: 'Point',
+      coordinates: [Number(this.longitude), Number(this.latitude)],
+    };
+  }
+  next();
+});
+
+// Virtual helper: primary image URL for immediate frontend card rendering
+complaintSchema.virtual('imageUrl').get(function () {
+  return this.images && this.images.length > 0 ? this.images[0] : '';
+});
+
+// Virtual helper: friendly identifier
+complaintSchema.virtual('id').get(function () {
+  return this.complaintId || this._id?.toString();
+});
 
 // Static generator helper for standard CivicConnect ID format: CC-YYYY-XXXX
 complaintSchema.statics.generateComplaintId = async function () {

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getStoredComplaints, updateComplaintStatusInStore } from '../../utils/mockData';
+import { workerComplaintAPI } from '../../services/api';
 import StatusBadge from '../../components/common/StatusBadge';
 import ComplaintTimeline from '../../components/complaints/ComplaintTimeline';
 import MapPicker from '../../components/common/MapPicker';
@@ -18,7 +19,8 @@ import {
   X,
   AlertCircle,
   HardHat,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -28,32 +30,61 @@ export default function TaskDetails() {
   const { user } = useAuth();
 
   const [task, setTask] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [completionNotes, setCompletionNotes] = useState('');
+  const [completionImageFile, setCompletionImageFile] = useState(null);
   const [completionImagePreview, setCompletionImagePreview] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
-    const list = getStoredComplaints();
-    const found = list.find((c) => c.id === id);
-    setTask(found || null);
+    const fetchTask = async () => {
+      setIsLoading(true);
+      try {
+        const res = await workerComplaintAPI.getById(id);
+        if (res.data?.success && res.data.data) {
+          const comp = res.data.data;
+          setTask({
+            ...comp,
+            id: comp.complaintId || comp._id,
+            imageUrl: comp.imageUrl || (comp.images && comp.images[0]) || '',
+            coordinates: comp.latitude && comp.longitude ? { lat: comp.latitude, lng: comp.longitude } : { lat: 18.5204, lng: 73.8567 },
+          });
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend unavailable; loading local stored task:', err.message);
+      }
+
+      // Offline fallback
+      const list = getStoredComplaints();
+      const found = list.find((c) => c.id === id || c.complaintId === id);
+      setTask(found || null);
+      setIsLoading(false);
+    };
+
+    fetchTask();
   }, [id]);
 
-  if (!task) {
-    return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
-        <AlertCircle className="w-10 h-10 text-amber-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-800">Task Not Found</h2>
-        <Link to="/worker/tasks" className="text-xs font-bold text-sky-600 hover:underline">
-          Return to Task Registry
-        </Link>
-      </div>
-    );
-  }
-
   // Action: Mark as IN_PROGRESS
-  const handleStartWork = () => {
+  const handleStartWork = async () => {
     setIsUpdating(true);
-    setTimeout(() => {
+    try {
+      const res = await workerComplaintAPI.startWork(task.id || task._id, {
+        remarks: 'Field crew arrived on site. Commenced repair & remediation work.',
+      });
+      if (res.data?.success) {
+        const updated = res.data.data;
+        setTask((prev) => ({
+          ...prev,
+          status: updated.status,
+        }));
+        toast.success(`Task #${task.id} marked as IN PROGRESS!`);
+        setIsUpdating(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('API startWork failed; updating local mock store:', err.message);
       const updated = updateComplaintStatusInStore(
         task.id,
         'IN_PROGRESS',
@@ -62,16 +93,21 @@ export default function TaskDetails() {
       );
       if (updated) {
         setTask(updated);
-        toast.success(`Task #${task.id} marked as IN PROGRESS!`);
+        toast.success(`Task #${task.id} marked as IN PROGRESS (Offline Demo)!`);
       }
-      setIsUpdating(false);
-    }, 400);
+    }
+    setIsUpdating(false);
   };
 
   // Image Upload Handler for Completion Proof
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error('Evidence photo must be under 5MB');
+        return;
+      }
+      setCompletionImageFile(file);
       const reader = new FileReader();
       reader.onloadend = () => {
         setCompletionImagePreview(reader.result);
@@ -81,7 +117,7 @@ export default function TaskDetails() {
   };
 
   // Action: Mark as RESOLVED
-  const handleCompleteWork = (e) => {
+  const handleCompleteWork = async (e) => {
     e.preventDefault();
     if (!completionNotes.trim()) {
       toast.error('Please describe the work completed in the notes field');
@@ -89,7 +125,35 @@ export default function TaskDetails() {
     }
 
     setIsUpdating(true);
-    setTimeout(() => {
+    try {
+      const formData = new FormData();
+      formData.append('resolutionRemarks', completionNotes.trim());
+      if (completionImageFile) {
+        formData.append('resolutionImages', completionImageFile);
+      } else if (completionImagePreview) {
+        formData.append('resolutionImageUrl', completionImagePreview);
+      } else {
+        formData.append(
+          'resolutionImageUrl',
+          'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80'
+        );
+      }
+
+      const res = await workerComplaintAPI.resolve(task.id || task._id, formData);
+      if (res.data?.success) {
+        const updated = res.data.data;
+        setTask((prev) => ({
+          ...prev,
+          status: updated.status,
+          resolutionRemarks: updated.resolutionRemarks,
+          resolutionImages: updated.resolutionImages,
+        }));
+        toast.success(`Task #${task.id} marked as RESOLVED with proof photo!`);
+        setIsUpdating(false);
+        return;
+      }
+    } catch (err) {
+      console.warn('API resolve failed; updating local mock store:', err.message);
       const proofUrl =
         completionImagePreview ||
         'https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80';
@@ -104,11 +168,20 @@ export default function TaskDetails() {
 
       if (updated) {
         setTask(updated);
-        toast.success(`Task #${task.id} marked as RESOLVED with proof photo!`);
+        toast.success(`Task #${task.id} marked as RESOLVED (Offline Demo)!`);
       }
-      setIsUpdating(false);
-    }, 500);
+    }
+    setIsUpdating(false);
   };
+
+  if (isLoading) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-2">
+        <Loader2 className="w-8 h-8 animate-spin text-amber-600" />
+        <p className="text-xs font-medium">Loading field task dossier...</p>
+      </div>
+    );
+  }
 
   const priorityConfig = PRIORITY_LEVELS[task.priority] || PRIORITY_LEVELS.MEDIUM;
   const isResolved = task.status === 'RESOLVED' || task.status === 'CITIZEN_FEEDBACK';

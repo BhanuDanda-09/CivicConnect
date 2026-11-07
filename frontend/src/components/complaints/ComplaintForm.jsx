@@ -83,6 +83,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       priority: formData.priority,
       description: formData.description,
       coordinates: formData.coordinates,
+      imageFile: formData.imageFile,
       imageUrl:
         formData.imagePreview ||
         'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',

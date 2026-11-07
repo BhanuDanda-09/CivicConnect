@@ -1,17 +1,36 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getStoredComplaints } from '../../utils/mockData';
+import { complaintAPI } from '../../services/api';
 import ComplaintTable from '../../components/complaints/ComplaintTable';
 import ComplaintCard from '../../components/complaints/ComplaintCard';
-import { PlusCircle, LayoutGrid, ListFilter, ClipboardList } from 'lucide-react';
+import { PlusCircle, LayoutGrid, ListFilter, ClipboardList, Loader2 } from 'lucide-react';
 
 export default function MyComplaints() {
   const [complaints, setComplaints] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ALL');
   const [viewMode, setViewMode] = useState('cards'); // 'cards' or 'table'
 
   useEffect(() => {
-    setComplaints(getStoredComplaints());
+    const fetchComplaints = async () => {
+      setIsLoading(true);
+      try {
+        const res = await complaintAPI.getMyComplaints();
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setComplaints(res.data.data);
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        // Fallback to local stored complaints if backend is unreachable or offline
+        console.warn('Backend unavailable; loading local stored complaints:', err.message);
+      }
+      setComplaints(getStoredComplaints());
+      setIsLoading(false);
+    };
+
+    fetchComplaints();
   }, []);
 
   const tabFiltered = complaints.filter((c) => {
@@ -117,22 +136,39 @@ export default function MyComplaints() {
         </div>
       </div>
 
-      {/* Display Content */}
-      {viewMode === 'cards' ? (
+      {/* Loading state */}
+      {isLoading ? (
+        <div className="py-16 flex flex-col items-center justify-center text-slate-400 space-y-2">
+          <Loader2 className="w-7 h-7 animate-spin text-sky-600" />
+          <p className="text-xs font-medium">Fetching complaints from municipal registry...</p>
+        </div>
+      ) : viewMode === 'cards' ? (
         tabFiltered.length === 0 ? (
           <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center text-slate-500 text-xs">
-            No complaints found in this tab.
+            No complaints found in this category.
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {tabFiltered.map((c) => (
-              <ComplaintCard key={c.id} complaint={c} linkPrefix="/citizen/complaints" />
+              <ComplaintCard
+                key={c.complaintId || c._id || c.id}
+                complaint={{
+                  ...c,
+                  id: c.complaintId || c.id || c._id,
+                  imageUrl: c.imageUrl || (c.images && c.images[0]) || '',
+                }}
+                linkPrefix="/citizen/complaints"
+              />
             ))}
           </div>
         )
       ) : (
         <ComplaintTable
-          complaints={tabFiltered}
+          complaints={tabFiltered.map((c) => ({
+            ...c,
+            id: c.complaintId || c.id || c._id,
+            imageUrl: c.imageUrl || (c.images && c.images[0]) || '',
+          }))}
           linkPrefix="/citizen/complaints"
           showWorker={true}
         />
@@ -140,4 +176,3 @@ export default function MyComplaints() {
     </div>
   );
 }
-

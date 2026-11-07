@@ -6,11 +6,8 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
-  headers: {
-    'Content-Type': 'application/json',
-  },
   withCredentials: true,
-  timeout: 10000,
+  timeout: 15000,
 });
 
 // Request Interceptor: Attach JWT Bearer token from localStorage
@@ -20,6 +17,14 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+
+    // If payload is FormData, do not set application/json
+    if (config.data instanceof FormData) {
+      delete config.headers['Content-Type'];
+    } else if (!config.headers['Content-Type']) {
+      config.headers['Content-Type'] = 'application/json';
+    }
+
     return config;
   },
   (error) => Promise.reject(error)
@@ -50,12 +55,39 @@ api.interceptors.response.use(
   }
 );
 
-// Authentication API Helper Functions
+// Authentication API
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
   getMe: () => api.get('/auth/me'),
   logout: () => api.post('/auth/logout'),
+};
+
+// Citizen Complaint API
+export const complaintAPI = {
+  create: (complaintData) => api.post('/complaints', complaintData),
+  getMyComplaints: (params) => api.get('/complaints/my', { params }),
+  getById: (id) => api.get(`/complaints/${id}`),
+  update: (id, updateData) => api.patch(`/complaints/${id}`, updateData),
+  getHistory: (id) => api.get(`/complaints/${id}/history`),
+};
+
+// Municipal Admin Complaint API
+export const adminComplaintAPI = {
+  getAll: (params) => api.get('/admin/complaints', { params }),
+  getStats: () => api.get('/admin/complaints/stats'),
+  verify: (id, data = {}) => api.patch(`/admin/complaints/${id}/verify`, data),
+  reject: (id, data) => api.patch(`/admin/complaints/${id}/reject`, data),
+  assign: (id, data) => api.patch(`/admin/complaints/${id}/assign`, data),
+  changePriority: (id, data) => api.patch(`/admin/complaints/${id}/priority`, data),
+};
+
+// Field Worker Complaint API
+export const workerComplaintAPI = {
+  getAssigned: (params) => api.get('/workers/complaints', { params }),
+  getById: (id) => api.get(`/workers/complaints/${id}`),
+  startWork: (id, data = {}) => api.patch(`/workers/complaints/${id}/start`, data),
+  resolve: (id, resolutionData) => api.patch(`/workers/complaints/${id}/resolve`, resolutionData),
 };
 
 export default api;

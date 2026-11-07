@@ -1,0 +1,281 @@
+// ==============================================================================
+// Citizen & Shared Complaint Controller (complaintController.js)
+// ==============================================================================
+
+const mongoose = require('mongoose');
+const Complaint = require('../models/Complaint');
+const ComplaintHistory = require('../models/ComplaintHistory');
+const { uploadMultipleFiles } = require('../services/cloudinaryService');
+const ApiError = require('../utils/ApiError');
+const asyncHandler = require('../utils/asyncHandler');
+
+/**
+ * Finds a complaint by either MongoDB ObjectId or custom complaintId (e.g., CC-2026-0001)
+ * @param {string} idOrComplaintId
+ */
+const findComplaintByIdentifier = async (idOrComplaintId) => {
+  if (mongoose.Types.ObjectId.isValid(idOrComplaintId)) {
+    const byMongoId = await Complaint.findById(idOrComplaintId);
+    if (byMongoId) return byMongoId;
+  }
+  return await Complaint.findOne({ complaintId: idOrComplaintId });
+};
+
+/**
+ * @desc    Submit a new citizen complaint (with photo upload & geolocation)
+ * @route   POST /api/complaints
+ * @access  Private (Citizen only)
+ */
+const createComplaint = asyncHandler(async (req, res) => {
+  const {
+    title,
+    description,
+    category,
+    categoryLabel,
+    location,
+    latitude,
+    longitude,
+    ward,
+    landmark,
+    priority,
+    imageUrl, // optional fallback if submitted via JSON
+  } = req.body;
+
+  // Process uploaded images via Cloudinary service
+  let uploadedImages = [];
+  if (req.files && req.files.length > 0) {
+    uploadedImages = await uploadMultipleFiles(req.files, 'civicconnect/complaints');
+  }
+
+  // Combine Cloudinary URLs or fallback provided image
+  const images = uploadedImages.map((img) => img.url);
+  const imageDetails = uploadedImages.map((img) => ({
+    url: img.url,
+    publicId: img.publicId,
+  }));
+
+  if (images.length === 0 && imageUrl) {
+    images.push(imageUrl);
+    imageDetails.push({ url: imageUrl, publicId: '' });
+  }
+
+  // Generate unique complaint ID: CC-YYYY-XXXX
+  const complaintId = await Complaint.generateComplaintId();
+
+  const latNum = latitude !== undefined && latitude !== '' ? Number(latitude) : 18.5204;
+  const lngNum = longitude !== undefined && longitude !== '' ? Number(longitude) : 73.8567;
+
+  // Create new complaint document in MongoDB
+  const complaint = new Complaint({
+    complaintId,
+    title,
+    description,
+    category,
+    categoryLabel: categoryLabel || category,
+    location,
+    latitude: latNum,
+    longitude: lngNum,
+    locationGeo: {
+      type: 'Point',
+      coordinates: [lngNum, latNum],
+    },
+    ward,
+    landmark: landmark || '',
+    priority: priority || 'MEDIUM',
+    status: 'SUBMITTED',
+    citizen: req.user._id, // Enforce authenticated citizen ownership
+    images,
+    imageDetails,
+  });
+
+  await complaint.save();
+
+  // Create initial audit trail history record
+  await ComplaintHistory.create({
+    complaint: complaint._id,
+    action: 'SUBMITTED',
+    previousStatus: null,
+    newStatus: 'SUBMITTED',
+    changedBy: req.user._id,
+    remarks: 'Complaint logged and submitted to the municipal verification desk.',
+    timestamp: new Date(),
+  });
+
+  res.status(201).json({
+    success: true,
+    message: 'Complaint submitted successfully',
+    data: complaint,
+  });
+});
+
+/**
+ * @desc    Get all complaints submitted by the authenticated citizen
+ * @route   GET /api/complaints/my
+ * @access  Private (Citizen only)
+ */
+const getMyComplaints = asyncHandler(async (req, res) => {
+  const { status, category } = req.query;
+
+  const query = { citizen: req.user._id };
+  if (status) query.status = status;
+  if (category) query.category = category;
+
+  const complaints = await Complaint.find(query)
+    .sort({ createdAt: -1 })
+    .populate('assignedWorker', 'fullName email mobileNumber avatar');
+
+  res.status(200).json({
+    success: true,
+    count: complaints.length,
+    data: complaints,
+  });
+});
+
+/**
+ * @desc    Get single complaint details (Owner, Admin, or Assigned Worker)
+ * @route   GET /api/complaints/:id
+ * @access  Private
+ */
+const getComplaintById = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const complaint = await findComplaintByIdentifier(id);
+  if (!complaint) {
+    throw new ApiError(404, `Complaint #${id} could not be found.`);
+  }
+
+  // Authorization check: Admin, Owner, or Assigned Worker
+  const isOwner = complaint.citizen.toString() === req.user._id.toString();
+  const isAdmin = req.user.role === 'admin';
+  const isAssignedWorker =
+    complaint.assignedWorker &&
+    complaint.assignedWorker.toString() === req.user._id.toString();
+
+  if (!isOwner && !isAdmin && !isAssignedWorker) {
+    throw new ApiError(
+      403,
+      'Forbidden: You are not authorized to view the details of this complaint.'
+    );
+  }
+
+  await complaint.populate('citizen', 'fullName email mobileNumber address avatar');
+  if (complaint.assignedWorker) {
+    await complaint.populate('assignedWorker', 'fullName email mobileNumber avatar');
+  }
+
+  res.status(200).json({
+    success: true,
+    data: complaint,
+  });
+});
+
+/**
+ * @desc    Update complaint details while in SUBMITTED status
+ * @route   PATCH /api/complaints/:id
+ * @access  Private (Owner citizen or Admin)
+ */
+const updateComplaint = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const complaint = await findComplaintByIdentifier(id);
+  if (!complaint) {
+    throw new ApiError(404, `Complaint #${id} could not be found.`);
+  }
+
+  const isOwner = complaint.citizen.toString() === req.user._id.toString();
+  const isAdmin = req.user.role === 'admin';
+
+  if (!isOwner && !isAdmin) {
+    throw new ApiError(403, 'Forbidden: You can only edit complaints that you submitted.');
+  }
+
+  // Citizens can only edit while in SUBMITTED status
+  if (!isAdmin && complaint.status !== 'SUBMITTED') {
+    throw new ApiError(
+      400,
+      `Complaint cannot be edited once it has transitioned to '${complaint.status}' status.`
+    );
+  }
+
+  // Safe update fields (citizens cannot change status, citizen, or assignedWorker)
+  const allowedFields = ['title', 'description', 'landmark', 'location', 'ward', 'latitude', 'longitude'];
+  allowedFields.forEach((field) => {
+    if (req.body[field] !== undefined) {
+      complaint[field] = req.body[field];
+    }
+  });
+
+  if (req.body.latitude !== undefined && req.body.longitude !== undefined) {
+    complaint.locationGeo = {
+      type: 'Point',
+      coordinates: [Number(req.body.longitude), Number(req.body.latitude)],
+    };
+  }
+
+  await complaint.save();
+
+  // Audit history
+  await ComplaintHistory.create({
+    complaint: complaint._id,
+    action: 'DETAILS_UPDATED',
+    previousStatus: complaint.status,
+    newStatus: complaint.status,
+    changedBy: req.user._id,
+    remarks: 'Complaint details updated by citizen.',
+    timestamp: new Date(),
+  });
+
+  res.status(200).json({
+    success: true,
+    message: 'Complaint details updated successfully',
+    data: complaint,
+  });
+});
+
+/**
+ * @desc    Get chronological status audit trail for a complaint
+ * @route   GET /api/complaints/:id/history
+ * @access  Private (Owner, Admin, or Assigned Worker)
+ */
+const getComplaintHistory = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+
+  const complaint = await findComplaintByIdentifier(id);
+  if (!complaint) {
+    throw new ApiError(404, `Complaint #${id} could not be found.`);
+  }
+
+  // Authorization check
+  const isOwner = complaint.citizen.toString() === req.user._id.toString();
+  const isAdmin = req.user.role === 'admin';
+  const isAssignedWorker =
+    complaint.assignedWorker &&
+    complaint.assignedWorker.toString() === req.user._id.toString();
+
+  if (!isOwner && !isAdmin && !isAssignedWorker) {
+    throw new ApiError(
+      403,
+      'Forbidden: You are not authorized to view the history of this complaint.'
+    );
+  }
+
+  const history = await ComplaintHistory.find({ complaint: complaint._id })
+    .sort({ timestamp: 1 })
+    .populate('changedBy', 'fullName role email');
+
+  res.status(200).json({
+    success: true,
+    count: history.length,
+    data: history,
+  });
+});
+
+module.exports = {
+  createComplaint,
+  getMyComplaints,
+  getComplaintById,
+  updateComplaint,
+  getComplaintHistory,
+  findComplaintByIdentifier,
+};
+

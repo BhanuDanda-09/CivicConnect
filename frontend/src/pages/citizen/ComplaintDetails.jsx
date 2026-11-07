@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getStoredComplaints, addFeedbackInStore } from '../../utils/mockData';
+import { complaintAPI } from '../../services/api';
 import StatusBadge from '../../components/common/StatusBadge';
 import ComplaintTimeline from '../../components/complaints/ComplaintTimeline';
 import MapPicker from '../../components/common/MapPicker';
@@ -17,7 +18,8 @@ import {
   CheckCircle2,
   AlertTriangle,
   MessageSquare,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Loader2
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -25,15 +27,72 @@ export default function ComplaintDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [complaint, setComplaint] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [feedbackRating, setFeedbackRating] = useState(5);
   const [feedbackComment, setFeedbackComment] = useState('');
   const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false);
 
   useEffect(() => {
-    const list = getStoredComplaints();
-    const found = list.find((c) => c.id === id);
-    setComplaint(found || null);
+    const loadData = async () => {
+      setIsLoading(true);
+      try {
+        const [compRes, histRes] = await Promise.allSettled([
+          complaintAPI.getById(id),
+          complaintAPI.getHistory(id),
+        ]);
+
+        if (compRes.status === 'fulfilled' && compRes.value.data?.success) {
+          const comp = compRes.value.data.data;
+          const hist =
+            histRes.status === 'fulfilled' && histRes.value.data?.success
+              ? histRes.value.data.data
+              : [];
+
+          setComplaint({
+            ...comp,
+            id: comp.complaintId || comp._id,
+            imageUrl: comp.imageUrl || (comp.images && comp.images[0]) || '',
+            coordinates:
+              comp.latitude && comp.longitude
+                ? { lat: comp.latitude, lng: comp.longitude }
+                : { lat: 18.5204, lng: 73.8567 },
+            timeline:
+              hist.length > 0
+                ? hist.map((h, i) => ({
+                    step: i + 1,
+                    title: h.action || h.newStatus,
+                    status: h.newStatus,
+                    date: h.timestamp,
+                    description: h.remarks,
+                    actor: h.changedBy?.fullName || 'Municipal Officer',
+                  }))
+                : comp.timeline,
+          });
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend unavailable; loading local stored data:', err.message);
+      }
+
+      // Offline fallback
+      const list = getStoredComplaints();
+      const found = list.find((c) => c.id === id || c.complaintId === id);
+      setComplaint(found || null);
+      setIsLoading(false);
+    };
+
+    loadData();
   }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-2">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+        <p className="text-xs font-medium">Loading complaint dossier & audit timeline...</p>
+      </div>
+    );
+  }
 
   if (!complaint) {
     return (

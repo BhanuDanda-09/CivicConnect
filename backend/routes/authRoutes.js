@@ -53,3 +53,4 @@ router.get('/admin-check', protect, authorize('admin'), (req, res) => {
 });
 
 module.exports = router;
+

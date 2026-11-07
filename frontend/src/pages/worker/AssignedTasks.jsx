@@ -2,21 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { getStoredComplaints } from '../../utils/mockData';
+import { workerComplaintAPI } from '../../services/api';
 import ComplaintCard from '../../components/complaints/ComplaintCard';
 import StatusBadge from '../../components/common/StatusBadge';
 import { formatDate } from '../../utils/formatDate';
 import { PRIORITY_LEVELS } from '../../utils/constants';
-import { HardHat, MapPin, Calendar, ArrowRight, Eye, LayoutGrid, ListFilter } from 'lucide-react';
+import { HardHat, MapPin, Calendar, ArrowRight, Eye, LayoutGrid, ListFilter, Loader2 } from 'lucide-react';
 
 export default function AssignedTasks() {
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('ALL');
   const [viewMode, setViewMode] = useState('cards');
 
   useEffect(() => {
-    const list = getStoredComplaints();
-    setTasks(list);
+    const fetchTasks = async () => {
+      setIsLoading(true);
+      try {
+        const res = await workerComplaintAPI.getAssigned();
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setTasks(res.data.data);
+          setIsLoading(false);
+          return;
+        }
+      } catch (err) {
+        console.warn('Backend unavailable; loading local mock tasks:', err.message);
+      }
+      setTasks(getStoredComplaints());
+      setIsLoading(false);
+    };
+
+    fetchTasks();
   }, [user]);
 
   const filteredTasks = tasks.filter((t) => {
@@ -99,7 +116,12 @@ export default function AssignedTasks() {
       </div>
 
       {/* Content */}
-      {viewMode === 'cards' ? (
+      {isLoading ? (
+        <div className="py-16 flex flex-col items-center justify-center text-slate-400 space-y-2">
+          <Loader2 className="w-7 h-7 animate-spin text-amber-600" />
+          <p className="text-xs font-medium">Fetching dispatched worker assignments...</p>
+        </div>
+      ) : viewMode === 'cards' ? (
         filteredTasks.length === 0 ? (
           <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center text-xs text-slate-500">
             No tasks found in this category.
@@ -107,7 +129,15 @@ export default function AssignedTasks() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredTasks.map((task) => (
-              <ComplaintCard key={task.id} complaint={task} linkPrefix="/worker/tasks" />
+              <ComplaintCard
+                key={task.complaintId || task._id || task.id}
+                complaint={{
+                  ...task,
+                  id: task.complaintId || task.id || task._id,
+                  imageUrl: task.imageUrl || (task.images && task.images[0]) || '',
+                }}
+                linkPrefix="/worker/tasks"
+              />
             ))}
           </div>
         )
@@ -127,43 +157,46 @@ export default function AssignedTasks() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100 text-xs">
-                {filteredTasks.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50/80 transition-colors">
-                    <td className="py-3 px-4 font-mono font-semibold text-slate-900">
-                      {item.id}
-                    </td>
-                    <td className="py-3 px-4 max-w-xs font-medium text-slate-800 truncate">
-                      {item.title}
-                    </td>
-                    <td className="py-3 px-4 text-slate-600">
-                      {item.categoryLabel || item.category}
-                    </td>
-                    <td className="py-3 px-4 text-slate-500 max-w-xs truncate">
-                      {item.location}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span
-                        className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
-                          PRIORITY_LEVELS[item.priority]?.color || ''
-                        }`}
-                      >
-                        {item.priority}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4">
-                      <StatusBadge status={item.status} size="sm" />
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <Link
-                        to={`/worker/tasks/${item.id}`}
-                        className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors"
-                      >
-                        <Eye className="w-3.5 h-3.5" />
-                        <span>Inspect & Update</span>
-                      </Link>
-                    </td>
-                  </tr>
-                ))}
+                {filteredTasks.map((item) => {
+                  const targetId = item.complaintId || item.id || item._id;
+                  return (
+                    <tr key={targetId} className="hover:bg-slate-50/80 transition-colors">
+                      <td className="py-3 px-4 font-mono font-semibold text-slate-900">
+                        {targetId}
+                      </td>
+                      <td className="py-3 px-4 max-w-xs font-medium text-slate-800 truncate">
+                        {item.title}
+                      </td>
+                      <td className="py-3 px-4 text-slate-600">
+                        {item.categoryLabel || item.category}
+                      </td>
+                      <td className="py-3 px-4 text-slate-500 max-w-xs truncate">
+                        {item.location}
+                      </td>
+                      <td className="py-3 px-4">
+                        <span
+                          className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase ${
+                            PRIORITY_LEVELS[item.priority]?.color || ''
+                          }`}
+                        >
+                          {item.priority}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4">
+                        <StatusBadge status={item.status} size="sm" />
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <Link
+                          to={`/worker/tasks/${targetId}`}
+                          className="inline-flex items-center gap-1 px-3 py-1 rounded-lg text-xs font-bold bg-amber-500 text-slate-950 hover:bg-amber-400 transition-colors"
+                        >
+                          <Eye className="w-3.5 h-3.5" />
+                          <span>Inspect & Update</span>
+                        </Link>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -172,4 +205,3 @@ export default function AssignedTasks() {
     </div>
   );
 }
-

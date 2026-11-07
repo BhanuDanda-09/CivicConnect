@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import StatCard from '../../components/dashboard/StatCard';
 import ComplaintCard from '../../components/complaints/ComplaintCard';
 import { getStoredComplaints } from '../../utils/mockData';
+import { workerComplaintAPI } from '../../services/api';
 import {
   HardHat,
   ClipboardList,
@@ -21,17 +22,30 @@ export default function WorkerDashboard() {
   const [tasks, setTasks] = useState([]);
 
   useEffect(() => {
-    const list = getStoredComplaints();
-    // Filter tasks assigned to worker (or all active tasks in demo mode)
-    const myTasks = list.filter(
-      (c) =>
-        c.assignedWorker?.id === user?.id ||
-        c.assignedWorker?.name === user?.name ||
-        c.status === 'ASSIGNED' ||
-        c.status === 'IN_PROGRESS' ||
-        (c.status === 'RESOLVED' && c.assignedWorker)
-    );
-    setTasks(myTasks.length > 0 ? myTasks : list.slice(0, 3));
+    const loadTasks = async () => {
+      try {
+        const res = await workerComplaintAPI.getAssigned();
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setTasks(res.data.data);
+          return;
+        }
+      } catch (err) {
+        // Fallback
+      }
+
+      const list = getStoredComplaints();
+      const myTasks = list.filter(
+        (c) =>
+          c.assignedWorker?.id === user?.id ||
+          c.assignedWorker?.name === user?.name ||
+          c.status === 'ASSIGNED' ||
+          c.status === 'IN_PROGRESS' ||
+          (c.status === 'RESOLVED' && c.assignedWorker)
+      );
+      setTasks(myTasks.length > 0 ? myTasks : list.slice(0, 3));
+    };
+
+    loadTasks();
   }, [user]);
 
   const assignedCount = tasks.filter((t) => t.status === 'ASSIGNED').length;

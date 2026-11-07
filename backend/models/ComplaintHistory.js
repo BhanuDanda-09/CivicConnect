@@ -12,6 +12,11 @@ const complaintHistorySchema = new mongoose.Schema(
       required: [true, 'Complaint reference is required'],
       index: true,
     },
+    action: {
+      type: String,
+      default: 'STATUS_CHANGE',
+      trim: true,
+    },
     previousStatus: {
       type: String,
       default: null,
@@ -48,10 +53,13 @@ const complaintHistorySchema = new mongoose.Schema(
   },
   {
     timestamps: false, // Explicit timestamp field used above
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   }
 );
+
+complaintHistorySchema.index({ complaint: 1, timestamp: 1 });
 
 const ComplaintHistory = mongoose.model('ComplaintHistory', complaintHistorySchema);
 
 module.exports = ComplaintHistory;
-

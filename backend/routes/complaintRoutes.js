@@ -1,0 +1,44 @@
+// ==============================================================================
+// Citizen Complaint Routes (complaintRoutes.js)
+// ==============================================================================
+
+const express = require('express');
+const router = express.Router();
+
+const {
+  createComplaint,
+  getMyComplaints,
+  getComplaintById,
+  updateComplaint,
+  getComplaintHistory,
+} = require('../controllers/complaintController');
+
+const { protect } = require('../middleware/authMiddleware');
+const { authorize } = require('../middleware/roleMiddleware');
+const { uploadComplaintPhotos } = require('../middleware/uploadMiddleware');
+const {
+  validateComplaintCreation,
+  validateMongoIdParam,
+} = require('../middleware/complaintValidation');
+
+// All complaint routes require verified authentication
+router.use(protect);
+
+// Citizen routes
+router.post(
+  '/',
+  authorize('citizen'),
+  uploadComplaintPhotos,
+  validateComplaintCreation,
+  createComplaint
+);
+
+router.get('/my', authorize('citizen'), getMyComplaints);
+
+// Shared protected detail routes (Owner, Admin, or Assigned Worker)
+router.get('/:id', validateMongoIdParam('id'), getComplaintById);
+router.patch('/:id', validateMongoIdParam('id'), updateComplaint);
+router.get('/:id/history', validateMongoIdParam('id'), getComplaintHistory);
+
+module.exports = router;
+

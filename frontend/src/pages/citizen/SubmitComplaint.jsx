@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import ComplaintForm from '../../components/complaints/ComplaintForm';
 import { createMockComplaint } from '../../utils/mockData';
 import { useAuth } from '../../hooks/useAuth';
+import { complaintAPI } from '../../services/api';
 import { FilePlus, ShieldAlert, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -11,20 +12,57 @@ export default function SubmitComplaint() {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = (data) => {
+  const handleSubmit = async (data) => {
     setIsSubmitting(true);
 
-    setTimeout(() => {
-      try {
-        const created = createMockComplaint(data, user);
-        setIsSubmitting(false);
-        toast.success(`Complaint #${created.id} submitted successfully!`);
-        navigate(`/citizen/complaints/${created.id}`);
-      } catch (err) {
-        setIsSubmitting(false);
-        toast.error('Failed to submit complaint. Please try again.');
+    try {
+      // 1. Build FormData payload supporting multipart image uploads
+      const formData = new FormData();
+      formData.append('title', data.title);
+      formData.append('description', data.description);
+      formData.append('category', data.category);
+      formData.append('categoryLabel', data.categoryLabel || data.category);
+      formData.append('location', data.location);
+      formData.append('ward', data.ward);
+      formData.append('priority', data.priority || 'MEDIUM');
+
+      if (data.coordinates) {
+        formData.append('latitude', data.coordinates.lat);
+        formData.append('longitude', data.coordinates.lng);
       }
-    }, 600);
+
+      if (data.imageFile) {
+        formData.append('images', data.imageFile);
+      } else if (data.imageUrl) {
+        formData.append('imageUrl', data.imageUrl);
+      }
+
+      // 2. Call backend REST API
+      const res = await complaintAPI.create(formData);
+
+      if (res.data?.success) {
+        const createdComplaint = res.data.data;
+        const targetId = createdComplaint.complaintId || createdComplaint._id || createdComplaint.id;
+        toast.success(`Complaint #${targetId} submitted successfully to municipal desk!`);
+        navigate(`/citizen/complaints/${targetId}`);
+        return;
+      }
+    } catch (err) {
+      console.warn('Backend complaint submission failed or offline; using local mock storage:', err.message);
+
+      // Graceful offline fallback
+      try {
+        const fallbackCreated = createMockComplaint(data, user);
+        toast.success(`Complaint #${fallbackCreated.id} recorded in offline demo mode!`);
+        navigate(`/citizen/complaints/${fallbackCreated.id}`);
+        return;
+      } catch (mockErr) {
+        const errMsg = err.response?.data?.message || 'Failed to submit complaint. Please check form values.';
+        toast.error(errMsg);
+      }
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -65,4 +103,3 @@ export default function SubmitComplaint() {
     </div>
   );
 }
-

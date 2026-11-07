@@ -4,6 +4,7 @@ import { useAuth } from '../../hooks/useAuth';
 import StatCard from '../../components/dashboard/StatCard';
 import ComplaintCard from '../../components/complaints/ComplaintCard';
 import { getStoredComplaints } from '../../utils/mockData';
+import { complaintAPI } from '../../services/api';
 import {
   FileText,
   Clock,
@@ -21,9 +22,20 @@ export default function CitizenDashboard() {
   const [complaints, setComplaints] = useState([]);
 
   useEffect(() => {
-    // Load stored complaints
-    const data = getStoredComplaints();
-    setComplaints(data);
+    const loadComplaints = async () => {
+      try {
+        const res = await complaintAPI.getMyComplaints();
+        if (res.data?.success && Array.isArray(res.data.data)) {
+          setComplaints(res.data.data);
+          return;
+        }
+      } catch (err) {
+        // Fallback
+      }
+      setComplaints(getStoredComplaints());
+    };
+
+    loadComplaints();
   }, []);
 
   const total = complaints.length;

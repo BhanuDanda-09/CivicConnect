@@ -20,7 +20,13 @@ export default function ComplaintTable({
   const [priorityFilter, setPriorityFilter] = useState('ALL');
 
   const filtered = useMemo(() => {
-    return complaints.filter((item) => {
+    return complaints.map((item) => ({
+      ...item,
+      id: item.id || item.complaintId || item._id?.toString() || 'CC-UNKNOWN',
+      title: item.title || '',
+      location: item.location || '',
+      citizenName: item.citizenName || item.citizen?.fullName || '',
+    })).filter((item) => {
       const matchSearch =
         item.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -192,6 +198,15 @@ export default function ComplaintTable({
                         className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-blue-50 text-blue-700 hover:bg-blue-100 transition-colors"
                       >
                         Verify
+                      </button>
+                    )}
+
+                    {onReject && (item.status === 'SUBMITTED' || item.status === 'UNDER_VERIFICATION') && (
+                      <button
+                        onClick={() => onReject(item)}
+                        className="px-2.5 py-1 rounded-lg text-[11px] font-bold bg-rose-50 text-rose-700 hover:bg-rose-100 transition-colors"
+                      >
+                        Reject
                       </button>
                     )}
 
