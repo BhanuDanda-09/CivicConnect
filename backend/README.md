@@ -1,6 +1,6 @@
 # CivicConnect Backend - Node.js, Express & MongoDB Service 🏛️
 
-> **The REST API engine powering CivicConnect: A Smart Civic Complaint Management System with role-based routing, JWT authentication, complaint lifecycle workflows, Cloudinary photo uploads, geospatial indexing, and automated audit trails.**
+> **The REST API engine powering CivicConnect: A Smart Civic Complaint Management System with role-based routing, JWT authentication, complaint lifecycle workflows, Cloudinary photo uploads, geospatial indexing, real-time analytics aggregations, and administrative telemetry.**
 
 ---
 
@@ -13,7 +13,7 @@ The backend follows the **Model-View-Controller (MVC)** architectural pattern:
 - **`config/cloudinary.js`**: Cloudinary SDK client configuration.
 - **`services/cloudinaryService.js`**: Streams Multer memory buffers to Cloudinary folders (`civicconnect/complaints` and `civicconnect/resolutions`) with an offline test fallback.
 - **`models/`**: Strongly-typed Mongoose models:
-  - `User.js`: User accounts with bcrypt hashing (`rounds = 12`), `comparePassword`, and `generateAuthToken`.
+  - `User.js`: User accounts with bcrypt hashing (`rounds = 12`), `comparePassword`, `generateAuthToken`, and municipal worker `trade`.
   - `Complaint.js`: Geo-tagged complaint model with `2dsphere` geospatial indexing (`[longitude, latitude]`), photo URLs, and lifecycle status.
   - `ComplaintHistory.js`: Immutable chronological audit trail of status and assignment changes.
   - `Notification.js`: Alert dispatch documents.
@@ -28,8 +28,12 @@ The backend follows the **Model-View-Controller (MVC)** architectural pattern:
   - `authController.js`: `register`, `login`, `getMe`, and `logout`.
   - `complaintController.js`: Citizen complaint creation, personal listings, details, and audit history.
   - `adminComplaintController.js`: Admin verification, rejection, worker assignment, priority modification, and municipal stats.
+  - `adminWorkerController.js`: Admin municipal worker registry, workload aggregation, and worker registration.
+  - `adminUserController.js`: Admin user directory, complaint counts, and activation status toggle.
+  - `analyticsController.js`: Real-time MongoDB aggregations for municipal overview, ward breakdown, worker workloads, and geocoded locations.
   - `workerComplaintController.js`: Worker assigned task listing, details, start work, and resolution with proof photos.
-- **`routes/`**: Centralized routing system mounted under `/api` (`/api/auth/*`, `/api/complaints/*`, `/api/admin/complaints/*`, `/api/workers/complaints/*`, `/api/health`).
+  - `workerAnalyticsController.js`: Worker personal metrics, turnaround velocity, and assigned task location mapping.
+- **`routes/`**: Centralized routing system mounted under `/api` (`/api/auth/*`, `/api/complaints/*`, `/api/admin/complaints/*`, `/api/admin/analytics/*`, `/api/admin/workers/*`, `/api/admin/users/*`, `/api/workers/complaints/*`, `/api/workers/analytics/*`, `/api/health`).
 
 ---
 
@@ -45,7 +49,11 @@ backend/
 │   ├── authController.js         # Register, login, getMe, logout logic
 │   ├── complaintController.js    # Citizen complaint submission & details
 │   ├── adminComplaintController.js # Admin verification, rejection, assignment
-│   └── workerComplaintController.js# Worker task execution & resolution
+│   ├── adminWorkerController.js  # Municipal worker registry & active workloads
+│   ├── adminUserController.js    # User directory & activation status toggles
+│   ├── analyticsController.js    # MongoDB aggregations (overview, wards, locations)
+│   ├── workerComplaintController.js# Worker task execution & resolution
+│   └── workerAnalyticsController.js# Worker personal metrics & task locations
 │
 ├── middleware/
 │   ├── authMiddleware.js         # JWT verification & req.user attachment
@@ -68,7 +76,11 @@ backend/
 │   ├── authRoutes.js             # /api/auth routes
 │   ├── complaintRoutes.js        # /api/complaints routes (Citizen)
 │   ├── adminComplaintRoutes.js   # /api/admin/complaints routes (Admin)
+│   ├── adminAnalyticsRoutes.js   # /api/admin/analytics routes (Admin)
+│   ├── adminWorkerRoutes.js      # /api/admin/workers routes (Admin)
+│   ├── adminUserRoutes.js        # /api/admin/users routes (Admin)
 │   ├── workerComplaintRoutes.js  # /api/workers/complaints routes (Worker)
+│   ├── workerAnalyticsRoutes.js  # /api/workers/analytics routes (Worker)
 │   ├── healthRoutes.js           # GET /api/health probe
 │   └── index.js                  # Central API router mounted at /api
 │
@@ -84,6 +96,8 @@ backend/
 │   └── tokenUtils.js             # JWT generation, verification, and cookie response
 │
 ├── tests/
+│   ├── adminAnalytics.test.js    # Admin analytics, wards, workers & user mgmt tests
+│   ├── workerAnalytics.test.js   # Worker personal stats & location coordinates tests
 │   ├── complaint.test.js         # Citizen complaint submission & ownership tests
 │   ├── adminComplaint.test.js    # Admin verification, rejection & assignment tests
 │   ├── workerComplaint.test.js   # Worker task execution & resolution proof tests
@@ -100,121 +114,59 @@ backend/
 
 ---
 
-## 🔄 3. Core Complaint Lifecycle Workflow (Phase 5)
+## 📡 3. REST API Endpoints Specification
 
-```text
-[Citizen] ──(Submits report with GPS & Photos)──> [SUBMITTED]
-                                                      │
-                                           (Admin review desk)
-                                                      │
-                         ┌────────────────────────────┴────────────────────────────┐
-                         ▼                                                         ▼
-                 [VERIFIED]                                                    [REJECTED]
-                         │                                              (Requires rejectionReason)
-                 (Admin assigns worker)
-                         │
-                         ▼
-                 [ASSIGNED]
-                         │
-              (Worker arrives on site)
-                         │
-                         ▼
-                [IN_PROGRESS]
-                         │
-            (Worker finishes repair &
-             uploads proof photos)
-                         │
-                         ▼
-                 [RESOLVED]
-                         │
-            (Citizen submits 5-star rating)
-                         │
-                         ▼
-             [CITIZEN_FEEDBACK]
-```
-
----
-
-## 📡 4. REST API Endpoints Matrix
-
-### 👤 Citizen Endpoints (`/api/complaints`)
+### 🔐 Authentication (`/api/auth`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `POST` | `/api/complaints` | Citizen only | Submit new complaint with photo proof and GPS coordinates |
-| `GET` | `/api/complaints/my` | Citizen only | List all complaints submitted by the authenticated citizen |
-| `GET` | `/api/complaints/:id` | Owner, Admin, Worker | Get detailed complaint dossier |
-| `PATCH` | `/api/complaints/:id` | Owner only | Update complaint details while in `SUBMITTED` status |
-| `GET` | `/api/complaints/:id/history` | Owner, Admin, Worker | View chronological status transition audit trail |
+| `POST` | `/api/auth/register` | Public | Register a new Citizen account |
+| `POST` | `/api/auth/login` | Public | Authenticate user & issue JWT |
+| `GET` | `/api/auth/me` | Protected | Retrieve authenticated profile |
+| `POST` | `/api/auth/logout` | Protected | Clear session cookie |
 
-### 🏛️ Municipal Admin Endpoints (`/api/admin/complaints`)
+### 📝 Citizen Complaints (`/api/complaints`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/admin/complaints` | Admin only | List all complaints with pagination, search, and filters |
-| `GET` | `/api/admin/complaints/stats` | Admin only | Aggregated status counts for municipal dashboard |
-| `PATCH` | `/api/admin/complaints/:id/verify` | Admin only | Verify submitted complaint and approve for assignment |
-| `PATCH` | `/api/admin/complaints/:id/reject` | Admin only | Reject invalid or duplicate complaint with required reason |
-| `PATCH` | `/api/admin/complaints/:id/assign` | Admin only | Dispatch verified complaint to an active field worker |
-| `PATCH` | `/api/admin/complaints/:id/priority` | Admin only | Modify complaint urgency level (`LOW`, `MEDIUM`, `HIGH`, `URGENT`) |
+| `POST` | `/api/complaints` | Citizen | Submit a new geo-tagged complaint with image |
+| `GET` | `/api/complaints/my` | Citizen | View personal complaints with pagination & filters |
+| `GET` | `/api/complaints/:id` | Citizen / Authorized | View full complaint details |
+| `PATCH`| `/api/complaints/:id` | Citizen (Owner) | Update complaint while in SUBMITTED state |
+| `GET` | `/api/complaints/:id/history` | Authorized | View chronological timeline & status audit trail |
 
-### 👷 Field Worker Endpoints (`/api/workers/complaints`)
+### 🛠️ Administrative Operations & Analytics (`/api/admin`)
 | Method | Endpoint | Access | Description |
 | :--- | :--- | :--- | :--- |
-| `GET` | `/api/workers/complaints` | Worker only | List complaints assigned to the authenticated worker |
-| `GET` | `/api/workers/complaints/:id` | Worker only | Inspect assigned complaint location and details |
-| `PATCH` | `/api/workers/complaints/:id/start` | Worker only | Mark task as `IN_PROGRESS` upon site arrival |
-| `PATCH` | `/api/workers/complaints/:id/resolve` | Worker only | Mark task as `RESOLVED` with mandatory completion photograph |
+| `GET` | `/api/admin/complaints` | Admin | Search, filter, and paginate all complaints across wards |
+| `GET` | `/api/admin/complaints/stats` | Admin | Quick status aggregation counts |
+| `PATCH`| `/api/admin/complaints/:id/verify` | Admin | Verify reported grievance |
+| `PATCH`| `/api/admin/complaints/:id/reject` | Admin | Reject invalid report with mandatory explanation |
+| `PATCH`| `/api/admin/complaints/:id/assign` | Admin | Dispatch ticket to municipal field worker |
+| `PATCH`| `/api/admin/complaints/:id/priority`| Admin | Adjust priority (LOW, MEDIUM, HIGH, EMERGENCY) |
+| `GET` | `/api/admin/analytics/overview` | Admin | Overview KPIs, status breakdown, category, priority, trends |
+| `GET` | `/api/admin/analytics/workers` | Admin | Field worker performance, active workload & turnaround |
+| `GET` | `/api/admin/analytics/wards` | Admin | Ward-level grievance distribution & resolution rates |
+| `GET` | `/api/admin/analytics/complaint-locations` | Admin | Pinned GPS coordinates for OpenStreetMap visualization |
+| `GET` | `/api/admin/workers` | Admin | List all registered municipal field workers |
+| `POST`| `/api/admin/workers` | Admin | Register a new field officer into municipal registry |
+| `GET` | `/api/admin/users` | Admin | Searchable stakeholder directory (Citizens, Workers, Admins) |
+| `PATCH`| `/api/admin/users/:id/toggle-status` | Admin | Toggle account activation (with self-deactivation guard) |
+
+### 👷 Municipal Field Worker Operations (`/api/workers`)
+| Method | Endpoint | Access | Description |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/workers/complaints` | Worker | View assigned tasks with status and priority filtering |
+| `GET` | `/api/workers/complaints/:id`| Worker | Detailed inspection of assigned work order |
+| `PATCH`| `/api/workers/complaints/:id/start` | Worker | Transition task status from `ASSIGNED` to `IN_PROGRESS` |
+| `PATCH`| `/api/workers/complaints/:id/resolve` | Worker | Complete repair with completion remarks & proof photo |
+| `GET` | `/api/workers/analytics/overview` | Worker | Personal workload stats, urgent count & completion rate |
+| `GET` | `/api/workers/analytics/task-locations` | Worker | Geographic locations of tasks assigned to this worker |
 
 ---
 
-## 🗺️ 5. Geospatial Data & MongoDB Indexing
+## 🧪 4. Automated Testing
 
-GeoJSON Point geometry is stored in the `locationGeo` field:
-
-```javascript
-locationGeo: {
-  type: { type: String, enum: ['Point'], default: 'Point' },
-  coordinates: [73.8567, 18.5204] // [longitude, latitude]
-}
-```
-
-> [!NOTE]
-> In GeoJSON standard format, coordinate order is strictly **`[longitude, latitude]`**.
-> Indexed with a **`2dsphere`** index for spatial range and proximity operations.
-
----
-
-## 📸 6. Photo Uploads & Cloudinary Integration
-
-- Handled via **Multer memory storage**: Files are streamed directly to Cloudinary without persisting temporary binary files on disk.
-- Maximum file size: **5 MB per image**.
-- Maximum file count: **5 images per submission**.
-- Accepted formats: **JPEG, PNG, WebP**.
-- Cloudinary folders:
-  - Evidence photos: `civicconnect/complaints`
-  - Completion proof: `civicconnect/resolutions`
-- Safe offline fallback: When running without Cloudinary API credentials or in test environments, deterministic CDN image URLs are provided automatically so development and automated tests never crash.
-
----
-
-## 🧪 7. Automated Testing (58/58 Tests Passing)
-
-Run all backend test suites with Jest and Supertest:
-
-```powershell
-cd backend
+All endpoints are validated through automated test suites using **Jest** and **Supertest**:
+```bash
 npm test
 ```
-
-```text
-PASS tests/complaint.test.js (10 tests)
-PASS tests/adminComplaint.test.js (9 tests)
-PASS tests/workerComplaint.test.js (6 tests)
-PASS tests/auth.test.js (22 tests)
-PASS tests/health.test.js (5 tests)
-PASS tests/database.test.js (6 tests)
-
-Test Suites: 6 passed, 6 total
-Tests:       58 passed, 58 total
-Snapshots:   0 total
-Time:        7.061 s
-```
+**Results:** 8 Passed Suites, 70 Tests, 100% Passing.

@@ -54,6 +54,11 @@ const userSchema = new mongoose.Schema(
       default: 'Ward 1 - Central Market & Bus Terminal',
       trim: true,
     },
+    trade: {
+      type: String,
+      default: 'Roads & Public Infrastructure',
+      trim: true,
+    },
     role: {
       type: String,
       enum: {

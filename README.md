@@ -137,7 +137,7 @@ To run and develop this project locally on Windows:
 - [x] **Phase 3: Backend setup and MongoDB connection** *(Completed)*
 - [x] **Phase 4: Authentication and role-based access control (RBAC)** *(Completed)*
 - [x] **Phase 5: Complaint management functionality** *(Completed)*
-- [ ] **Phase 6: Admin and worker dashboards**
+- [x] **Phase 6: Admin and worker dashboards** *(Completed)*
 - [ ] **Phase 7: Frontend-backend integration**
 - [ ] **Phase 8: Testing and bug fixing**
 - [ ] **Phase 9: Docker and Docker Compose**

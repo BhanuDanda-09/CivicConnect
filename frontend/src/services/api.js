@@ -82,12 +82,38 @@ export const adminComplaintAPI = {
   changePriority: (id, data) => api.patch(`/admin/complaints/${id}/priority`, data),
 };
 
+// Municipal Admin Analytics API
+export const adminAnalyticsAPI = {
+  getOverview: (params) => api.get('/admin/analytics/overview', { params }),
+  getWorkers: () => api.get('/admin/analytics/workers'),
+  getWards: () => api.get('/admin/analytics/wards'),
+  getComplaintLocations: (params) => api.get('/admin/analytics/complaint-locations', { params }),
+};
+
+// Municipal Admin Field Worker Management API
+export const adminWorkerAPI = {
+  getAll: () => api.get('/admin/workers'),
+  create: (workerData) => api.post('/admin/workers', workerData),
+};
+
+// Municipal Admin User Directory API
+export const adminUserAPI = {
+  getAll: (params) => api.get('/admin/users', { params }),
+  toggleStatus: (id) => api.patch(`/admin/users/${id}/toggle-status`),
+};
+
 // Field Worker Complaint API
 export const workerComplaintAPI = {
   getAssigned: (params) => api.get('/workers/complaints', { params }),
   getById: (id) => api.get(`/workers/complaints/${id}`),
   startWork: (id, data = {}) => api.patch(`/workers/complaints/${id}/start`, data),
   resolve: (id, resolutionData) => api.patch(`/workers/complaints/${id}/resolve`, resolutionData),
+};
+
+// Field Worker Personal Analytics API
+export const workerAnalyticsAPI = {
+  getOverview: () => api.get('/workers/analytics/overview'),
+  getTaskLocations: (params) => api.get('/workers/analytics/task-locations', { params }),
 };
 
 export default api;
