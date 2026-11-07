@@ -1,49 +1,80 @@
-const express = require('express');
-const cors = require('cors');
-const helmet = require('helmet');
-const dotenv = require('dotenv');
+// ==============================================================================
+// Server Entry Point (server.js)
+// Handles database initialization, port binding, and graceful shutdown
+// ==============================================================================
 
+const dotenv = require('dotenv');
 dotenv.config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const app = require('./app');
+const { connectDB, disconnectDB } = require('./config/database');
 
-// Security and utility middleware
-app.use(helmet());
-app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
-  credentials: true
-}));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+const PORT = parseInt(process.env.PORT, 10) || 5000;
+let server;
 
-// Health check endpoint for Docker, Kubernetes, and uptime probes
-app.get('/api/health', (req, res) => {
-  res.status(200).json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    service: 'smart-civic-backend',
-    uptime: process.uptime()
-  });
-});
+/**
+ * Boots the database and starts the HTTP server
+ */
+const startServer = async () => {
+  try {
+    // 1. Establish database connection before accepting traffic
+    console.log('[CivicConnect Server] Initializing MongoDB connection...');
+    await connectDB();
 
-// Root welcome route
-app.get('/', (req, res) => {
-  res.json({
-    message: 'Smart Civic Complaint Management API is operational.',
-    version: '1.0.0',
-    endpoints: {
-      health: '/api/health',
-      docs: '/api/docs'
+    // 2. Start HTTP listener
+    server = app.listen(PORT, () => {
+      console.log('------------------------------------------------------------');
+      console.log(`🏛️  CivicConnect API Server running on port ${PORT}`);
+      console.log(`🌐  Environment : ${process.env.NODE_ENV || 'development'}`);
+      console.log(`🩺  Health Check: http://localhost:${PORT}/api/health`);
+      console.log('------------------------------------------------------------');
+    });
+  } catch (error) {
+    console.error('[CivicConnect Server Error] Critical startup failure:', error.message);
+    if (process.env.NODE_ENV === 'production') {
+      process.exit(1);
+    } else {
+      console.warn('[CivicConnect Server] Running in dev fallback mode: starting server with DB offline.');
+      // In local dev without MongoDB running, start server so developer can still check health/routes
+      server = app.listen(PORT, () => {
+        console.log(`[CivicConnect Server] HTTP Server running on port ${PORT} (Database offline)`);
+      });
     }
-  });
+  }
+};
+
+// Graceful Shutdown Handlers
+const handleGracefulShutdown = async (signal) => {
+  console.log(`\n[CivicConnect Server] Received ${signal}. Initiating graceful shutdown...`);
+
+  if (server) {
+    server.close(async () => {
+      console.log('[CivicConnect Server] HTTP server closed.');
+      try {
+        await disconnectDB();
+        console.log('[CivicConnect Server] Clean exit completed.');
+        process.exit(0);
+      } catch (err) {
+        console.error('[CivicConnect Server Error] Error during DB disconnect:', err.message);
+        process.exit(1);
+      }
+    });
+  } else {
+    process.exit(0);
+  }
+};
+
+process.on('SIGINT', () => handleGracefulShutdown('SIGINT'));
+process.on('SIGTERM', () => handleGracefulShutdown('SIGTERM'));
+
+// Prevent unhandled promise rejections from crashing without logging
+process.on('unhandledRejection', (err) => {
+  console.error('[CivicConnect Server Error] Unhandled Promise Rejection:', err);
 });
 
-// Start server
+// Start server if not running inside a test runner (Jest)
 if (process.env.NODE_ENV !== 'test') {
-  app.listen(PORT, () => {
-    console.log(`[CivicAPI] Server running on port ${PORT} in ${process.env.NODE_ENV || 'development'} mode`);
-  });
+  startServer();
 }
 
-module.exports = app;
+module.exports = { app, startServer };
