@@ -17,14 +17,29 @@ const initSocket = (httpServer) => {
   const allowedOrigins = [
     process.env.FRONTEND_URL,
     process.env.CLIENT_URL,
+    'https://civicconnect-src.vercel.app',
     'http://localhost:5173',
     'http://localhost:3000',
     'http://127.0.0.1:5173',
   ].filter(Boolean);
 
+  const isAllowedSocketOrigin = (origin) => {
+    if (!origin) return true;
+    if (allowedOrigins.includes(origin)) return true;
+    if (/^https:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/.test(origin)) return true;
+    if (/^http:\/\/(localhost|127\.0\.0\.1):[0-9]+$/.test(origin)) return true;
+    return false;
+  };
+
   io = new Server(httpServer, {
     cors: {
-      origin: allowedOrigins.length > 0 ? allowedOrigins : '*',
+      origin: (origin, callback) => {
+        if (isAllowedSocketOrigin(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Origin not allowed by Socket CORS policy'));
+        }
+      },
       methods: ['GET', 'POST', 'PATCH'],
       credentials: true,
     },
