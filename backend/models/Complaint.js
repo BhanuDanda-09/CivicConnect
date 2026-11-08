@@ -207,17 +207,42 @@ complaintSchema.virtual('id').get(function () {
 // Static generator helper for standard CivicConnect ID format: CC-YYYY-XXXX
 complaintSchema.statics.generateComplaintId = async function () {
   const currentYear = new Date().getFullYear();
+  const prefix = `CC-${currentYear}-`;
   try {
     if (mongoose.connection.readyState === 1) {
-      const count = await this.countDocuments();
-      const serial = String(count + 1).padStart(4, '0');
-      return `CC-${currentYear}-${serial}`;
+      // Find the highest numbered complaint matching this year's prefix
+      const latest = await this.findOne({ complaintId: new RegExp(`^${prefix}\\d+$`) })
+        .sort({ complaintId: -1 })
+        .select('complaintId')
+        .lean();
+
+      let nextSeq = 1;
+      if (latest && latest.complaintId) {
+        const parts = latest.complaintId.split('-');
+        const lastNum = parseInt(parts[2], 10);
+        if (!isNaN(lastNum)) {
+          nextSeq = lastNum + 1;
+        }
+      } else {
+        const count = await this.countDocuments();
+        nextSeq = count + 1;
+      }
+
+      // Guarantee uniqueness to avoid duplicate key errors
+      let candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+      let exists = await this.exists({ complaintId: candidate });
+      while (exists) {
+        nextSeq++;
+        candidate = `${prefix}${String(nextSeq).padStart(4, '0')}`;
+        exists = await this.exists({ complaintId: candidate });
+      }
+      return candidate;
     }
   } catch (e) {
     // Fallback if DB query fails
   }
   const randomSerial = String(Math.floor(1000 + Math.random() * 9000));
-  return `CC-${currentYear}-${randomSerial}`;
+  return `${prefix}${randomSerial}`;
 };
 
 const Complaint = mongoose.model('Complaint', complaintSchema);

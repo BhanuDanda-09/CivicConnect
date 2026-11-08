@@ -29,6 +29,7 @@ const {
 
 // Public complaint tracking (No login required - safe sanitized data)
 router.get('/track/:identifier', trackComplaintPublic);
+router.get('/public/track/:identifier', trackComplaintPublic);
 
 // All subsequent complaint routes require verified authentication
 router.use(protect);

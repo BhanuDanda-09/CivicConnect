@@ -286,4 +286,132 @@ describe('CivicConnect Phase 5 - Citizen Complaint Test Suite', () => {
     expect(res.statusCode).toBe(200);
     expect(complaintDoc.status).toBe('SUBMITTED'); // Status must NOT change!
   });
+
+  // --------------------------------------------------------------------------
+  // Public Grievance Tracking Regression Tests
+  // --------------------------------------------------------------------------
+  describe('Public Grievance Tracking & Normalization Tests', () => {
+    const mockTrackDoc = {
+      _id: new mongoose.Types.ObjectId(),
+      complaintId: 'CC-2026-0001',
+      title: 'Large deep pothole near metro pillar 42',
+      description: 'Hazardous pothole causing vehicular damage',
+      category: 'pothole',
+      categoryLabel: 'Road and Potholes',
+      status: 'IN_PROGRESS',
+      priority: 'HIGH',
+      ward: 'Ward 1 - Central Market & Bus Terminal',
+      location: 'MG Road, near Pillar 42',
+      landmark: 'Near Pillar 42',
+      latitude: 18.5204,
+      longitude: 73.8567,
+      images: ['https://images.unsplash.com/photo-1515162816999-a0c47dc192f7'],
+      resolutionPhotos: [],
+      resolutionNotes: '',
+      createdAt: new Date('2026-11-04T09:30:00Z'),
+      updatedAt: new Date('2026-11-06T14:15:00Z'),
+    };
+
+    const mockHistoryEvents = [
+      {
+        newStatus: 'SUBMITTED',
+        remarks: 'Complaint filed by citizen with location and photograph.',
+        timestamp: new Date('2026-11-04T09:30:00Z'),
+        changedBy: { fullName: 'Rahul Sharma', role: 'citizen' },
+      },
+      {
+        newStatus: 'IN_PROGRESS',
+        remarks: 'Road crew on site with hot-mix asphalt equipment.',
+        timestamp: new Date('2026-11-06T14:15:00Z'),
+        changedBy: { fullName: 'Ramesh Patel', role: 'worker' },
+      },
+    ];
+
+    const mockHistoryQuery = {
+      sort: jest.fn().mockReturnThis(),
+      populate: jest.fn().mockResolvedValue(mockHistoryEvents),
+    };
+
+    it('11. should track complaint publicly using exact uppercase Tracking ID without auth', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get('/api/complaints/track/CC-2026-0001');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.complaintId).toBe('CC-2026-0001');
+      expect(res.body.data.status).toBe('IN_PROGRESS');
+      expect(res.body.data.timeline.length).toBe(2);
+      expect(res.body.data.timeline[0].actor).toContain('Rahul Sharma');
+    });
+
+    it('12. should track complaint with lowercase Tracking ID (case-insensitive normalization)', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get('/api/complaints/track/cc-2026-0001');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.complaintId).toBe('CC-2026-0001');
+    });
+
+    it('13. should track complaint with whitespace and leading hash symbol (#CC-2026-0001)', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get('/api/complaints/track/%20%23CC-2026-0001%20');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.complaintId).toBe('CC-2026-0001');
+    });
+
+    it('14. should track complaint by MongoDB ObjectId', async () => {
+      jest.spyOn(Complaint, 'findById').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get(`/api/complaints/track/${mockTrackDoc._id}`);
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.complaintId).toBe('CC-2026-0001');
+    });
+
+    it('15. should support the /public/track/:identifier alias endpoint', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get('/api/complaints/public/track/CC-2026-0001');
+
+      expect(res.statusCode).toBe(200);
+      expect(res.body.success).toBe(true);
+      expect(res.body.data.complaintId).toBe('CC-2026-0001');
+    });
+
+    it('16. should return 404 with helpful error message when grievance ID is not found', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(null);
+
+      const res = await request(app).get('/api/complaints/track/CC-2026-9999');
+
+      expect(res.statusCode).toBe(404);
+      expect(res.body.success).toBe(false);
+      expect(res.body.message).toContain('No civic grievance found matching tracking ID');
+    });
+
+    it('17. should preserve citizen privacy and NOT expose phone, email, or password in public tracking payload', async () => {
+      jest.spyOn(Complaint, 'findOne').mockResolvedValue(mockTrackDoc);
+      jest.spyOn(ComplaintHistory, 'find').mockReturnValue(mockHistoryQuery);
+
+      const res = await request(app).get('/api/complaints/track/CC-2026-0001');
+
+      expect(res.statusCode).toBe(200);
+      const data = res.body.data;
+      expect(data.citizenPhone).toBeUndefined();
+      expect(data.citizenEmail).toBeUndefined();
+      expect(data.password).toBeUndefined();
+      expect(data.mobileNumber).toBeUndefined();
+    });
+  });
 });

@@ -13,14 +13,34 @@ const asyncHandler = require('../utils/asyncHandler');
 
 /**
  * Finds a complaint by either MongoDB ObjectId or custom complaintId (e.g., CC-2026-0001)
+ * Supports whitespace trimming, case-insensitivity, and leading '#' handling.
  * @param {string} idOrComplaintId
  */
 const findComplaintByIdentifier = async (idOrComplaintId) => {
-  if (mongoose.Types.ObjectId.isValid(idOrComplaintId)) {
-    const byMongoId = await Complaint.findById(idOrComplaintId);
+  if (!idOrComplaintId || typeof idOrComplaintId !== 'string') return null;
+
+  // Trim whitespace and remove optional leading '#' or surrounding quotes
+  const cleanId = idOrComplaintId.trim().replace(/^#/, '').replace(/^["']|["']$/g, '').trim();
+  if (!cleanId) return null;
+
+  // 1. Check if it's a valid 24-character hexadecimal MongoDB ObjectId
+  if (mongoose.Types.ObjectId.isValid(cleanId) && /^[0-9a-fA-F]{24}$/.test(cleanId)) {
+    const byMongoId = await Complaint.findById(cleanId);
     if (byMongoId) return byMongoId;
   }
-  return await Complaint.findOne({ complaintId: idOrComplaintId });
+
+  // 2. Fast exact match using uppercase (standard format: CC-YYYY-XXXX)
+  const upper = cleanId.toUpperCase();
+  let complaint = await Complaint.findOne({ complaintId: upper });
+  if (complaint) return complaint;
+
+  // 3. Fallback: Case-insensitive regex match (safely escaping special characters)
+  const escaped = cleanId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  complaint = await Complaint.findOne({
+    complaintId: { $regex: new RegExp(`^${escaped}$`, 'i') },
+  });
+
+  return complaint;
 };
 
 /**
@@ -295,13 +315,14 @@ const getComplaintHistory = asyncHandler(async (req, res) => {
  * @access  Public (No personal PII exposed)
  */
 const trackComplaintPublic = asyncHandler(async (req, res) => {
-  const { identifier } = req.params;
+  const rawIdentifier = req.params.identifier;
 
-  if (!identifier) {
+  if (!rawIdentifier || !rawIdentifier.trim()) {
     throw new ApiError(400, 'Complaint tracking ID is required.');
   }
 
-  const complaint = await findComplaintByIdentifier(identifier.trim());
+  const identifier = rawIdentifier.trim();
+  const complaint = await findComplaintByIdentifier(identifier);
 
   if (!complaint) {
     throw new ApiError(
@@ -310,10 +331,19 @@ const trackComplaintPublic = asyncHandler(async (req, res) => {
     );
   }
 
-  // Retrieve public audit timeline
-  const history = await ComplaintHistory.find({ complaint: complaint._id })
+  // Retrieve public audit timeline with populated actor details
+  const historyRecords = await ComplaintHistory.find({ complaint: complaint._id })
     .sort({ timestamp: 1 })
-    .select('status remarks timestamp changedByRole');
+    .populate('changedBy', 'fullName role');
+
+  const timeline = historyRecords.map((item) => ({
+    status: item.newStatus || item.status,
+    note: item.remarks || '',
+    timestamp: item.timestamp,
+    actor: item.changedBy?.fullName
+      ? `${item.changedBy.fullName} (${(item.changedBy.role || 'Municipal Desk').toUpperCase()})`
+      : 'Municipal Desk',
+  }));
 
   // Sanitize response: do NOT expose citizen phone or private user details
   res.status(200).json({
@@ -329,6 +359,7 @@ const trackComplaintPublic = asyncHandler(async (req, res) => {
       priority: complaint.priority,
       ward: complaint.ward,
       location: complaint.location,
+      landmark: complaint.landmark || '',
       latitude: complaint.latitude,
       longitude: complaint.longitude,
       images: complaint.images || [],
@@ -337,7 +368,8 @@ const trackComplaintPublic = asyncHandler(async (req, res) => {
       resolutionNotes: complaint.resolutionNotes || '',
       createdAt: complaint.createdAt,
       updatedAt: complaint.updatedAt,
-      timeline: history,
+      timeline,
+      history: timeline,
     },
   });
 });

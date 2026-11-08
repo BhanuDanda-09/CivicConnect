@@ -33,7 +33,8 @@ export default function TrackComplaint() {
   const [errorMessage, setErrorMessage] = useState('');
 
   const executeSearch = async (queryId) => {
-    const idToSearch = (queryId || trackingId).trim();
+    const rawInput = queryId !== undefined ? queryId : trackingId;
+    const idToSearch = (rawInput || '').trim().replace(/^#/, '').trim();
     if (!idToSearch) {
       toast.error('Please enter a Complaint Tracking ID');
       return;
@@ -44,6 +45,7 @@ export default function TrackComplaint() {
     setHasSearched(true);
     setSearchParams({ id: idToSearch });
 
+    let apiErrorMessage = '';
     try {
       const res = await complaintAPI.trackPublic(idToSearch);
       if (res.data?.success && res.data.data) {
@@ -52,7 +54,8 @@ export default function TrackComplaint() {
         return;
       }
     } catch (err) {
-      console.warn('Public API tracking returned notice; checking offline cache:', err.message);
+      apiErrorMessage = err.response?.data?.message || err.message || '';
+      console.warn('Public API tracking returned notice; checking offline cache:', apiErrorMessage);
     }
 
     // Offline demo fallback: search local stored complaints
@@ -74,7 +77,10 @@ export default function TrackComplaint() {
       toast.success('Found grievance in municipal cache!');
     } else {
       setComplaint(null);
-      setErrorMessage(`No civic grievance found matching Tracking ID: "${idToSearch}". Please check the ID and try again.`);
+      setErrorMessage(
+        apiErrorMessage ||
+          `No civic grievance found matching Tracking ID: "${idToSearch}". Please check the ID and try again.`
+      );
     }
 
     setIsLoading(false);

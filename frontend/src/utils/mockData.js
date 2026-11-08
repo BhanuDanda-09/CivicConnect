@@ -6,7 +6,8 @@ export { CITY_WARDS };
 
 export const INITIAL_COMPLAINTS = [
   {
-    id: "CC-2026-0841",
+    id: "CC-2026-0001",
+    complaintId: "CC-2026-0001",
     title: "Large deep pothole causing traffic slowdown near metro pillar 42",
     category: "pothole",
     categoryLabel: "Road and Potholes",
@@ -40,7 +41,8 @@ export const INITIAL_COMPLAINTS = [
     feedback: null
   },
   {
-    id: "CC-2026-0839",
+    id: "CC-2026-0002",
+    complaintId: "CC-2026-0002",
     title: "Overflowing commercial garbage dumpsters behind Main Market",
     category: "garbage",
     categoryLabel: "Garbage Collection",
@@ -79,7 +81,8 @@ export const INITIAL_COMPLAINTS = [
     }
   },
   {
-    id: "CC-2026-0835",
+    id: "CC-2026-0003",
+    complaintId: "CC-2026-0003",
     title: "Continuous drinking water leakage from underground pipe joint",
     category: "water_leakage",
     categoryLabel: "Water Leakage",

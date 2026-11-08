@@ -23,7 +23,8 @@ const WORKFLOW_STEPS = [
   'CITIZEN_FEEDBACK'
 ];
 
-export default function ComplaintTimeline({ timeline = [], currentStatus = 'SUBMITTED' }) {
+export default function ComplaintTimeline({ timeline, history, currentStatus = 'SUBMITTED' }) {
+  const events = (Array.isArray(timeline) && timeline.length > 0 ? timeline : Array.isArray(history) ? history : []) || [];
   const isRejected = currentStatus === 'REJECTED';
   const currentStepIndex = WORKFLOW_STEPS.indexOf(currentStatus);
 
@@ -88,9 +89,10 @@ export default function ComplaintTimeline({ timeline = [], currentStatus = 'SUBM
 
       {/* Detailed Vertical Event Log */}
       <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200">
-        {timeline.map((event, index) => {
-          const config = COMPLAINT_STATUS[event.status] || {};
-          const isLatest = index === timeline.length - 1;
+        {events.map((event, index) => {
+          const statusKey = event.status || event.newStatus;
+          const config = COMPLAINT_STATUS[statusKey] || {};
+          const isLatest = index === events.length - 1;
 
           return (
             <div key={index} className="relative group">
@@ -107,13 +109,13 @@ export default function ComplaintTimeline({ timeline = [], currentStatus = 'SUBM
               <div className="bg-slate-50/70 border border-slate-100 rounded-xl p-3.5 hover:bg-slate-50 transition-colors">
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                   <span className="text-xs font-bold text-slate-900">
-                    {config.label || event.status}
+                    {config.label || statusKey}
                   </span>
                   <span className="text-[11px] text-slate-500 font-medium">
                     {formatDateTime(event.timestamp)}
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed">{event.note}</p>
+                <p className="text-xs text-slate-600 leading-relaxed">{event.note || event.remarks || 'Status updated.'}</p>
                 {event.actor && (
                   <p className="text-[10px] text-slate-400 mt-1 font-semibold">
                     Action by: <span className="text-slate-600">{event.actor}</span>
