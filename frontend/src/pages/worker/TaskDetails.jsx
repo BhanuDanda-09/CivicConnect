@@ -20,7 +20,8 @@ import {
   AlertCircle,
   HardHat,
   Image as ImageIcon,
-  Loader2
+  Loader2,
+  Navigation,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -251,11 +252,22 @@ export default function TaskDetails() {
           </p>
         </div>
 
-        {/* Map Location */}
+        {/* Map Location & GPS Navigation */}
         <div className="space-y-2">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-            On-Site Navigation Coordinates
-          </h3>
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+              On-Site Navigation Coordinates
+            </h3>
+            <a
+              href={`https://www.google.com/maps/dir/?api=1&destination=${task.coordinates?.lat || 18.5204},${task.coordinates?.lng || 73.8567}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-xl border border-sky-200 transition-colors w-fit"
+            >
+              <Navigation className="w-3.5 h-3.5 text-sky-600" />
+              <span>Open Turn-by-Turn GPS Directions</span>
+            </a>
+          </div>
           <MapPicker
             initialLat={task.coordinates?.lat || 18.5204}
             initialLng={task.coordinates?.lng || 73.8567}

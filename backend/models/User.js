@@ -49,6 +49,46 @@ const userSchema = new mongoose.Schema(
       required: [true, 'Address is required'],
       trim: true,
     },
+    houseNumber: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    street: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    landmark: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    city: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    district: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    state: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    pincode: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    country: {
+      type: String,
+      trim: true,
+      default: 'India',
+    },
     ward: {
       type: String,
       default: 'Ward 1 - Central Market & Bus Terminal',

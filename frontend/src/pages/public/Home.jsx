@@ -98,7 +98,10 @@ export default function Home() {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-white leading-tight">
-                Together, Let's Build a <span className="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-teal-300">Better Community.</span>
+                Together, Let's Build a{' '}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-teal-300 to-emerald-300">
+                  Better Community.
+                </span>
               </h1>
 
               <p className="text-base sm:text-lg text-slate-300 max-w-2xl mx-auto lg:mx-0 leading-relaxed">
@@ -109,52 +112,103 @@ export default function Home() {
               <div className="pt-2 flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
                 <Link
                   to="/citizen/submit-complaint"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-bold text-sm bg-sky-500 hover:bg-sky-400 text-slate-950 shadow-lg shadow-sky-500/25 transition-all active:scale-95"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-bold text-sm bg-gradient-to-r from-cyan-500 to-teal-400 hover:from-cyan-400 hover:to-teal-300 text-slate-950 shadow-xl shadow-cyan-500/25 transition-all active:scale-95 cursor-pointer"
                 >
                   <span>Report an Issue</span>
                   <ArrowRight className="w-4 h-4" />
                 </Link>
 
                 <Link
-                  to="/citizen/complaints"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-xl font-semibold text-sm bg-slate-800/90 hover:bg-slate-700 text-white border border-slate-700 transition-all active:scale-95"
+                  to="/track"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-2xl font-semibold text-sm bg-slate-800/90 hover:bg-slate-700/90 text-white border border-slate-700/80 shadow-md transition-all active:scale-95 cursor-pointer"
                 >
-                  <Search className="w-4 h-4 text-slate-400" />
+                  <Search className="w-4 h-4 text-cyan-400" />
                   <span>Track Complaint</span>
                 </Link>
               </div>
 
-              {/* Demo Notice Banner */}
-              <div className="pt-4 flex items-center justify-center lg:justify-start space-x-2 text-xs text-slate-400">
-                <span className="px-2 py-0.5 rounded bg-sky-950 border border-sky-800 text-sky-300 font-mono font-bold">
-                  Phase 2 UI Demo
-                </span>
-                <span>Interactive prototype ready with 3 demo personas: Citizen, Admin, Worker</span>
+              {/* Role Quick Access Navigation Bar */}
+              <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
+                <Link
+                  to="/citizen/dashboard"
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition-all group"
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-cyan-400 mb-1">
+                    <span>Citizen Portal</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 line-clamp-2">
+                    Submit grievances with GPS & photo evidence
+                  </p>
+                </Link>
+
+                <Link
+                  to="/worker/dashboard"
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-teal-500/40 transition-all group"
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-teal-400 mb-1">
+                    <span>Field Worker</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 line-clamp-2">
+                    On-site GPS tasks, repair uploads & resolution
+                  </p>
+                </Link>
+
+                <Link
+                  to="/admin/dashboard"
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/40 transition-all group"
+                >
+                  <div className="flex items-center justify-between text-xs font-bold text-indigo-400 mb-1">
+                    <span>Municipal Admin</span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-500 group-hover:translate-x-0.5 transition-transform" />
+                  </div>
+                  <p className="text-[11px] text-slate-400 line-clamp-2">
+                    Verification, crew assignment & ward analytics
+                  </p>
+                </Link>
               </div>
             </div>
 
             {/* Right Column: Hero Visual Card */}
             <div className="lg:col-span-5">
               <div className="relative mx-auto max-w-md lg:max-w-none">
-                <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-700/60 bg-slate-800/50 backdrop-blur-sm p-4">
-                  <div className="relative rounded-2xl overflow-hidden h-72 sm:h-80 bg-slate-900">
+                <div className="rounded-3xl overflow-hidden shadow-2xl border border-slate-700/60 bg-slate-800/60 backdrop-blur-md p-4">
+                  <div className="relative rounded-2xl overflow-hidden h-72 sm:h-84 bg-slate-900 group">
                     <img
                       src="https://images.unsplash.com/photo-1541888946425-d0fbb18f15f6?auto=format&fit=crop&w=1000&q=80"
                       alt="Civic Infrastructure Repair Work"
-                      className="w-full h-full object-cover opacity-90 hover:scale-105 transition-transform duration-500"
+                      onError={(e) => {
+                        // Reliable SVG fallback if Unsplash image network is restricted
+                        e.target.style.display = 'none';
+                        const parent = e.target.parentElement;
+                        const fallbackDiv = document.createElement('div');
+                        fallbackDiv.className = 'w-full h-full flex flex-col items-center justify-center p-6 text-center bg-gradient-to-br from-slate-900 to-slate-800 text-slate-300';
+                        fallbackDiv.innerHTML = '<div class="w-16 h-16 rounded-2xl bg-cyan-500/20 text-cyan-400 flex items-center justify-center mb-3"><svg class="w-8 h-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg></div><p class="font-bold text-sm text-white">Smart Civic Infrastructure Dispatch</p><p class="text-xs text-slate-400 mt-1">Real-time municipal grievance resolution unit</p>';
+                        parent.appendChild(fallbackDiv);
+                      }}
+                      className="w-full h-full object-cover opacity-90 group-hover:scale-105 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
-                    <div className="absolute bottom-4 left-4 right-4 p-4 rounded-xl bg-slate-900/90 backdrop-blur-md border border-slate-700/60 text-left">
-                      <div className="flex items-center justify-between text-xs mb-1">
-                        <span className="font-bold text-sky-400">Live Municipal Dispatch</span>
-                        <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold">
-                          In Progress
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/30 to-transparent" />
+                    
+                    {/* Live Municipal Dispatch Floating Card */}
+                    <div className="absolute bottom-4 left-4 right-4 p-4 rounded-2xl bg-slate-900/95 backdrop-blur-md border border-slate-700/80 text-left shadow-xl space-y-1.5">
+                      <div className="flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-1.5 font-bold text-cyan-400">
+                          <span className="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+                          <span>Live Municipal Dispatch</span>
+                        </div>
+                        <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-black tracking-wider uppercase border border-emerald-500/30">
+                          IN PROGRESS
                         </span>
                       </div>
-                      <p className="text-xs text-white font-semibold truncate">
+                      <p className="text-xs text-white font-bold truncate">
                         Road asphalt resurfacing at Metro Pillar 42, Ward 1
                       </p>
-                      <p className="text-[11px] text-slate-400 mt-0.5">Crew assigned: Roads & Works Unit #3</p>
+                      <div className="flex items-center justify-between text-[11px] text-slate-400 pt-0.5 border-t border-slate-800">
+                        <span>Crew: Roads & Works Unit #3</span>
+                        <span className="text-cyan-300 font-mono font-medium">SLA: 4h remaining</span>
+                      </div>
                     </div>
                   </div>
                 </div>

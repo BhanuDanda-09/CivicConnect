@@ -1,11 +1,21 @@
 import React, { useState } from 'react';
 import { COMPLAINT_CATEGORIES, CITY_WARDS, PRIORITY_LEVELS } from '../../utils/constants';
+import { useAuth } from '../../hooks/useAuth';
 import MapPicker from '../common/MapPicker';
 import Button from '../common/Button';
-import { UploadCloud, X, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, X, AlertCircle, CheckCircle2, MapPin } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
+  let user = null;
+  try {
+    const auth = useAuth();
+    user = auth?.user;
+  } catch (err) {
+    // Graceful fallback when rendered without AuthProvider in standalone component tests
+    user = null;
+  }
+
   const [formData, setFormData] = useState({
     title: '',
     category: 'pothole',
@@ -13,7 +23,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     location: '',
     priority: 'MEDIUM',
     description: '',
-    coordinates: { lat: 18.5204, lng: 73.8567 },
+    coordinates: { lat: 17.3850, lng: 78.4867 },
     imageFile: null,
     imagePreview: null,
   });
@@ -159,9 +169,24 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
       {/* Street Address / Landmark */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-          Street Address / Nearest Landmark <span className="text-rose-500">*</span>
-        </label>
+        <div className="flex items-center justify-between mb-1.5">
+          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+            Street Address / Nearest Landmark <span className="text-rose-500">*</span>
+          </label>
+          {user?.address && (
+            <button
+              type="button"
+              onClick={() => {
+                setFormData((prev) => ({ ...prev, location: user.address }));
+                toast.success('Address populated from your citizen profile!');
+              }}
+              className="text-[11px] font-bold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1 cursor-pointer bg-sky-50 px-2 py-0.5 rounded-lg"
+            >
+              <MapPin className="w-3 h-3" />
+              <span>Use My Registered Address</span>
+            </button>
+          )}
+        </div>
         <input
           type="text"
           placeholder="e.g., Opposite Bank of India, 4th Cross Road, Shivaji Nagar"

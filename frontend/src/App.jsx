@@ -15,6 +15,7 @@ import WorkerLayout from './layouts/WorkerLayout';
 import Home from './pages/public/Home';
 import About from './pages/public/About';
 import Contact from './pages/public/Contact';
+import TrackComplaint from './pages/public/TrackComplaint';
 import NotFound from './pages/public/NotFound';
 import Unauthorized from './pages/public/Unauthorized';
 
@@ -107,6 +108,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/track" element={<TrackComplaint />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/forgot-password" element={<ForgotPassword />} />

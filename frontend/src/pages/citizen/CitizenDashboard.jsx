@@ -64,14 +64,19 @@ export default function CitizenDashboard() {
         <div className="space-y-2">
           <div className="flex items-center space-x-2 text-xs font-semibold text-sky-400">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <span>Citizen Dashboard • Ward 4</span>
+            <span>Citizen Dashboard • {user?.ward || 'Municipal Ward'}</span>
           </div>
           <h2 className="text-2xl sm:text-3xl font-black tracking-tight">
-            Welcome back, {user?.name || 'Citizen'}!
+            Welcome back, {user?.name || user?.fullName || 'Citizen'}!
           </h2>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl leading-relaxed">
             Report local civic infrastructure hazards and track resolution progress with photo verification.
           </p>
+          {user?.address && (
+            <p className="text-[11px] text-cyan-300/90 font-medium pt-1 truncate max-w-lg">
+              📍 Registered Address: {user.address}
+            </p>
+          )}
         </div>
 
         <Link

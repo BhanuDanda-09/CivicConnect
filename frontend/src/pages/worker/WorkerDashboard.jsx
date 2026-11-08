@@ -30,6 +30,7 @@ import {
   Flame,
   Star,
   ExternalLink,
+  Navigation,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -303,8 +304,19 @@ export default function WorkerDashboard() {
                         {task.complaintId || task.id}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 text-[11px] max-w-xs truncate">
-                      {task.location || task.ward}
+                    <td className="py-3.5 px-4 text-slate-600 text-[11px] max-w-xs">
+                      <div className="truncate">{task.location || task.ward}</div>
+                      {(task.latitude || task.coordinates?.lat) && (
+                        <a
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${task.latitude || task.coordinates.lat},${task.longitude || task.coordinates.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-0.5 text-[10px] text-sky-600 hover:text-sky-700 font-bold mt-0.5"
+                        >
+                          <Navigation className="w-2.5 h-2.5" />
+                          <span>GPS Route</span>
+                        </a>
+                      )}
                     </td>
                     <td className="py-3.5 px-4">
                       <span

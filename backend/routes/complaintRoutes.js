@@ -11,6 +11,7 @@ const {
   getComplaintById,
   updateComplaint,
   getComplaintHistory,
+  trackComplaintPublic,
 } = require('../controllers/complaintController');
 
 const {
@@ -26,7 +27,10 @@ const {
   validateMongoIdParam,
 } = require('../middleware/complaintValidation');
 
-// All complaint routes require verified authentication
+// Public complaint tracking (No login required - safe sanitized data)
+router.get('/track/:identifier', trackComplaintPublic);
+
+// All subsequent complaint routes require verified authentication
 router.use(protect);
 
 // Citizen routes

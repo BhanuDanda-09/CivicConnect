@@ -60,6 +60,7 @@ api.interceptors.response.use(
         currentPath.includes('/register') ||
         currentPath.includes('/about') ||
         currentPath.includes('/contact') ||
+        currentPath.includes('/track') ||
         currentPath === '/';
 
       if (!isPublicRoute) {
@@ -110,6 +111,7 @@ export const complaintAPI = {
   getById: (id) => api.get(`/complaints/${id}`),
   update: (id, updateData) => api.patch(`/complaints/${id}`, updateData),
   getHistory: (id) => api.get(`/complaints/${id}/history`),
+  trackPublic: (identifier) => api.get(`/complaints/track/${identifier}`),
 };
 
 // ------------------------------------------------------------------------------

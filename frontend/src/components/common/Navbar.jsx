@@ -72,6 +72,14 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
+                to="/track"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/track') ? 'text-sky-600 bg-sky-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                }`}
+              >
+                Track Complaint
+              </Link>
+              <Link
                 to="/about"
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive('/about') ? 'text-sky-600 bg-sky-50' : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
@@ -221,6 +229,13 @@ export default function Navbar() {
               className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
             >
               Home
+            </Link>
+            <Link
+              to="/track"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50"
+            >
+              Track Complaint
             </Link>
             <Link
               to="/about"

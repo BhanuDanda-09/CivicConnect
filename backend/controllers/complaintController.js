@@ -289,6 +289,59 @@ const getComplaintHistory = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Public complaint tracking by Complaint ID (e.g. CC-2026-0001) or Mongo ID
+ * @route   GET /api/complaints/public/track/:identifier
+ * @access  Public (No personal PII exposed)
+ */
+const trackComplaintPublic = asyncHandler(async (req, res) => {
+  const { identifier } = req.params;
+
+  if (!identifier) {
+    throw new ApiError(400, 'Complaint tracking ID is required.');
+  }
+
+  const complaint = await findComplaintByIdentifier(identifier.trim());
+
+  if (!complaint) {
+    throw new ApiError(
+      404,
+      `No civic grievance found matching tracking ID: "${identifier}". Please verify the ID.`
+    );
+  }
+
+  // Retrieve public audit timeline
+  const history = await ComplaintHistory.find({ complaint: complaint._id })
+    .sort({ timestamp: 1 })
+    .select('status remarks timestamp changedByRole');
+
+  // Sanitize response: do NOT expose citizen phone or private user details
+  res.status(200).json({
+    success: true,
+    data: {
+      id: complaint._id,
+      complaintId: complaint.complaintId,
+      title: complaint.title,
+      description: complaint.description,
+      category: complaint.category,
+      categoryLabel: complaint.categoryLabel || complaint.category,
+      status: complaint.status,
+      priority: complaint.priority,
+      ward: complaint.ward,
+      location: complaint.location,
+      latitude: complaint.latitude,
+      longitude: complaint.longitude,
+      images: complaint.images || [],
+      imageUrl: complaint.images?.[0] || '',
+      resolutionPhotos: complaint.resolutionPhotos || [],
+      resolutionNotes: complaint.resolutionNotes || '',
+      createdAt: complaint.createdAt,
+      updatedAt: complaint.updatedAt,
+      timeline: history,
+    },
+  });
+});
+
 module.exports = {
   createComplaint,
   getMyComplaints,
@@ -296,5 +349,6 @@ module.exports = {
   updateComplaint,
   getComplaintHistory,
   findComplaintByIdentifier,
+  trackComplaintPublic,
 };
 

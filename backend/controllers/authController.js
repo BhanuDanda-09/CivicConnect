@@ -13,7 +13,22 @@ const { sendTokenResponse } = require('../utils/tokenUtils');
  * @access  Public
  */
 const register = asyncHandler(async (req, res) => {
-  const { fullName, email, password, mobileNumber, address, ward } = req.body;
+  const {
+    fullName,
+    email,
+    password,
+    mobileNumber,
+    address,
+    houseNumber,
+    street,
+    landmark,
+    city,
+    district,
+    state,
+    pincode,
+    country,
+    ward,
+  } = req.body;
 
   // 1. Check for existing user with normalized email
   const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
@@ -21,20 +36,47 @@ const register = asyncHandler(async (req, res) => {
     throw new ApiError(409, 'An account with this email address already exists. Please sign in instead.');
   }
 
-  // 2. Strict Security: Enforce citizen role for all public registrations
+  // 2. Validate & format Indian address
+  let fullAddress = address ? address.trim() : '';
+  if (!fullAddress) {
+    const addressComponents = [
+      houseNumber,
+      street,
+      landmark ? `Near ${landmark}` : null,
+      city,
+      district,
+      state,
+      pincode ? `PIN: ${pincode}` : null,
+    ].filter(Boolean);
+    fullAddress = addressComponents.join(', ');
+  }
+
+  if (!fullAddress) {
+    throw new ApiError(400, 'Residential address is required. Please provide your locality or state/district.');
+  }
+
+  // 3. Strict Security: Enforce citizen role for all public registrations
   // ADMIN and WORKER roles cannot be created via public registration
   const user = await User.create({
     fullName: fullName.trim(),
     email: email.toLowerCase().trim(),
     password, // Hashed automatically by pre-save hook in User model
     mobileNumber: mobileNumber.trim(),
-    address: address.trim(),
+    address: fullAddress,
+    houseNumber: houseNumber ? houseNumber.trim() : '',
+    street: street ? street.trim() : '',
+    landmark: landmark ? landmark.trim() : '',
+    city: city ? city.trim() : '',
+    district: district ? district.trim() : '',
+    state: state ? state.trim() : '',
+    pincode: pincode ? pincode.trim() : '',
+    country: country ? country.trim() : 'India',
     ward: ward ? ward.trim() : 'Ward 1 - Central Market & Bus Terminal',
     role: 'citizen', // Enforced role
     isActive: true,
   });
 
-  // 3. Issue token and return sanitized user response
+  // 4. Issue token and return sanitized user response
   sendTokenResponse(user, 201, res, 'Citizen account registered successfully.');
 });
 
