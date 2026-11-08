@@ -13,6 +13,11 @@ const {
   getComplaintHistory,
 } = require('../controllers/complaintController');
 
+const {
+  submitFeedback,
+  getComplaintFeedback,
+} = require('../controllers/feedbackController');
+
 const { protect } = require('../middleware/authMiddleware');
 const { authorize } = require('../middleware/roleMiddleware');
 const { uploadComplaintPhotos } = require('../middleware/uploadMiddleware');
@@ -35,10 +40,22 @@ router.post(
 
 router.get('/my', authorize('citizen'), getMyComplaints);
 
+// Citizen feedback on resolved complaint
+router.post(
+  '/:id/feedback',
+  validateMongoIdParam('id'),
+  authorize('citizen'),
+  submitFeedback
+);
+router.get(
+  '/:id/feedback',
+  validateMongoIdParam('id'),
+  getComplaintFeedback
+);
+
 // Shared protected detail routes (Owner, Admin, or Assigned Worker)
 router.get('/:id', validateMongoIdParam('id'), getComplaintById);
 router.patch('/:id', validateMongoIdParam('id'), updateComplaint);
 router.get('/:id/history', validateMongoIdParam('id'), getComplaintHistory);
 
 module.exports = router;
-

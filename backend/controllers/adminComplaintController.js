@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const Complaint = require('../models/Complaint');
 const ComplaintHistory = require('../models/ComplaintHistory');
 const User = require('../models/User');
+const { createAndDispatchNotification } = require('./notificationController');
+const { emitToUser, emitToRole } = require('../services/socketService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { findComplaintByIdentifier } = require('./complaintController');
@@ -118,6 +120,24 @@ const verifyComplaint = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
+  // Real-time dispatch to citizen and administrators
+  await createAndDispatchNotification({
+    recipient: complaint.citizen,
+    title: 'Grievance Verified',
+    message: `Your complaint #${complaint.complaintId} has been verified and approved for field crew dispatch.`,
+    type: 'VERIFICATION',
+    relatedComplaint: complaint._id,
+  });
+
+  emitToUser(complaint.citizen, 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'VERIFIED',
+  });
+  emitToRole('admin', 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'VERIFIED',
+  });
+
   res.status(200).json({
     success: true,
     message: `Complaint #${complaint.complaintId} has been verified successfully.`,
@@ -161,6 +181,25 @@ const rejectComplaint = asyncHandler(async (req, res) => {
     changedBy: req.user._id,
     remarks: rejectionReason.trim(),
     timestamp: new Date(),
+  });
+
+  // Real-time dispatch to citizen
+  await createAndDispatchNotification({
+    recipient: complaint.citizen,
+    title: 'Grievance Rejected',
+    message: `Your complaint #${complaint.complaintId} was rejected. Note: "${rejectionReason.trim()}".`,
+    type: 'STATUS_UPDATE',
+    relatedComplaint: complaint._id,
+  });
+
+  emitToUser(complaint.citizen, 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'REJECTED',
+    rejectionReason: rejectionReason.trim(),
+  });
+  emitToRole('admin', 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'REJECTED',
   });
 
   res.status(200).json({
@@ -223,6 +262,40 @@ const assignWorker = asyncHandler(async (req, res) => {
     changedBy: req.user._id,
     remarks: remarks || `Assigned to field worker ${worker.fullName}.`,
     timestamp: new Date(),
+  });
+
+  // Real-time dispatch to assigned field worker and citizen
+  await Promise.all([
+    createAndDispatchNotification({
+      recipient: worker._id,
+      title: 'New Work Order Assigned',
+      message: `You have been dispatched to complaint #${complaint.complaintId} in ${complaint.ward}.`,
+      type: 'ASSIGNMENT',
+      relatedComplaint: complaint._id,
+    }),
+    createAndDispatchNotification({
+      recipient: complaint.citizen,
+      title: 'Field Officer Dispatched',
+      message: `Municipal officer ${worker.fullName} (${worker.trade || 'Field Crew'}) has been dispatched to resolve #${complaint.complaintId}.`,
+      type: 'STATUS_UPDATE',
+      relatedComplaint: complaint._id,
+    }),
+  ]);
+
+  emitToUser(worker._id, 'complaint:assigned', {
+    complaintId: complaint.complaintId,
+    title: complaint.title,
+    ward: complaint.ward,
+    priority: complaint.priority,
+  });
+  emitToUser(complaint.citizen, 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'ASSIGNED',
+    workerName: worker.fullName,
+  });
+  emitToRole('admin', 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'ASSIGNED',
   });
 
   await complaint.populate('assignedWorker', 'fullName email mobileNumber avatar');

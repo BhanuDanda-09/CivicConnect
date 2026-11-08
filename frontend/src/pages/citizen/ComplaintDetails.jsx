@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getStoredComplaints, addFeedbackInStore } from '../../utils/mockData';
-import { complaintAPI } from '../../services/api';
+import { complaintAPI, feedbackAPI } from '../../services/api';
 import StatusBadge from '../../components/common/StatusBadge';
 import ComplaintTimeline from '../../components/complaints/ComplaintTimeline';
 import MapPicker from '../../components/common/MapPicker';
@@ -116,7 +116,7 @@ export default function ComplaintDetails() {
   const priorityConfig = PRIORITY_LEVELS[complaint.priority] || PRIORITY_LEVELS.MEDIUM;
   const isResolved = complaint.status === 'RESOLVED' || complaint.status === 'CITIZEN_FEEDBACK';
 
-  const handleFeedbackSubmit = (e) => {
+  const handleFeedbackSubmit = async (e) => {
     e.preventDefault();
     if (!feedbackComment.trim()) {
       toast.error('Please enter a brief feedback comment');
@@ -124,14 +124,38 @@ export default function ComplaintDetails() {
     }
 
     setIsSubmittingFeedback(true);
-    setTimeout(() => {
-      const updated = addFeedbackInStore(complaint.id, feedbackRating, feedbackComment);
-      if (updated) {
-        setComplaint(updated);
-        toast.success('Thank you! Your feedback has been recorded.');
+    const targetId = complaint.complaintId || complaint.id || complaint._id;
+
+    try {
+      const res = await feedbackAPI.submit(targetId, {
+        rating: feedbackRating,
+        comment: feedbackComment.trim(),
+      });
+
+      if (res.data?.success) {
+        setComplaint((prev) => ({
+          ...prev,
+          status: 'CITIZEN_FEEDBACK',
+          feedback: {
+            rating: feedbackRating,
+            comment: feedbackComment.trim(),
+            submittedAt: new Date(),
+          },
+        }));
+        toast.success('Thank you! Your feedback has been recorded in the municipal registry.');
+        setIsSubmittingFeedback(false);
+        return;
       }
-      setIsSubmittingFeedback(false);
-    }, 400);
+    } catch (err) {
+      console.warn('API notice: falling back to local storage for feedback:', err.message);
+    }
+
+    const updated = addFeedbackInStore(targetId, feedbackRating, feedbackComment);
+    if (updated) {
+      setComplaint(updated);
+      toast.success('Thank you! Your feedback has been recorded.');
+    }
+    setIsSubmittingFeedback(false);
   };
 
   return (

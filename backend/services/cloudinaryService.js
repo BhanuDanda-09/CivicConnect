@@ -1,8 +1,10 @@
 // ==============================================================================
 // Cloudinary Service (cloudinaryService.js)
+// Production-safe image streaming with strict credential validation
 // ==============================================================================
 
 const cloudinary = require('../config/cloudinary');
+const ApiError = require('../utils/ApiError');
 
 /**
  * Checks if Cloudinary is configured with valid production/dev credentials
@@ -25,11 +27,23 @@ const isCloudinaryConfigured = () => {
  * @returns {Promise<{ url: string, publicId: string }>}
  */
 const uploadBufferToCloudinary = async (buffer, folder = 'civicconnect/complaints') => {
-  // If in automated test mode or Cloudinary credentials are not configured, use safe fallback
-  if (process.env.NODE_ENV === 'test' || !isCloudinaryConfigured()) {
+  const isProduction = process.env.NODE_ENV === 'production';
+  const configured = isCloudinaryConfigured();
+
+  // Strict Production Safety: Never generate fake URLs in production
+  if (isProduction && !configured) {
+    throw new ApiError(
+      503,
+      'Image Upload Service Unavailable: Cloudinary CDN credentials are not configured in production.'
+    );
+  }
+
+  // Non-production fallback (offline dev / unit test runner)
+  if (!configured) {
+    console.warn('[Cloudinary Dev Warning] Cloudinary not configured. Using local session image fallback.');
     const mockId = `mock_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
     return {
-      url: `https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80`,
+      url: 'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
       publicId: `${folder}/${mockId}`,
     };
   }
@@ -43,7 +57,10 @@ const uploadBufferToCloudinary = async (buffer, folder = 'civicconnect/complaint
       },
       (error, result) => {
         if (error) {
-          return reject(error);
+          console.error('[Cloudinary Error] Upload failed:', error.message);
+          return reject(
+            new ApiError(500, `Image upload failed: ${error.message || 'Cloudinary network error'}`)
+          );
         }
         resolve({
           url: result.secure_url || result.url,
@@ -92,4 +109,3 @@ module.exports = {
   uploadMultipleFiles,
   deleteFromCloudinary,
 };
-

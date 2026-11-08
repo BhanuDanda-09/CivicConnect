@@ -25,3 +25,4 @@ router.get('/wards', getWardAnalytics);
 router.get('/complaint-locations', getComplaintLocations);
 
 module.exports = router;
+

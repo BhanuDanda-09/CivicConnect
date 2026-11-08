@@ -21,3 +21,4 @@ router.get('/', getAllUsers);
 router.patch('/:id/toggle-status', toggleUserStatus);
 
 module.exports = router;
+

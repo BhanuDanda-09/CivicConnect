@@ -1,19 +1,21 @@
 // ==============================================================================
 // Server Entry Point (server.js)
-// Handles database initialization, port binding, and graceful shutdown
+// Handles database initialization, HTTP/Socket.IO binding, and graceful shutdown
 // ==============================================================================
 
+const http = require('http');
 const dotenv = require('dotenv');
 dotenv.config();
 
 const app = require('./app');
 const { connectDB, disconnectDB } = require('./config/database');
+const { initSocket } = require('./services/socketService');
 
 const PORT = parseInt(process.env.PORT, 10) || 5000;
 let server;
 
 /**
- * Boots the database and starts the HTTP server
+ * Boots the database, initializes real-time WebSockets, and starts the HTTP server
  */
 const startServer = async () => {
   try {
@@ -21,11 +23,18 @@ const startServer = async () => {
     console.log('[CivicConnect Server] Initializing MongoDB connection...');
     await connectDB();
 
-    // 2. Start HTTP listener
-    server = app.listen(PORT, () => {
+    // 2. Wrap Express app in standard Node HTTP server for WebSocket integration
+    server = http.createServer(app);
+
+    // 3. Initialize authenticated Socket.IO service
+    initSocket(server);
+
+    // 4. Start HTTP listener
+    server.listen(PORT, () => {
       console.log('------------------------------------------------------------');
       console.log(`🏛️  CivicConnect API Server running on port ${PORT}`);
       console.log(`🌐  Environment : ${process.env.NODE_ENV || 'development'}`);
+      console.log(`⚡  Real-Time   : Socket.IO initialized on ws://localhost:${PORT}`);
       console.log(`🩺  Health Check: http://localhost:${PORT}/api/health`);
       console.log('------------------------------------------------------------');
     });
@@ -35,8 +44,9 @@ const startServer = async () => {
       process.exit(1);
     } else {
       console.warn('[CivicConnect Server] Running in dev fallback mode: starting server with DB offline.');
-      // In local dev without MongoDB running, start server so developer can still check health/routes
-      server = app.listen(PORT, () => {
+      server = http.createServer(app);
+      initSocket(server);
+      server.listen(PORT, () => {
         console.log(`[CivicConnect Server] HTTP Server running on port ${PORT} (Database offline)`);
       });
     }
@@ -49,7 +59,7 @@ const handleGracefulShutdown = async (signal) => {
 
   if (server) {
     server.close(async () => {
-      console.log('[CivicConnect Server] HTTP server closed.');
+      console.log('[CivicConnect Server] HTTP & Socket.IO server closed.');
       try {
         await disconnectDB();
         console.log('[CivicConnect Server] Clean exit completed.');

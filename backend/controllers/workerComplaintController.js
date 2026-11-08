@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const Complaint = require('../models/Complaint');
 const ComplaintHistory = require('../models/ComplaintHistory');
 const { uploadMultipleFiles } = require('../services/cloudinaryService');
+const { createAndDispatchNotification } = require('./notificationController');
+const { emitToUser, emitToRole } = require('../services/socketService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 const { findComplaintByIdentifier } = require('./complaintController');
@@ -112,6 +114,24 @@ const startWork = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
+  // Real-time dispatch to citizen and administrators
+  await createAndDispatchNotification({
+    recipient: complaint.citizen,
+    title: 'Repairs In Progress',
+    message: `Officer ${req.user.fullName} has arrived on site and started work on complaint #${complaint.complaintId}.`,
+    type: 'STATUS_UPDATE',
+    relatedComplaint: complaint._id,
+  });
+
+  emitToUser(complaint.citizen, 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'IN_PROGRESS',
+  });
+  emitToRole('admin', 'complaint:updated', {
+    complaintId: complaint.complaintId,
+    status: 'IN_PROGRESS',
+  });
+
   res.status(200).json({
     success: true,
     message: `Work started on complaint #${complaint.complaintId}. Status changed to IN_PROGRESS.`,
@@ -203,6 +223,25 @@ const resolveComplaint = asyncHandler(async (req, res) => {
     changedBy: req.user._id,
     remarks: notes.trim(),
     timestamp: new Date(),
+  });
+
+  // Real-time dispatch to citizen (requesting feedback) and administrators
+  await createAndDispatchNotification({
+    recipient: complaint.citizen,
+    title: 'Resolution Completed - Action Requested',
+    message: `Repairs for complaint #${complaint.complaintId} have completed. Please review the photo proof and submit your feedback.`,
+    type: 'FEEDBACK_REQUEST',
+    relatedComplaint: complaint._id,
+  });
+
+  emitToUser(complaint.citizen, 'complaint:resolved', {
+    complaintId: complaint.complaintId,
+    status: 'RESOLVED',
+    resolutionRemarks: notes.trim(),
+  });
+  emitToRole('admin', 'complaint:resolved', {
+    complaintId: complaint.complaintId,
+    status: 'RESOLVED',
   });
 
   res.status(200).json({

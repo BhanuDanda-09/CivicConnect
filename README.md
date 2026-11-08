@@ -138,7 +138,7 @@ To run and develop this project locally on Windows:
 - [x] **Phase 4: Authentication and role-based access control (RBAC)** *(Completed)*
 - [x] **Phase 5: Complaint management functionality** *(Completed)*
 - [x] **Phase 6: Admin and worker dashboards** *(Completed)*
-- [ ] **Phase 7: Frontend-backend integration**
+- [x] **Phase 7: Frontend-backend integration, real-time notifications & application hardening** *(Completed)*
 - [ ] **Phase 8: Testing and bug fixing**
 - [ ] **Phase 9: Docker and Docker Compose**
 - [ ] **Phase 10: GitHub Actions and Jenkins CI/CD**
@@ -147,3 +147,28 @@ To run and develop this project locally on Windows:
 - [ ] **Phase 13: Prometheus and Grafana monitoring**
 - [ ] **Phase 14: Centralized logging and failure recovery**
 - [ ] **Phase 15: Final testing and documentation**
+
+---
+
+## ⚡ 7. Phase 7: Real-Time & End-to-End Integration Architecture
+
+### Real-Time WebSockets (Socket.IO)
+CivicConnect integrates **Socket.IO** (`socket.io` on Express server + `socket.io-client` on React frontend) for zero-latency bidirectional alerts without browser polling:
+- **Handshake Authentication**: Tokens are verified in `initSocket` via `socket.handshake.auth.token` (or `Bearer <token>` in auth headers).
+- **Targeted User Channels**: Each authenticated user automatically joins `user:<userId>`.
+- **Role Broadcast Channels**: Users join their respective role room (`role:citizen`, `role:worker`, `role:admin`).
+- **Live Notifications**:
+  - `notification:received`: Dispatches instant notification payload to user.
+  - `notification:count`: Updates unread counter badge in header bell.
+  - `complaint:created`: Alerts admins of newly filed civic reports.
+  - `complaint:assigned`: Alerts municipal workers of new field assignments.
+  - `complaint:updated`: Notifies citizens of verification, progress, or rejection.
+  - `complaint:resolved`: Prompts citizen for star rating & resolution feedback.
+  - `feedback:submitted`: Notifies worker of citizen feedback and satisfaction score.
+
+### Frontend Hardening & UX Resilience
+- **React Error Boundary**: Catches render crashes gracefully with user retry options.
+- **Async Skeletons & Spinners**: `DashboardSkeleton`, `TableSkeleton`, `ComplaintCardSkeleton`, and `LoadingSpinner` provide smooth loading transitions.
+- **Empty & Error State Components**: Consistent fallback UI with actionable recovery buttons.
+- **HTTP Interceptors**: Centralized Axios response handlers categorizing HTTP 400, 401, 403, 404, 409, 422, 429, and 500 errors with user-friendly toast messages.
+- **Vite Chunk Optimization**: Manual chunk splitting (`vendor`, `charts`, `maps`, `realtime`) optimizing initial page load speed.

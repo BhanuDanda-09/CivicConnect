@@ -125,3 +125,4 @@ describe('CivicConnect Phase 6 - Frontend Dashboards Test Suite', () => {
     expect(screen.getByPlaceholderText(/e\.g\. Ramesh Chandra Patel/i)).toBeInTheDocument();
   });
 });
+

@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const Complaint = require('../models/Complaint');
 const ComplaintHistory = require('../models/ComplaintHistory');
 const { uploadMultipleFiles } = require('../services/cloudinaryService');
+const { createAndDispatchNotification } = require('./notificationController');
+const { emitToRole } = require('../services/socketService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -99,6 +101,23 @@ const createComplaint = asyncHandler(async (req, res) => {
     changedBy: req.user._id,
     remarks: 'Complaint logged and submitted to the municipal verification desk.',
     timestamp: new Date(),
+  });
+
+  // Real-time dispatch & notification
+  await createAndDispatchNotification({
+    recipient: req.user._id,
+    title: 'Grievance Registered',
+    message: `Your complaint #${complaint.complaintId} has been registered and is under municipal verification.`,
+    type: 'STATUS_UPDATE',
+    relatedComplaint: complaint._id,
+  });
+
+  emitToRole('admin', 'complaint:created', {
+    complaintId: complaint.complaintId,
+    title: complaint.title,
+    category: complaint.category,
+    priority: complaint.priority,
+    ward: complaint.ward,
   });
 
   res.status(201).json({

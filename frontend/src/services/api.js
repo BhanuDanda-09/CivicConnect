@@ -1,11 +1,15 @@
 // ==============================================================================
 // Axios HTTP Client & API Service Layer (api.js)
+// Phase 7 - Hardened Interceptors, Error Categorization, and Real-Time APIs
 // ==============================================================================
 
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api',
+  baseURL:
+    import.meta.env.VITE_API_URL ||
+    import.meta.env.VITE_API_BASE_URL ||
+    'http://localhost:5000/api',
   withCredentials: true,
   timeout: 15000,
 });
@@ -18,7 +22,7 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
 
-    // If payload is FormData, do not set application/json
+    // Automatically omit Content-Type for FormData so the browser generates correct multipart boundaries
     if (config.data instanceof FormData) {
       delete config.headers['Content-Type'];
     } else if (!config.headers['Content-Type']) {
@@ -30,32 +34,66 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Handle global 401 Unauthorized responses
+// Response Interceptor: Structured Error Handling & Session Expiration Guard
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response && error.response.status === 401) {
-      // Clear expired credentials
+    // 1. Network Disconnect or Server Down
+    if (!error.response) {
+      const networkError = new Error(
+        'Unable to communicate with CivicConnect server. Please check your internet connection or verify the backend is running.'
+      );
+      networkError.isNetworkError = true;
+      return Promise.reject(networkError);
+    }
+
+    const { status, data } = error.response;
+
+    // 2. Authentication Expiration / Invalid Token (401)
+    if (status === 401) {
       localStorage.removeItem('civic_token');
       localStorage.removeItem('civic_user');
 
-      // Only redirect if not already on public authentication routes
       const currentPath = window.location.pathname;
-      if (
-        !currentPath.includes('/login') &&
-        !currentPath.includes('/register') &&
-        !currentPath.includes('/about') &&
-        !currentPath.includes('/contact') &&
-        currentPath !== '/'
-      ) {
+      const isPublicRoute =
+        currentPath.includes('/login') ||
+        currentPath.includes('/register') ||
+        currentPath.includes('/about') ||
+        currentPath.includes('/contact') ||
+        currentPath === '/';
+
+      if (!isPublicRoute) {
         window.location.href = '/login?sessionExpired=true';
       }
     }
-    return Promise.reject(error);
+
+    // 3. User-Friendly Error Message Enrichment
+    const message =
+      data?.message ||
+      (status === 403
+        ? 'Access forbidden: You do not have permission for this municipal action.'
+        : status === 404
+        ? 'The requested resource was not found.'
+        : status === 409
+        ? 'Conflict: A duplicate record already exists in the system.'
+        : status === 429
+        ? 'Request rate limit exceeded. Please wait a moment and try again.'
+        : status >= 500
+        ? 'Municipal server error. The engineering team has been alerted.'
+        : 'An unexpected application error occurred.');
+
+    const enrichedError = new Error(message);
+    enrichedError.status = status;
+    enrichedError.data = data;
+    enrichedError.response = error.response;
+
+    return Promise.reject(enrichedError);
   }
 );
 
+// ------------------------------------------------------------------------------
 // Authentication API
+// ------------------------------------------------------------------------------
 export const authAPI = {
   register: (userData) => api.post('/auth/register', userData),
   login: (credentials) => api.post('/auth/login', credentials),
@@ -63,7 +101,9 @@ export const authAPI = {
   logout: () => api.post('/auth/logout'),
 };
 
+// ------------------------------------------------------------------------------
 // Citizen Complaint API
+// ------------------------------------------------------------------------------
 export const complaintAPI = {
   create: (complaintData) => api.post('/complaints', complaintData),
   getMyComplaints: (params) => api.get('/complaints/my', { params }),
@@ -72,7 +112,9 @@ export const complaintAPI = {
   getHistory: (id) => api.get(`/complaints/${id}/history`),
 };
 
+// ------------------------------------------------------------------------------
 // Municipal Admin Complaint API
+// ------------------------------------------------------------------------------
 export const adminComplaintAPI = {
   getAll: (params) => api.get('/admin/complaints', { params }),
   getStats: () => api.get('/admin/complaints/stats'),
@@ -82,7 +124,9 @@ export const adminComplaintAPI = {
   changePriority: (id, data) => api.patch(`/admin/complaints/${id}/priority`, data),
 };
 
+// ------------------------------------------------------------------------------
 // Municipal Admin Analytics API
+// ------------------------------------------------------------------------------
 export const adminAnalyticsAPI = {
   getOverview: (params) => api.get('/admin/analytics/overview', { params }),
   getWorkers: () => api.get('/admin/analytics/workers'),
@@ -90,19 +134,25 @@ export const adminAnalyticsAPI = {
   getComplaintLocations: (params) => api.get('/admin/analytics/complaint-locations', { params }),
 };
 
+// ------------------------------------------------------------------------------
 // Municipal Admin Field Worker Management API
+// ------------------------------------------------------------------------------
 export const adminWorkerAPI = {
   getAll: () => api.get('/admin/workers'),
   create: (workerData) => api.post('/admin/workers', workerData),
 };
 
+// ------------------------------------------------------------------------------
 // Municipal Admin User Directory API
+// ------------------------------------------------------------------------------
 export const adminUserAPI = {
   getAll: (params) => api.get('/admin/users', { params }),
   toggleStatus: (id) => api.patch(`/admin/users/${id}/toggle-status`),
 };
 
+// ------------------------------------------------------------------------------
 // Field Worker Complaint API
+// ------------------------------------------------------------------------------
 export const workerComplaintAPI = {
   getAssigned: (params) => api.get('/workers/complaints', { params }),
   getById: (id) => api.get(`/workers/complaints/${id}`),
@@ -110,10 +160,31 @@ export const workerComplaintAPI = {
   resolve: (id, resolutionData) => api.patch(`/workers/complaints/${id}/resolve`, resolutionData),
 };
 
+// ------------------------------------------------------------------------------
 // Field Worker Personal Analytics API
+// ------------------------------------------------------------------------------
 export const workerAnalyticsAPI = {
   getOverview: () => api.get('/workers/analytics/overview'),
   getTaskLocations: (params) => api.get('/workers/analytics/task-locations', { params }),
+};
+
+// ------------------------------------------------------------------------------
+// Real-Time Notification API
+// ------------------------------------------------------------------------------
+export const notificationAPI = {
+  getAll: (params) => api.get('/notifications', { params }),
+  markAsRead: (id) => api.patch(`/notifications/${id}/read`),
+  markAllAsRead: () => api.patch('/notifications/read-all'),
+};
+
+// ------------------------------------------------------------------------------
+// Citizen Feedback & Satisfaction Rating API
+// ------------------------------------------------------------------------------
+export const feedbackAPI = {
+  submit: (complaintId, feedbackData) =>
+    api.post(`/complaints/${complaintId}/feedback`, feedbackData),
+  getByComplaint: (complaintId) => api.get(`/complaints/${complaintId}/feedback`),
+  getAll: (params) => api.get('/feedback', { params }),
 };
 
 export default api;

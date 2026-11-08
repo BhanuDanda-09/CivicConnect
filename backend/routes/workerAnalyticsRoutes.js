@@ -21,3 +21,4 @@ router.get('/overview', getWorkerOverview);
 router.get('/task-locations', getWorkerTaskLocations);
 
 module.exports = router;
+
