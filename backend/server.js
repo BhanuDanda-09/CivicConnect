@@ -4,7 +4,12 @@
 // ==============================================================================
 
 const http = require('http');
+const path = require('path');
 const dotenv = require('dotenv');
+
+// Robust environment file discovery (checks backend/.env, root .env, then process.cwd())
+dotenv.config({ path: path.resolve(__dirname, '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 dotenv.config();
 
 const app = require('./app');
