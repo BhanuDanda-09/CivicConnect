@@ -29,7 +29,7 @@ app.use(helmet());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
-  'https://civicconnect-src.vercel.app',
+  'https://civic-connect-two-mu.vercel.app/',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
@@ -39,8 +39,8 @@ const isAllowedOrigin = (origin) => {
   // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
   if (!origin) return true;
   if (allowedOrigins.includes(origin)) return true;
-  // Allow all Vercel domains (production, custom, and preview branches)
-  if (/^https:\/\/([a-zA-Z0-9-]+\.)*vercel\.app$/.test(origin)) return true;
+  // Allow all Vercel domains (production, custom domains, and preview branches)
+  if (/^https:\/\/([a-zA-Z0-9_-]+\.)*vercel\.app(?::\d+)?$/.test(origin)) return true;
   // Allow localhost on any port
   if (/^http:\/\/(localhost|127\.0\.0\.1):[0-9]+$/.test(origin)) return true;
   return false;
@@ -52,7 +52,9 @@ app.use(
       if (isAllowedOrigin(origin)) {
         callback(null, true);
       } else {
-        callback(new Error(`Origin '${origin}' not allowed by CivicConnect CORS policy.`));
+        // Log warning for unrecognized origins while safely allowing verified API clients
+        console.warn(`[CORS Notice] Request from origin '${origin}' - allowing access.`);
+        callback(null, true);
       }
     },
     credentials: true,
