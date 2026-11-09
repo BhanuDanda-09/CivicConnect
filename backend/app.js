@@ -29,7 +29,7 @@ app.use(helmet());
 const allowedOrigins = [
   process.env.FRONTEND_URL,
   process.env.CLIENT_URL,
-  'https://civic-connect-two-mu.vercel.app/',
+  'https://civic-connect-two-mu.vercel.app',
   'http://localhost:5173',
   'http://localhost:3000',
   'http://127.0.0.1:5173',
