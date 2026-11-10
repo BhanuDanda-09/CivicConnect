@@ -571,9 +571,9 @@ export default function MapPicker({
         <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200/60 dark:border-slate-800">
           <span className="flex items-center gap-1">
             <Compass className="w-3.5 h-3.5 text-slate-400" />
-            <span>Latitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lat).toFixed(6)}° N</strong></span>
+            <span>Lat: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lat).toFixed(6)}° N</strong></span>
           </span>
-          <span>Longitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lng).toFixed(6)}° E</strong></span>
+          <span>Lng: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lng).toFixed(6)}° E</strong></span>
         </div>
       </div>
     </div>

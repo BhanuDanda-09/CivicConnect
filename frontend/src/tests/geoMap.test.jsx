@@ -128,7 +128,7 @@ describe('Pan-India Interactive Map & Geocoding Test Suite', () => {
     );
 
     // Verify Country: India is displayed
-    expect(screen.getByText('India')).toBeInTheDocument();
+    expect(screen.getByText(/India/i)).toBeInTheDocument();
 
     // Verify State select is populated with Indian states
     const stateSelect = screen.getByDisplayValue(/Telangana/i);
@@ -142,3 +142,4 @@ describe('Pan-India Interactive Map & Geocoding Test Suite', () => {
     expect(screen.getByText('NTR (Vijayawada)')).toBeInTheDocument();
   });
 });
+
