@@ -25,66 +25,66 @@ export const COMPLAINT_STATUS = {
   SUBMITTED: {
     key: 'SUBMITTED',
     label: 'Submitted',
-    color: 'bg-slate-100 text-slate-700 border-slate-300',
+    color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 border-slate-300 dark:border-slate-700',
     step: 1,
     description: 'Complaint recorded and awaiting municipal desk verification.'
   },
   UNDER_VERIFICATION: {
     key: 'UNDER_VERIFICATION',
     label: 'Under Verification',
-    color: 'bg-amber-100 text-amber-800 border-amber-300',
+    color: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-300 dark:border-amber-800',
     step: 2,
     description: 'Municipal desk reviewing report details, location, and photos.'
   },
   VERIFIED: {
     key: 'VERIFIED',
     label: 'Verified',
-    color: 'bg-blue-100 text-blue-800 border-blue-300',
+    color: 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-300 dark:border-blue-800',
     step: 3,
     description: 'Complaint verified and approved for municipal department assignment.'
   },
   ASSIGNED: {
     key: 'ASSIGNED',
     label: 'Assigned',
-    color: 'bg-indigo-100 text-indigo-800 border-indigo-300',
+    color: 'bg-indigo-100 dark:bg-indigo-950/60 text-indigo-800 dark:text-indigo-300 border-indigo-300 dark:border-indigo-800',
     step: 4,
     description: 'Assigned to field municipal worker for on-site inspection and action.'
   },
   IN_PROGRESS: {
     key: 'IN_PROGRESS',
     label: 'In Progress',
-    color: 'bg-purple-100 text-purple-800 border-purple-300',
+    color: 'bg-purple-100 dark:bg-purple-950/60 text-purple-800 dark:text-purple-300 border-purple-300 dark:border-purple-800',
     step: 5,
     description: 'Field team is on site actively executing repairs or cleaning.'
   },
   RESOLVED: {
     key: 'RESOLVED',
     label: 'Resolved',
-    color: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+    color: 'bg-emerald-100 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-300 dark:border-emerald-800',
     step: 6,
     description: 'Work completed on site with photographic proof uploaded.'
   },
   CITIZEN_FEEDBACK: {
     key: 'CITIZEN_FEEDBACK',
     label: 'Closed with Feedback',
-    color: 'bg-teal-100 text-teal-800 border-teal-300',
+    color: 'bg-teal-100 dark:bg-teal-950/60 text-teal-800 dark:text-teal-300 border-teal-300 dark:border-teal-800',
     step: 7,
     description: 'Citizen acknowledged resolution and submitted a satisfaction rating.'
   },
   REJECTED: {
     key: 'REJECTED',
     label: 'Rejected',
-    color: 'bg-rose-100 text-rose-800 border-rose-300',
+    color: 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800',
     step: -1,
     description: 'Marked invalid, duplicate, or out of municipal jurisdiction.'
   }
 };
 
 export const PRIORITY_LEVELS = {
-  LOW: { label: 'Low', color: 'bg-slate-100 text-slate-700 border-slate-200' },
-  MEDIUM: { label: 'Medium', color: 'bg-blue-100 text-blue-800 border-blue-200' },
-  HIGH: { label: 'High', color: 'bg-amber-100 text-amber-800 border-amber-200' },
-  URGENT: { label: 'Urgent', color: 'bg-rose-100 text-rose-800 border-rose-300 font-semibold' },
+  LOW: { label: 'Low', color: 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700' },
+  MEDIUM: { label: 'Medium', color: 'bg-blue-100 dark:bg-blue-950/60 text-blue-800 dark:text-blue-300 border-blue-200 dark:border-blue-800' },
+  HIGH: { label: 'High', color: 'bg-amber-100 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800' },
+  URGENT: { label: 'Urgent', color: 'bg-rose-100 dark:bg-rose-950/60 text-rose-800 dark:text-rose-300 border-rose-300 dark:border-rose-800 font-semibold' },
 };
 
 export const CITY_WARDS = [

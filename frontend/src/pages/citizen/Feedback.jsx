@@ -96,13 +96,13 @@ export default function Feedback() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-10">
+    <div className="max-w-3xl mx-auto space-y-6 pb-10 transition-colors">
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <MessageSquare className="w-7 h-7 text-sky-600" />
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <MessageSquare className="w-7 h-7 text-sky-600 dark:text-sky-400" />
           <span>Citizen Resolution Feedback</span>
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Review resolved infrastructure grievances to evaluate municipal performance and ensure ground-level repair quality.
         </p>
       </div>
@@ -113,22 +113,22 @@ export default function Feedback() {
           title="No Resolved Issues Awaiting Feedback"
           description="When your reported civic problems (potholes, garbage, streetlights) are resolved by municipal crews, they will appear here for your satisfaction rating."
           actionText="View My Active Reports"
-          actionLink="/citizen/my-complaints"
+          actionLink="/citizen/complaints"
         />
       ) : (
-        <form onSubmit={handleSubmit} className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 space-y-6 shadow-xs">
+        <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 space-y-6 shadow-xs transition-colors">
           {/* Select Complaint */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Select Resolved Grievance to Rate *
             </label>
             <select
               value={selectedComplaintId}
               onChange={(e) => setSelectedComplaintId(e.target.value)}
-              className="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 bg-slate-50/50 font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              className="w-full px-4 py-3 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-950 font-medium text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
             >
               {complaints.map((c) => (
-                <option key={c._id || c.id || c.complaintId} value={c.complaintId || c._id || c.id}>
+                <option key={c._id || c.id || c.complaintId} value={c.complaintId || c._id || c.id} className="dark:bg-slate-900">
                   {c.complaintId || c.id} • {c.title} ({c.ward})
                 </option>
               ))}
@@ -137,7 +137,7 @@ export default function Feedback() {
 
           {/* Star Rating Picker */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Overall Resolution Satisfaction Rating *
             </label>
             <div className="flex items-center gap-2">
@@ -152,12 +152,12 @@ export default function Feedback() {
                     className={`w-8 h-8 ${
                       star <= rating
                         ? 'text-amber-400 fill-amber-400'
-                        : 'text-slate-200 fill-slate-100'
+                        : 'text-slate-200 dark:text-slate-700 fill-slate-100 dark:fill-slate-800'
                     }`}
                   />
                 </button>
               ))}
-              <span className="ml-3 text-xs font-bold text-slate-700">
+              <span className="ml-3 text-xs font-bold text-slate-700 dark:text-slate-300">
                 {rating === 5 && '🌟 Outstanding Work'}
                 {rating === 4 && '👍 Satisfactory Resolution'}
                 {rating === 3 && '😐 Average Quality'}
@@ -169,7 +169,7 @@ export default function Feedback() {
 
           {/* Feedback Comments */}
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-2">
               Ground-Level Experience & Observations *
             </label>
             <textarea
@@ -178,12 +178,12 @@ export default function Feedback() {
               placeholder="Describe whether the pothole was smoothly asphalted, debris was completely cleared, or if any remnants remain on the road..."
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              className="w-full p-4 text-xs rounded-2xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              className="w-full p-4 text-xs rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
             ></textarea>
           </div>
 
-          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-            <span className="text-[11px] text-slate-400">
+          <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+            <span className="text-[11px] text-slate-400 dark:text-slate-500">
               Your feedback is audited by the Municipal Commissioner's office.
             </span>
             <Button

@@ -15,20 +15,20 @@ export default function ErrorState({
 }) {
   return (
     <div
-      className={`bg-white rounded-3xl border border-rose-200/90 p-8 sm:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs ${className}`}
+      className={`bg-white dark:bg-slate-900 rounded-3xl border border-rose-200/90 dark:border-rose-900/50 p-8 sm:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs transition-colors ${className}`}
       data-testid="error-state"
     >
-      <div className="w-16 h-16 rounded-3xl bg-rose-50 text-rose-500 flex items-center justify-center">
+      <div className="w-16 h-16 rounded-3xl bg-rose-50 dark:bg-rose-950/60 text-rose-500 dark:text-rose-400 flex items-center justify-center border border-rose-100 dark:border-rose-900/40">
         {isNetworkError ? (
-          <WifiOff className="w-8 h-8 text-rose-500" />
+          <WifiOff className="w-8 h-8 text-rose-500 dark:text-rose-400" />
         ) : (
-          <AlertTriangle className="w-8 h-8 text-rose-500" />
+          <AlertTriangle className="w-8 h-8 text-rose-500 dark:text-rose-400" />
         )}
       </div>
 
       <div className="max-w-md space-y-1">
-        <h3 className="text-base font-bold text-slate-900">{title}</h3>
-        <p className="text-xs text-slate-500 leading-relaxed">{message}</p>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{message}</p>
       </div>
 
       {onRetry && (
@@ -41,4 +41,3 @@ export default function ErrorState({
     </div>
   );
 }
-

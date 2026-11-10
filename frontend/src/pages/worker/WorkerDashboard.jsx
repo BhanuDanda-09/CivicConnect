@@ -244,10 +244,10 @@ export default function WorkerDashboard() {
       />
 
       {/* Task Queue with Inline Actions & Tabs */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Work Order Action Queue</h3>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Work Order Action Queue</h3>
             <p className="text-xs text-slate-400">Immediate repair tasks assigned to your mobile unit</p>
           </div>
 
@@ -266,7 +266,7 @@ export default function WorkerDashboard() {
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                   filterTab === tab.value
                     ? 'bg-amber-500 text-slate-950 shadow-xs'
-                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700'
                 }`}
               >
                 {tab.label}
@@ -279,7 +279,7 @@ export default function WorkerDashboard() {
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
-              <tr className="border-b border-slate-100 bg-slate-50/70 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+              <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/60 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
                 <th className="py-3 px-4">Task / Ticket</th>
                 <th className="py-3 px-4">Location / Ward</th>
                 <th className="py-3 px-4">Priority</th>
@@ -288,7 +288,7 @@ export default function WorkerDashboard() {
                 <th className="py-3 px-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100 text-xs">
+            <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
               {filteredTasks.length === 0 ? (
                 <tr>
                   <td colSpan="6" className="py-8 text-center text-slate-400">
@@ -297,21 +297,21 @@ export default function WorkerDashboard() {
                 </tr>
               ) : (
                 filteredTasks.map((task) => (
-                  <tr key={task.id || task._id} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={task.id || task._id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
                     <td className="py-3.5 px-4">
-                      <div className="font-bold text-slate-900 line-clamp-1">{task.title}</div>
+                      <div className="font-bold text-slate-900 dark:text-white line-clamp-1">{task.title}</div>
                       <div className="font-mono text-[10px] text-slate-400">
                         {task.complaintId || task.id}
                       </div>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 text-[11px] max-w-xs">
+                    <td className="py-3.5 px-4 text-slate-600 dark:text-slate-300 text-[11px] max-w-xs">
                       <div className="truncate">{task.location || task.ward}</div>
                       {(task.latitude || task.coordinates?.lat) && (
                         <a
                           href={`https://www.google.com/maps/dir/?api=1&destination=${task.latitude || task.coordinates.lat},${task.longitude || task.coordinates.lng}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-0.5 text-[10px] text-sky-600 hover:text-sky-700 font-bold mt-0.5"
+                          className="inline-flex items-center gap-0.5 text-[10px] text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 font-bold mt-0.5"
                         >
                           <Navigation className="w-2.5 h-2.5" />
                           <span>GPS Route</span>
@@ -322,10 +322,10 @@ export default function WorkerDashboard() {
                       <span
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
                           task.priority === 'EMERGENCY'
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-red-100 text-red-700 dark:bg-red-950/60 dark:text-red-300'
                             : task.priority === 'HIGH'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-sky-100 text-sky-700'
+                            ? 'bg-orange-100 text-orange-700 dark:bg-orange-950/60 dark:text-orange-300'
+                            : 'bg-sky-100 text-sky-700 dark:bg-sky-950/60 dark:text-sky-300'
                         }`}
                       >
                         {task.priority}
@@ -360,7 +360,7 @@ export default function WorkerDashboard() {
 
                       <Link
                         to={`/worker/tasks/${task.id || task._id}`}
-                        className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-600 hover:text-slate-900 px-2 py-1"
+                        className="inline-flex items-center gap-0.5 text-xs font-bold text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white px-2 py-1"
                       >
                         <span>Details</span>
                         <ExternalLink className="w-3 h-3" />

@@ -17,16 +17,16 @@ export default function EmptyState({
 }) {
   return (
     <div
-      className={`bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs ${className}`}
+      className={`bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-8 sm:p-12 text-center flex flex-col items-center justify-center space-y-4 shadow-xs transition-colors ${className}`}
       data-testid="empty-state"
     >
-      <div className="w-16 h-16 rounded-3xl bg-slate-100 text-slate-400 flex items-center justify-center">
-        <Icon className="w-8 h-8 text-slate-400" />
+      <div className="w-16 h-16 rounded-3xl bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center">
+        <Icon className="w-8 h-8 text-slate-400 dark:text-slate-500" />
       </div>
 
       <div className="max-w-sm space-y-1">
-        <h3 className="text-base font-bold text-slate-900">{title}</h3>
-        <p className="text-xs text-slate-500 leading-relaxed">{description}</p>
+        <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{description}</p>
       </div>
 
       {actionText && (
@@ -48,4 +48,3 @@ export default function EmptyState({
     </div>
   );
 }
-

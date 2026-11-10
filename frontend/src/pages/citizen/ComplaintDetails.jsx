@@ -64,7 +64,7 @@ export default function ComplaintDetails() {
                     status: h.newStatus,
                     date: h.timestamp,
                     description: h.remarks,
-                    actor: h.changedBy?.fullName || 'Municipal Officer',
+                    actor: h.changedBy?.fullName || h.changedBy?.name || 'Municipal Officer',
                   }))
                 : comp.timeline,
           });
@@ -87,8 +87,8 @@ export default function ComplaintDetails() {
 
   if (isLoading) {
     return (
-      <div className="py-20 flex flex-col items-center justify-center text-slate-400 space-y-2">
-        <Loader2 className="w-8 h-8 animate-spin text-sky-600" />
+      <div className="py-20 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 space-y-2">
+        <Loader2 className="w-8 h-8 animate-spin text-sky-600 dark:text-sky-400" />
         <p className="text-xs font-medium">Loading complaint dossier & audit timeline...</p>
       </div>
     );
@@ -96,15 +96,15 @@ export default function ComplaintDetails() {
 
   if (!complaint) {
     return (
-      <div className="bg-white rounded-3xl border border-slate-200 p-12 text-center space-y-4">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 p-12 text-center space-y-4">
         <AlertTriangle className="w-10 h-10 text-amber-500 mx-auto" />
-        <h2 className="text-xl font-bold text-slate-800">Complaint Not Found</h2>
-        <p className="text-xs text-slate-500">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-200">Complaint Not Found</h2>
+        <p className="text-xs text-slate-500 dark:text-slate-400">
           The requested complaint identifier (#{id}) could not be located in local store.
         </p>
         <Link
           to="/citizen/complaints"
-          className="inline-flex items-center text-xs font-bold text-sky-600 hover:underline"
+          className="inline-flex items-center text-xs font-bold text-sky-600 dark:text-sky-400 hover:underline cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5 mr-1" />
           <span>Back to All Complaints</span>
@@ -164,7 +164,7 @@ export default function ComplaintDetails() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors self-start"
+          className="inline-flex items-center text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 transition-colors self-start cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5 mr-1" />
           <span>Back to Grievance List</span>
@@ -179,26 +179,26 @@ export default function ComplaintDetails() {
       </div>
 
       {/* Main Overview Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
-        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-slate-100 pb-6">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6 transition-colors">
+        <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
           <div className="space-y-2">
-            <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-500">
-              <span className="bg-slate-100 px-2 py-0.5 rounded-md text-slate-800">
+            <div className="flex items-center space-x-2 text-xs font-mono font-bold text-slate-500 dark:text-slate-400">
+              <span className="bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-slate-800 dark:text-slate-200 border border-transparent dark:border-slate-700">
                 Grievance #{complaint.id}
               </span>
               <span>•</span>
               <span>Filed {formatDate(complaint.createdAt)}</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 leading-snug">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white leading-snug">
               {complaint.title}
             </h1>
           </div>
 
           <div className="text-left md:text-right shrink-0">
-            <span className="text-xs font-semibold text-slate-400 block uppercase tracking-wider">
+            <span className="text-xs font-semibold text-slate-400 dark:text-slate-500 block uppercase tracking-wider">
               Category
             </span>
-            <span className="text-sm font-bold text-slate-800">
+            <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
               {complaint.categoryLabel || complaint.category}
             </span>
           </div>
@@ -206,35 +206,35 @@ export default function ComplaintDetails() {
 
         {/* Location & Metadata Pill Bar */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 text-xs">
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-            <MapPin className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2.5">
+            <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Location</p>
-              <p className="font-semibold text-slate-800">{complaint.location}</p>
-              <p className="text-[11px] text-slate-500">{complaint.ward}</p>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Location</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">{complaint.location}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">{complaint.ward}</p>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-            <Calendar className="w-4 h-4 text-indigo-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2.5">
+            <Calendar className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Submission Timestamp</p>
-              <p className="font-semibold text-slate-800">{formatDateTime(complaint.createdAt)}</p>
-              <p className="text-[11px] text-slate-500">Updated: {formatDate(complaint.updatedAt)}</p>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Submission Timestamp</p>
+              <p className="font-semibold text-slate-800 dark:text-slate-200">{formatDateTime(complaint.createdAt)}</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">Updated: {formatDate(complaint.updatedAt)}</p>
             </div>
           </div>
 
-          <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-100 flex items-start gap-2.5">
-            <HardHat className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+          <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 flex items-start gap-2.5">
+            <HardHat className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="text-[10px] font-bold text-slate-400 uppercase">Assigned Field Crew</p>
+              <p className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase">Assigned Field Crew</p>
               {complaint.assignedWorker ? (
                 <>
-                  <p className="font-semibold text-slate-800">{complaint.assignedWorker.name}</p>
-                  <p className="text-[11px] text-slate-500">{complaint.assignedWorker.trade}</p>
+                  <p className="font-semibold text-slate-800 dark:text-slate-200">{complaint.assignedWorker.name || complaint.assignedWorker}</p>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400">{complaint.assignedWorker.trade || 'Municipal Maintenance'}</p>
                 </>
               ) : (
-                <p className="font-medium text-slate-400 italic">Pending municipal assignment</p>
+                <p className="font-medium text-slate-400 dark:text-slate-500 italic">Pending municipal assignment</p>
               )}
             </div>
           </div>
@@ -242,28 +242,28 @@ export default function ComplaintDetails() {
 
         {/* Detailed Description */}
         <div className="space-y-2">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Report Description
           </h3>
-          <p className="text-sm text-slate-700 leading-relaxed bg-slate-50/60 p-4 rounded-2xl border border-slate-100">
+          <p className="text-sm text-slate-700 dark:text-slate-300 leading-relaxed bg-slate-50/60 dark:bg-slate-950/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
             {complaint.description}
           </p>
         </div>
 
         {/* Photographic Evidence Grid: Before vs After */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Photographic Evidence
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Initial Citizen Photo */}
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-amber-500"></span>
                 <span>Citizen Report Photo (Before)</span>
               </span>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 h-56 bg-slate-100">
+              <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 h-56 bg-slate-100 dark:bg-slate-950">
                 {complaint.imageUrl ? (
                   <img
                     src={complaint.imageUrl}
@@ -271,7 +271,7 @@ export default function ComplaintDetails() {
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-xs">
                     <ImageIcon className="w-8 h-8 mb-1" />
                     <span>No image attached</span>
                   </div>
@@ -281,19 +281,19 @@ export default function ComplaintDetails() {
 
             {/* Resolution Completion Photo */}
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1.5">
                 <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
                 <span>Worker Proof Photo (After Resolution)</span>
               </span>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 h-56 bg-slate-100">
-                {complaint.completionImageUrl ? (
+              <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 h-56 bg-slate-100 dark:bg-slate-950">
+                {complaint.completionImageUrl || (complaint.resolutionPhotos && complaint.resolutionPhotos[0]) ? (
                   <img
-                    src={complaint.completionImageUrl}
+                    src={complaint.completionImageUrl || complaint.resolutionPhotos[0]}
                     alt="Resolution Evidence"
                     className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
-                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs p-4 text-center">
+                  <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 text-xs p-4 text-center">
                     <ImageIcon className="w-8 h-8 mb-1" />
                     <span>Awaiting field worker completion photograph</span>
                   </div>
@@ -305,7 +305,7 @@ export default function ComplaintDetails() {
 
         {/* Map Location */}
         <div className="space-y-2">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Interactive OpenStreetMap Location
           </h3>
           <MapPicker
@@ -322,40 +322,40 @@ export default function ComplaintDetails() {
 
       {/* Citizen Feedback Section */}
       {isResolved && (
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-4">
-          <div className="flex items-center space-x-2 text-sky-600 font-bold text-sm">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-4 transition-colors">
+          <div className="flex items-center space-x-2 text-sky-600 dark:text-sky-400 font-bold text-sm">
             <MessageSquare className="w-5 h-5" />
             <span>Citizen Quality Feedback</span>
           </div>
 
           {complaint.feedback ? (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 space-y-2">
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-100 dark:border-emerald-800 space-y-2">
               <div className="flex items-center space-x-1 text-amber-500">
                 {[...Array(5)].map((_, i) => (
                   <Star
                     key={i}
                     className={`w-4 h-4 ${
-                      i < complaint.feedback.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300'
+                      i < complaint.feedback.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-300 dark:text-slate-600'
                     }`}
                   />
                 ))}
-                <span className="text-xs font-bold text-emerald-800 ml-2">
+                <span className="text-xs font-bold text-emerald-800 dark:text-emerald-300 ml-2">
                   Rating: {complaint.feedback.rating} / 5 Stars
                 </span>
               </div>
-              <p className="text-xs text-slate-700 italic">"{complaint.feedback.comment}"</p>
-              <p className="text-[10px] text-slate-400">
+              <p className="text-xs text-slate-700 dark:text-slate-300 italic">"{complaint.feedback.comment}"</p>
+              <p className="text-[10px] text-slate-400 dark:text-slate-500">
                 Submitted on {formatDateTime(complaint.feedback.submittedAt)}
               </p>
             </div>
           ) : (
             <form onSubmit={handleFeedbackSubmit} className="space-y-4">
-              <p className="text-xs text-slate-600">
+              <p className="text-xs text-slate-600 dark:text-slate-400">
                 This grievance has been resolved! Please rate the promptness and quality of the municipal repair.
               </p>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Satisfaction Rating
                 </label>
                 <div className="flex items-center space-x-2">
@@ -364,25 +364,25 @@ export default function ComplaintDetails() {
                       key={star}
                       type="button"
                       onClick={() => setFeedbackRating(star)}
-                      className="p-1 hover:scale-110 transition-transform"
+                      className="p-1 hover:scale-110 transition-transform cursor-pointer"
                     >
                       <Star
                         className={`w-7 h-7 ${
                           star <= feedbackRating
                             ? 'fill-amber-400 text-amber-400'
-                            : 'text-slate-300'
+                            : 'text-slate-300 dark:text-slate-600'
                         }`}
                       />
                     </button>
                   ))}
-                  <span className="text-xs font-bold text-slate-700 ml-2">
+                  <span className="text-xs font-bold text-slate-700 dark:text-slate-300 ml-2">
                     {feedbackRating} / 5 Stars
                   </span>
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Comments or Suggestions
                 </label>
                 <textarea
@@ -390,7 +390,7 @@ export default function ComplaintDetails() {
                   placeholder="e.g. Road was patched cleanly, debris removed promptly..."
                   value={feedbackComment}
                   onChange={(e) => setFeedbackComment(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
               </div>
 
@@ -409,4 +409,3 @@ export default function ComplaintDetails() {
     </div>
   );
 }
-

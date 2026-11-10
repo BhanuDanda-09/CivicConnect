@@ -149,29 +149,29 @@ export default function ComplaintMap({
   }, [filteredLocations, zoom]);
 
   return (
-    <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-6 shadow-xs space-y-4">
+    <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 transition-colors">
       {/* Map Header with Filters */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold border border-transparent dark:border-indigo-900/50">
               <MapPin className="w-4 h-4" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-slate-900">{title}</h3>
-                <span className="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white">{title}</h3>
+                <span className="px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-[11px] font-bold border border-transparent dark:border-slate-700">
                   {filteredLocations.length} Geocoded
                 </span>
               </div>
-              <p className="text-xs text-slate-400 mt-0.5">{subtitle}</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500 mt-0.5">{subtitle}</p>
             </div>
           </div>
         </div>
 
         {/* Quick Filters */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+          <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-transparent dark:border-slate-700">
             {[
               { id: 'ALL', label: 'All' },
               { id: 'OPEN', label: 'Unresolved' },
@@ -183,7 +183,9 @@ export default function ComplaintMap({
                 type="button"
                 onClick={() => setStatusFilter(st.id)}
                 className={`px-2.5 py-1 rounded-lg font-bold text-[10px] uppercase transition-colors cursor-pointer ${
-                  statusFilter === st.id ? 'bg-white text-slate-900 shadow-xs' : 'text-slate-500 hover:text-slate-800'
+                  statusFilter === st.id
+                    ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-xs'
+                    : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200'
                 }`}
               >
                 {st.label}
@@ -194,19 +196,19 @@ export default function ComplaintMap({
           <select
             value={priorityFilter}
             onChange={(e) => setPriorityFilter(e.target.value)}
-            className="px-2.5 py-1 text-xs rounded-xl border border-slate-200 bg-white text-slate-700 font-semibold focus:outline-none"
+            className="px-2.5 py-1 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
           >
-            <option value="ALL">All Priorities</option>
-            <option value="EMERGENCY">Priority: Red</option>
-            <option value="HIGH">Priority: Orange</option>
-            <option value="MEDIUM">Priority: Sky</option>
-            <option value="LOW">Priority: Green</option>
+            <option value="ALL" className="dark:bg-slate-900">All Priorities</option>
+            <option value="EMERGENCY" className="dark:bg-slate-900">Priority: Red</option>
+            <option value="HIGH" className="dark:bg-slate-900">Priority: Orange</option>
+            <option value="MEDIUM" className="dark:bg-slate-900">Priority: Sky</option>
+            <option value="LOW" className="dark:bg-slate-900">Priority: Green</option>
           </select>
         </div>
       </div>
 
       {/* Priority Legend Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 text-[11px] text-slate-600">
+      <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-100 dark:border-slate-800 text-[11px] text-slate-600 dark:text-slate-400">
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 font-medium">
             <span className="w-2.5 h-2.5 rounded-full bg-red-600"></span> Emergency
@@ -221,14 +223,14 @@ export default function ComplaintMap({
             <span className="w-2.5 h-2.5 rounded-full bg-green-600"></span> Low
           </span>
         </div>
-        <span className="text-[10px] text-slate-400 font-mono">
+        <span className="text-[10px] text-slate-400 dark:text-slate-500 font-mono">
           Powered by OpenStreetMap India Survey
         </span>
       </div>
 
       {/* Leaflet Map Canvas */}
       <div
-        className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative z-10"
+        className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner relative z-10"
         style={{ height }}
       >
         <MapContainer

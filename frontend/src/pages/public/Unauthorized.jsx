@@ -7,11 +7,11 @@ export default function Unauthorized() {
   return (
     <div className="min-h-[70vh] flex items-center justify-center py-16 px-4 text-center">
       <div className="max-w-md space-y-4">
-        <div className="w-16 h-16 rounded-2xl bg-rose-50 text-rose-600 mx-auto flex items-center justify-center">
+        <div className="w-16 h-16 rounded-2xl bg-rose-50 dark:bg-rose-950/60 text-rose-600 dark:text-rose-400 mx-auto flex items-center justify-center border border-rose-100 dark:border-rose-900/50">
           <ShieldAlert className="w-8 h-8" />
         </div>
-        <h1 className="text-2xl font-black text-slate-900">Access Restricted</h1>
-        <p className="text-xs text-slate-500 leading-relaxed">
+        <h1 className="text-2xl font-black text-slate-900 dark:text-white">Access Restricted</h1>
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
           You do not have permission to access this administrative portal section. Use the demo role switcher in the navbar to switch between Citizen, Admin, and Worker personas.
         </p>
         <div className="pt-2 flex justify-center gap-3">
@@ -25,4 +25,3 @@ export default function Unauthorized() {
     </div>
   );
 }
-

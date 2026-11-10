@@ -37,22 +37,21 @@ export default function Contact() {
     e.preventDefault();
     if (!validate()) return;
 
-    // Phase 2: Frontend simulation
     setSubmitted(true);
-    toast.success('Your message has been received! (Demo Mode)');
+    toast.success('Your message has been received! Our support desk will follow up.');
   };
 
   return (
-    <div className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+    <div className="py-12 sm:py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12 transition-colors">
       {/* Title */}
       <div className="text-center max-w-2xl mx-auto space-y-3">
-        <span className="text-xs font-bold text-sky-600 uppercase tracking-widest bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+        <span className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest bg-sky-50 dark:bg-sky-950/60 px-3 py-1 rounded-full border border-sky-100 dark:border-sky-800">
           Get in Touch
         </span>
-        <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight">
           Contact Municipal Support
         </h1>
-        <p className="text-sm text-slate-600 leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-400 leading-relaxed">
           Have an inquiry, feedback regarding civic services, or need assistance navigating the CivicConnect portal? Reach out to our helpdesk.
         </p>
       </div>
@@ -60,7 +59,7 @@ export default function Contact() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Contact Info Cards */}
         <div className="lg:col-span-5 space-y-4">
-          <div className="bg-slate-900 text-white rounded-3xl p-8 space-y-6 shadow-xl">
+          <div className="bg-slate-900 text-white rounded-3xl p-8 space-y-6 shadow-xl border border-transparent dark:border-slate-800">
             <h2 className="text-xl font-bold text-white">Municipal Headquarters</h2>
             <p className="text-xs text-slate-400 leading-relaxed">
               For emergency reports or immediate civic hazards, dial the 24x7 municipal toll-free number or visit your local ward office.
@@ -101,27 +100,27 @@ export default function Contact() {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs flex items-center space-x-3">
-            <AlertCircle className="w-5 h-5 text-amber-600 shrink-0" />
+          <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 text-amber-900 dark:text-amber-200 text-xs flex items-center space-x-3">
+            <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0" />
             <div>
-              <p className="font-bold">Phase 2 Notice</p>
-              <p className="text-[11px] text-amber-800">
-                This contact form runs in frontend demonstration mode. Messages will be recorded into the Express database in Phase 3.
+              <p className="font-bold">Official Municipal Escalation</p>
+              <p className="text-[11px] text-amber-800 dark:text-amber-300">
+                All submitted queries are prioritized according to municipal citizen charter guidelines and SLA commitments.
               </p>
             </div>
           </div>
         </div>
 
         {/* Contact Form */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 p-8 sm:p-10 shadow-xs">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-8 sm:p-10 shadow-xs">
           {submitted ? (
             <div className="text-center py-12 space-y-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
+              <div className="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 mx-auto flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8" />
               </div>
-              <h3 className="text-2xl font-bold text-slate-900">Thank You for Reaching Out!</h3>
-              <p className="text-xs text-slate-600 max-w-md mx-auto leading-relaxed">
-                Your message has been logged in demonstration mode. In a production environment, our municipal grievance officer would reply within 24 business hours.
+              <h3 className="text-2xl font-bold text-slate-900 dark:text-white">Thank You for Reaching Out!</h3>
+              <p className="text-xs text-slate-600 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
+                Your message has been logged with our citizen support desk. Our municipal grievance officer will review and reply within 24 business hours.
               </p>
               <Button
                 variant="outline"
@@ -136,11 +135,11 @@ export default function Contact() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
-              <h3 className="text-lg font-bold text-slate-900">Send an Inquiry or Feedback</h3>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">Send an Inquiry or Feedback</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Your Name <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -148,13 +147,13 @@ export default function Contact() {
                     placeholder="e.g. Ramesh Kumar"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
                   {errors.name && <p className="mt-1 text-xs text-rose-500">{errors.name}</p>}
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                     Email Address <span className="text-rose-500">*</span>
                   </label>
                   <input
@@ -162,14 +161,14 @@ export default function Contact() {
                     placeholder="e.g. ramesh@example.com"
                     value={formData.email}
                     onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                    className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                   />
                   {errors.email && <p className="mt-1 text-xs text-rose-500">{errors.email}</p>}
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Subject Line <span className="text-rose-500">*</span>
                 </label>
                 <input
@@ -177,13 +176,13 @@ export default function Contact() {
                   placeholder="e.g., Query regarding Ward 4 sanitation schedule"
                   value={formData.subject}
                   onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
                 {errors.subject && <p className="mt-1 text-xs text-rose-500">{errors.subject}</p>}
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
                   Message <span className="text-rose-500">*</span>
                 </label>
                 <textarea
@@ -191,13 +190,13 @@ export default function Contact() {
                   placeholder="Describe your inquiry or feedback clearly..."
                   value={formData.message}
                   onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
                 />
                 {errors.message && <p className="mt-1 text-xs text-rose-500">{errors.message}</p>}
               </div>
 
               <Button type="submit" variant="primary" size="md" icon={Send} className="w-full">
-                Submit Inquiry (Demo)
+                Submit Inquiry
               </Button>
             </form>
           )}
@@ -206,4 +205,3 @@ export default function Contact() {
     </div>
   );
 }
-

@@ -13,17 +13,17 @@ export default function Button({
   onClick,
   ...props
 }) {
-  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs active:scale-[0.98]';
+  const baseStyles = 'inline-flex items-center justify-center font-medium rounded-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed shadow-xs active:scale-[0.98] cursor-pointer';
 
   const variants = {
-    primary: 'bg-slate-900 hover:bg-slate-800 text-white focus:ring-slate-900 border border-transparent shadow-slate-900/10',
+    primary: 'bg-slate-900 hover:bg-slate-800 text-white dark:bg-sky-600 dark:hover:bg-sky-500 focus:ring-slate-900 dark:focus:ring-sky-500 border border-transparent shadow-slate-900/10',
     accent: 'bg-sky-600 hover:bg-sky-700 text-white focus:ring-sky-600 border border-transparent shadow-sky-600/20',
-    secondary: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 focus:ring-slate-400',
-    outline: 'border border-slate-300 text-slate-700 hover:bg-slate-50 focus:ring-slate-400 bg-transparent',
+    secondary: 'bg-white hover:bg-slate-50 text-slate-700 border border-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 dark:text-slate-200 dark:border-slate-700 focus:ring-slate-400',
+    outline: 'border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 focus:ring-slate-400 bg-transparent',
     teal: 'bg-teal-600 hover:bg-teal-700 text-white focus:ring-teal-600 border border-transparent',
     danger: 'bg-rose-600 hover:bg-rose-700 text-white focus:ring-rose-600 border border-transparent',
     success: 'bg-emerald-600 hover:bg-emerald-700 text-white focus:ring-emerald-600 border border-transparent',
-    ghost: 'text-slate-600 hover:text-slate-900 hover:bg-slate-100 focus:ring-slate-300 shadow-none',
+    ghost: 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 focus:ring-slate-300 shadow-none',
   };
 
   const sizes = {
@@ -54,4 +54,3 @@ export default function Button({
     </button>
   );
 }
-

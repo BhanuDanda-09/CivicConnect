@@ -31,28 +31,28 @@ export default function Home() {
       title: 'Report an Issue',
       desc: 'Capture a photo of the road hazard, water leak, or garbage accumulation. Our GPS coordinates pin the location instantly.',
       icon: Camera,
-      color: 'bg-sky-50 text-sky-600 border-sky-200'
+      color: 'bg-sky-50 dark:bg-sky-950/50 text-sky-600 dark:text-sky-400 border-sky-200 dark:border-sky-800'
     },
     {
       num: '02',
       title: 'Authorities Review',
       desc: 'Municipal desk verifies the complaint authenticity, assigns priority level, and routes it to the specific department crew.',
       icon: ShieldCheck,
-      color: 'bg-indigo-50 text-indigo-600 border-indigo-200'
+      color: 'bg-indigo-50 dark:bg-indigo-950/50 text-indigo-600 dark:text-indigo-400 border-indigo-200 dark:border-indigo-800'
     },
     {
       num: '03',
       title: 'Worker Resolves',
       desc: 'Dispatched field workers arrive on site, carry out necessary repairs or cleanup, and upload post-work photographic proof.',
       icon: Clock,
-      color: 'bg-amber-50 text-amber-600 border-amber-200'
+      color: 'bg-amber-50 dark:bg-amber-950/50 text-amber-600 dark:text-amber-400 border-amber-200 dark:border-amber-800'
     },
     {
       num: '04',
       title: 'Citizen Gives Feedback',
       desc: 'The citizen receives resolution notification with before/after photos and rates the service quality to ensure accountability.',
       icon: CheckCircle2,
-      color: 'bg-emerald-50 text-emerald-600 border-emerald-200'
+      color: 'bg-emerald-50 dark:bg-emerald-950/50 text-emerald-600 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800'
     },
   ];
 
@@ -179,7 +179,6 @@ export default function Home() {
                       src="https://images.unsplash.com/photo-1541888946425-d0fbb18f15f6?auto=format&fit=crop&w=1000&q=80"
                       alt="Civic Infrastructure Repair Work"
                       onError={(e) => {
-                        // Reliable SVG fallback if Unsplash image network is restricted
                         e.target.style.display = 'none';
                         const parent = e.target.parentElement;
                         const fallbackDiv = document.createElement('div');
@@ -224,18 +223,18 @@ export default function Home() {
           {stats.map((s, idx) => (
             <div
               key={idx}
-              className="bg-white rounded-2xl p-6 border border-slate-200/90 shadow-lg shadow-slate-900/5 hover:-translate-y-1 transition-all"
+              className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/90 dark:border-slate-800 shadow-lg shadow-slate-900/5 hover:-translate-y-1 transition-all"
             >
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">{s.label}</p>
-              <p className="text-3xl font-black text-slate-900 mt-2 tracking-tight">{s.value}</p>
-              <div className="flex items-center gap-1.5 mt-2 text-xs font-medium text-emerald-600">
+              <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">{s.label}</p>
+              <p className="text-3xl font-black text-slate-900 dark:text-white mt-2 tracking-tight">{s.value}</p>
+              <div className="flex items-center gap-1.5 mt-2 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>{s.change}</span>
               </div>
             </div>
           ))}
         </div>
-        <p className="text-center text-[11px] text-slate-400 mt-3 italic">
+        <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-3 italic">
           * Figures shown are demonstration simulation metrics for academic presentation.
         </p>
       </section>
@@ -243,13 +242,13 @@ export default function Home() {
       {/* Problem Categories Grid */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-bold text-sky-600 uppercase tracking-widest bg-sky-50 px-3 py-1 rounded-full border border-sky-100">
+          <span className="text-xs font-bold text-sky-600 dark:text-sky-400 uppercase tracking-widest bg-sky-50 dark:bg-sky-950/60 px-3 py-1 rounded-full border border-sky-100 dark:border-sky-800">
             Issue Categories
           </span>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             What Can You Report on CivicConnect?
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Select an infrastructure category to quickly report a problem in your street or neighborhood.
           </p>
         </div>
@@ -258,27 +257,27 @@ export default function Home() {
           {COMPLAINT_CATEGORIES.map((cat) => (
             <div
               key={cat.id}
-              className="group bg-white rounded-2xl p-6 border border-slate-200 hover:border-sky-300 hover:shadow-xl hover:shadow-sky-500/5 transition-all duration-200 flex flex-col justify-between"
+              className="group bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200 dark:border-slate-800 hover:border-sky-400 dark:hover:border-sky-500 hover:shadow-xl hover:shadow-sky-500/5 transition-all duration-200 flex flex-col justify-between"
             >
               <div>
-                <div className="w-12 h-12 rounded-xl bg-slate-100 text-slate-800 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-sky-600 group-hover:text-white transition-colors shadow-xs">
+                <div className="w-12 h-12 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 flex items-center justify-center font-bold text-lg mb-4 group-hover:bg-sky-600 group-hover:text-white transition-colors shadow-xs">
                   <Activity className="w-6 h-6" />
                 </div>
-                <h3 className="text-base font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
+                <h3 className="text-base font-bold text-slate-900 dark:text-white group-hover:text-sky-600 dark:group-hover:text-sky-400 transition-colors">
                   {cat.label}
                 </h3>
-                <p className="text-xs text-slate-500 mt-2 leading-relaxed">
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
                   {cat.description}
                 </p>
               </div>
 
-              <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between">
-                <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+              <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                <span className="text-[11px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   24h-48h SLA
                 </span>
                 <Link
                   to={`/citizen/submit-complaint?category=${cat.id}`}
-                  className="inline-flex items-center text-xs font-bold text-sky-600 hover:text-sky-700 group-hover:translate-x-1 transition-all"
+                  className="inline-flex items-center text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300 group-hover:translate-x-1 transition-all"
                 >
                   <span>Report</span>
                   <ChevronRight className="w-4 h-4 ml-0.5" />
@@ -290,16 +289,16 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-slate-50 py-16 border-y border-slate-200/80">
+      <section className="bg-slate-50 dark:bg-slate-900/40 py-16 border-y border-slate-200/80 dark:border-slate-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-2xl mx-auto mb-14 space-y-3">
-            <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-3 py-1 rounded-full border border-indigo-100">
+            <span className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-widest bg-indigo-50 dark:bg-indigo-950/60 px-3 py-1 rounded-full border border-indigo-100 dark:border-indigo-800">
               Transparent Lifecycle
             </span>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+            <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               How CivicConnect Works
             </h2>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               A 4-step seamless process connecting citizens directly to field engineers and administrative overseers.
             </p>
           </div>
@@ -310,16 +309,16 @@ export default function Home() {
               return (
                 <div
                   key={st.num}
-                  className="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-xs hover:shadow-md transition-shadow relative"
+                  className="bg-white dark:bg-slate-900 rounded-2xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-xs hover:shadow-md transition-shadow relative"
                 >
-                  <span className="text-3xl font-black text-slate-200 absolute top-4 right-4">
+                  <span className="text-3xl font-black text-slate-200 dark:text-slate-800 absolute top-4 right-4">
                     {st.num}
                   </span>
                   <div className={`w-12 h-12 rounded-xl flex items-center justify-center border mb-4 ${st.color}`}>
                     <Icon className="w-6 h-6" />
                   </div>
-                  <h3 className="text-base font-bold text-slate-900 mb-2">{st.title}</h3>
-                  <p className="text-xs text-slate-500 leading-relaxed">{st.desc}</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white mb-2">{st.title}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">{st.desc}</p>
                 </div>
               );
             })}
@@ -330,13 +329,13 @@ export default function Home() {
       {/* Platform Benefits & DevOps Architecture Highlights */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-2xl mx-auto mb-12 space-y-3">
-          <span className="text-xs font-bold text-teal-600 uppercase tracking-widest bg-teal-50 px-3 py-1 rounded-full border border-teal-100">
+          <span className="text-xs font-bold text-teal-600 dark:text-teal-400 uppercase tracking-widest bg-teal-50 dark:bg-teal-950/60 px-3 py-1 rounded-full border border-teal-100 dark:border-teal-800">
             Key Advantages
           </span>
-          <h2 className="text-3xl font-black text-slate-900 tracking-tight">
+          <h2 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
             Designed for Reliability, Speed & Trust
           </h2>
-          <p className="text-sm text-slate-600">
+          <p className="text-sm text-slate-600 dark:text-slate-400">
             Modern civic-tech engineering combining user-friendly frontend design with cloud-native DevOps reliability.
           </p>
         </div>
@@ -347,14 +346,14 @@ export default function Home() {
             return (
               <div
                 key={idx}
-                className="flex items-start space-x-4 p-6 rounded-2xl border border-slate-200 bg-white shadow-xs"
+                className="flex items-start space-x-4 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-xs"
               >
-                <div className="w-12 h-12 rounded-xl bg-slate-900 text-sky-400 flex items-center justify-center shrink-0">
+                <div className="w-12 h-12 rounded-xl bg-slate-900 dark:bg-slate-800 text-sky-400 flex items-center justify-center shrink-0 border border-transparent dark:border-slate-700">
                   <Icon className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">{b.title}</h3>
-                  <p className="text-xs text-slate-500 mt-1.5 leading-relaxed">{b.desc}</p>
+                  <h3 className="text-base font-bold text-slate-900 dark:text-white">{b.title}</h3>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1.5 leading-relaxed">{b.desc}</p>
                 </div>
               </div>
             );
@@ -364,7 +363,7 @@ export default function Home() {
 
       {/* Final Call to Action */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="rounded-3xl bg-slate-900 text-white p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-2xl">
+        <div className="rounded-3xl bg-slate-900 dark:bg-slate-900/90 text-white p-8 sm:p-12 lg:p-16 text-center relative overflow-hidden shadow-2xl border border-transparent dark:border-slate-800">
           <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/10 rounded-full blur-3xl pointer-events-none" />
           <h2 className="text-3xl sm:text-4xl font-black tracking-tight mb-4">
             Spot a problem in your street? Report it right now.
@@ -375,13 +374,13 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               to="/citizen/submit-complaint"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm shadow-lg transition-all"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 font-bold text-sm shadow-lg transition-all cursor-pointer"
             >
               Report an Issue
             </Link>
             <Link
               to="/about"
-              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition-all"
+              className="w-full sm:w-auto px-8 py-3.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-semibold text-sm border border-slate-700 transition-all cursor-pointer"
             >
               Learn More About CivicConnect
             </Link>
@@ -391,4 +390,3 @@ export default function Home() {
     </div>
   );
 }
-

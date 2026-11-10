@@ -103,29 +103,29 @@ export default function TrackComplaint() {
     <div className="max-w-4xl mx-auto space-y-8 py-4 sm:py-8 px-4">
       {/* Header Banner */}
       <div className="text-center space-y-3">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-xs font-bold">
-          <ShieldCheck className="w-4 h-4 text-sky-600" />
+        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold">
+          <ShieldCheck className="w-4 h-4 text-sky-600 dark:text-sky-400" />
           <span>Real-Time Citizen Grievance Tracker</span>
         </div>
-        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
+        <h1 className="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
           Track Your Municipal Complaint
         </h1>
-        <p className="text-sm text-slate-600 max-w-xl mx-auto leading-relaxed">
+        <p className="text-sm text-slate-600 dark:text-slate-400 max-w-xl mx-auto leading-relaxed">
           Enter your unique Complaint Tracking ID below to view real-time department verification, worker dispatch, and resolution evidence.
         </p>
       </div>
 
       {/* Search Input Box */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-5 sm:p-7 shadow-lg shadow-slate-900/5">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-7 shadow-lg shadow-slate-900/5 transition-colors">
         <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
           <div className="relative flex-1">
-            <Search className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2" />
+            <Search className="w-5 h-5 text-slate-400 dark:text-slate-500 absolute left-4 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={trackingId}
               onChange={(e) => setTrackingId(e.target.value)}
               placeholder="e.g. CC-2026-0001 or MongoDB Grievance ID"
-              className="w-full pl-12 pr-4 py-3.5 text-sm rounded-2xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium"
+              className="w-full pl-12 pr-4 py-3.5 text-sm rounded-2xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 font-medium"
             />
           </div>
           <button
@@ -139,8 +139,8 @@ export default function TrackComplaint() {
         </form>
 
         {/* Sample IDs Pill Bar */}
-        <div className="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2 text-xs text-slate-500">
-          <span className="font-semibold text-slate-600">Sample Tracking IDs to test:</span>
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center gap-2 text-xs text-slate-500 dark:text-slate-400">
+          <span className="font-semibold text-slate-600 dark:text-slate-300">Sample Tracking IDs to test:</span>
           {sampleIds.map((sId) => (
             <button
               key={sId}
@@ -149,7 +149,7 @@ export default function TrackComplaint() {
                 setTrackingId(sId);
                 executeSearch(sId);
               }}
-              className="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-sky-50 hover:text-sky-700 font-mono text-[11px] font-semibold transition-colors cursor-pointer"
+              className="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-sky-50 dark:hover:bg-sky-950/60 hover:text-sky-700 dark:hover:text-sky-300 text-slate-700 dark:text-slate-300 font-mono text-[11px] font-semibold transition-colors cursor-pointer border border-transparent dark:border-slate-700"
             >
               {sId}
             </button>
@@ -163,31 +163,31 @@ export default function TrackComplaint() {
           <LoadingSpinner size="lg" message="Retrieving real-time dispatch records from municipality..." />
         </div>
       ) : complaint ? (
-        <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-8 animate-fadeIn">
+        <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-8 animate-fadeIn transition-colors">
           {/* Top Status Bar */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 dark:border-slate-800 pb-6">
             <div className="space-y-1">
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-1 rounded-md border border-sky-100">
+                <span className="font-mono text-xs font-bold text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-2.5 py-1 rounded-md border border-sky-100 dark:border-sky-800">
                   {complaint.complaintId || complaint.id}
                 </span>
-                <span className="text-xs text-slate-400">•</span>
-                <span className="text-xs font-semibold text-slate-500">
+                <span className="text-xs text-slate-400 dark:text-slate-600">•</span>
+                <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
                   {complaint.ward || 'Central Municipal Ward'}
                 </span>
               </div>
-              <h2 className="text-2xl font-black text-slate-900 mt-1">
+              <h2 className="text-2xl font-black text-slate-900 dark:text-white mt-1">
                 {complaint.title}
               </h2>
-              <p className="text-xs text-slate-500">
-                Category: <strong className="text-slate-700">{complaint.categoryLabel || complaint.category}</strong> • Priority:{' '}
-                <strong className="text-slate-700">{complaint.priority}</strong>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Category: <strong className="text-slate-700 dark:text-slate-200">{complaint.categoryLabel || complaint.category}</strong> • Priority:{' '}
+                <strong className="text-slate-700 dark:text-slate-200">{complaint.priority}</strong>
               </p>
             </div>
 
             <div className="flex sm:flex-col items-center sm:items-end justify-between gap-2">
               <StatusBadge status={complaint.status} size="lg" />
-              <span className="text-[11px] text-slate-400">
+              <span className="text-[11px] text-slate-400 dark:text-slate-500">
                 Filed on {formatDate(complaint.createdAt)}
               </span>
             </div>
@@ -195,30 +195,30 @@ export default function TrackComplaint() {
 
           {/* Description & Location */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                <MapPin className="w-4 h-4 text-sky-600" />
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400" />
                 <span>Reported Incident Site</span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {complaint.location || 'Municipal street location'}
               </p>
               {complaint.latitude && complaint.longitude && (
-                <div className="text-[11px] font-mono text-slate-400 pt-1">
+                <div className="text-[11px] font-mono text-slate-400 dark:text-slate-500 pt-1">
                   GPS: {Number(complaint.latitude).toFixed(4)}, {Number(complaint.longitude).toFixed(4)}
                 </div>
               )}
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-1.5">
-              <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-                <Clock className="w-4 h-4 text-indigo-600" />
+            <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 space-y-1.5">
+              <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+                <Clock className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
                 <span>Last Updated Status</span>
               </div>
-              <p className="text-xs text-slate-600 leading-relaxed">
+              <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
                 {formatDateTime(complaint.updatedAt || complaint.createdAt)}
               </p>
-              <div className="text-[11px] text-emerald-600 font-semibold flex items-center gap-1 pt-1">
+              <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1 pt-1">
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>Verified in Municipal Audit Registry</span>
               </div>
@@ -227,13 +227,13 @@ export default function TrackComplaint() {
 
           {/* Photo Evidence (Before & After) */}
           <div className="space-y-3">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Photographic Evidence
             </h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-slate-600">Initial Problem Photo (Before)</span>
-                <div className="rounded-2xl overflow-hidden border border-slate-200 h-48 bg-slate-100">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Initial Problem Photo (Before)</span>
+                <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 h-48 bg-slate-100 dark:bg-slate-950">
                   {complaint.imageUrl || (complaint.images && complaint.images[0]) ? (
                     <img
                       src={complaint.imageUrl || complaint.images[0]}
@@ -249,8 +249,8 @@ export default function TrackComplaint() {
               </div>
 
               <div className="space-y-1.5">
-                <span className="text-xs font-semibold text-slate-600">Municipal Remediation Photo (After)</span>
-                <div className="rounded-2xl overflow-hidden border border-slate-200 h-48 bg-slate-100">
+                <span className="text-xs font-semibold text-slate-600 dark:text-slate-300">Municipal Remediation Photo (After)</span>
+                <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-800 h-48 bg-slate-100 dark:bg-slate-950">
                   {complaint.resolutionPhotos && complaint.resolutionPhotos.length > 0 ? (
                     <img
                       src={complaint.resolutionPhotos[0]}
@@ -259,9 +259,9 @@ export default function TrackComplaint() {
                     />
                   ) : (
                     <div className="w-full h-full flex flex-col items-center justify-center p-4 text-center text-slate-400 space-y-1">
-                      <HardHat className="w-6 h-6 text-slate-300" />
+                      <HardHat className="w-6 h-6 text-slate-300 dark:text-slate-600" />
                       <span className="text-xs font-medium">Pending On-Site Work Completion</span>
-                      <span className="text-[10px] text-slate-400">Will be uploaded upon task resolution</span>
+                      <span className="text-[10px] text-slate-400 dark:text-slate-500">Will be uploaded upon task resolution</span>
                     </div>
                   )}
                 </div>
@@ -271,7 +271,7 @@ export default function TrackComplaint() {
 
           {/* Lifecycle Audit Timeline */}
           <div className="space-y-3 pt-2">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               Official Grievance Audit Trail
             </h3>
             <ComplaintTimeline
@@ -281,10 +281,10 @@ export default function TrackComplaint() {
           </div>
 
           {/* Action CTAs */}
-          <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center justify-between gap-3">
             <Link
               to="/citizen/submit-complaint"
-              className="inline-flex items-center text-xs font-bold text-sky-600 hover:text-sky-700"
+              className="inline-flex items-center text-xs font-bold text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300"
             >
               <span>Have another issue to report? File New Grievance</span>
               <ArrowRight className="w-3.5 h-3.5 ml-1" />
@@ -292,7 +292,7 @@ export default function TrackComplaint() {
 
             <Link
               to="/login"
-              className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold transition-colors"
+              className="px-4 py-2 rounded-xl bg-slate-900 dark:bg-slate-800 hover:bg-slate-800 dark:hover:bg-slate-700 text-white text-xs font-bold transition-colors border border-transparent dark:border-slate-700"
             >
               Sign In to Full Dashboard
             </Link>
@@ -307,12 +307,12 @@ export default function TrackComplaint() {
         />
       ) : (
         /* Helpful empty state instructions */
-        <div className="bg-slate-50 rounded-3xl border border-slate-200/80 p-8 text-center space-y-3">
-          <FileText className="w-10 h-10 text-slate-400 mx-auto" />
-          <h3 className="text-base font-bold text-slate-800">
+        <div className="bg-slate-50 dark:bg-slate-900 rounded-3xl border border-slate-200/80 dark:border-slate-800 p-8 text-center space-y-3 transition-colors">
+          <FileText className="w-10 h-10 text-slate-400 dark:text-slate-500 mx-auto" />
+          <h3 className="text-base font-bold text-slate-800 dark:text-slate-200">
             Every Complaint Has a Unique Tracking ID
           </h3>
-          <p className="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">
+          <p className="text-xs text-slate-500 dark:text-slate-400 max-w-md mx-auto leading-relaxed">
             When you submit a complaint via CivicConnect, an SMS and email notification with your tracking ID (e.g. <code>CC-2026-0001</code>) is issued. You can track it here anytime without logging in.
           </p>
         </div>
@@ -320,4 +320,3 @@ export default function TrackComplaint() {
     </div>
   );
 }
-

@@ -128,24 +128,24 @@ export default function ManageComplaints() {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-2">
-          <ClipboardList className="w-7 h-7 text-indigo-600" />
+        <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight flex items-center gap-2">
+          <ClipboardList className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
           <span>Municipal Grievance Manager</span>
         </h1>
-        <p className="text-xs text-slate-500 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           Review, authenticate, verify, and dispatch civic infrastructure grievances across all wards.
         </p>
       </div>
 
       {/* Notice Banner */}
-      <div className="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-100 flex items-center justify-between text-xs text-indigo-900">
+      <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-between text-xs text-indigo-900 dark:text-indigo-200">
         <span className="flex items-center gap-2">
-          <ShieldCheck className="w-4 h-4 text-indigo-600 shrink-0" />
+          <ShieldCheck className="w-4 h-4 text-indigo-600 dark:text-indigo-400 shrink-0" />
           <span>
             Connected to CivicConnect REST API with automated audit trails and RBAC verification.
           </span>
         </span>
-        <span className="font-mono text-[10px] bg-indigo-100 px-2 py-0.5 rounded text-indigo-800">
+        <span className="font-mono text-[10px] bg-indigo-100 dark:bg-indigo-900/60 px-2 py-0.5 rounded text-indigo-800 dark:text-indigo-300">
           Role: Municipal Admin
         </span>
       </div>
@@ -199,13 +199,13 @@ export default function ManageComplaints() {
         }
       >
         <div className="space-y-4">
-          <div className="p-3 rounded-xl bg-slate-50 border border-slate-100 text-xs">
-            <p className="font-bold text-slate-800">{selectedComplaint?.title}</p>
-            <p className="text-slate-500 text-[11px] mt-0.5">Location: {selectedComplaint?.location}</p>
+          <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 text-xs">
+            <p className="font-bold text-slate-800 dark:text-slate-100">{selectedComplaint?.title}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-[11px] mt-0.5">Location: {selectedComplaint?.location}</p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-2">
               Select Field Officer / Crew Leader
             </label>
             <div className="space-y-2">
@@ -214,8 +214,8 @@ export default function ManageComplaints() {
                   key={worker.id}
                   className={`flex items-center justify-between p-3 rounded-xl border cursor-pointer transition-all ${
                     selectedWorkerId === worker.id
-                      ? 'border-indigo-600 bg-indigo-50/50 ring-1 ring-indigo-500'
-                      : 'border-slate-200 hover:bg-slate-50'
+                      ? 'border-indigo-600 bg-indigo-50/50 dark:bg-indigo-950/40 dark:border-indigo-500 ring-1 ring-indigo-500'
+                      : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800/50'
                   }`}
                 >
                   <div className="flex items-center space-x-3">
@@ -233,15 +233,15 @@ export default function ManageComplaints() {
                       className="w-8 h-8 rounded-full object-cover"
                     />
                     <div>
-                      <p className="text-xs font-bold text-slate-800">{worker.name}</p>
-                      <p className="text-[10px] text-slate-500">{worker.trade} • {worker.assignedZone}</p>
+                      <p className="text-xs font-bold text-slate-800 dark:text-white">{worker.name}</p>
+                      <p className="text-[10px] text-slate-500 dark:text-slate-400">{worker.trade} • {worker.assignedZone}</p>
                     </div>
                   </div>
                   <div className="text-right text-[11px]">
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold text-slate-700 dark:text-slate-300">
                       {worker.activeTasks} active tasks
                     </span>
-                    <span className="block text-[10px] text-emerald-600 font-bold">
+                    <span className="block text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">
                       {worker.status}
                     </span>
                   </div>
@@ -278,18 +278,18 @@ export default function ManageComplaints() {
         }
       >
         <div className="space-y-4">
-          <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs text-rose-900">
+          <div className="p-3 rounded-xl bg-rose-50 dark:bg-rose-950/40 border border-rose-100 dark:border-rose-900/60 text-xs text-rose-900 dark:text-rose-200">
             <p className="font-bold flex items-center gap-1.5">
-              <AlertCircle className="w-4 h-4 text-rose-600 shrink-0" />
+              <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0" />
               <span>Provide Formal Rejection Reason</span>
             </p>
-            <p className="text-[11px] text-rose-700 mt-1">
+            <p className="text-[11px] text-rose-700 dark:text-rose-300 mt-1">
               Citizens receive this explanation when their complaint is marked out-of-scope or duplicate.
             </p>
           </div>
 
           <div>
-            <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-200 uppercase tracking-wider mb-1.5">
               Rejection Reason <span className="text-rose-500">*</span>
             </label>
             <textarea
@@ -297,7 +297,7 @@ export default function ManageComplaints() {
               placeholder="e.g. Duplicate report of ongoing pipeline overhaul; private property out of municipal jurisdiction..."
               value={rejectionReason}
               onChange={(e) => setRejectionReason(e.target.value)}
-              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
+              className="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-rose-500/20 focus:border-rose-500"
             />
           </div>
         </div>

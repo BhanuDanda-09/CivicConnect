@@ -20,17 +20,17 @@ export default function LoadingSpinner({
 
   if (inline) {
     return (
-      <span className={`inline-flex items-center gap-2 text-slate-500 text-xs ${className}`}>
-        <Loader2 className={`${sizeClasses[size] || sizeClasses.sm} animate-spin text-sky-600`} />
+      <span className={`inline-flex items-center gap-2 text-slate-500 dark:text-slate-400 text-xs ${className}`}>
+        <Loader2 className={`${sizeClasses[size] || sizeClasses.sm} animate-spin text-sky-600 dark:text-sky-400`} />
         {message && <span>{message}</span>}
       </span>
     );
   }
 
   return (
-    <div className={`py-12 flex flex-col items-center justify-center text-slate-400 space-y-3 ${className}`}>
-      <Loader2 className={`${sizeClasses[size] || sizeClasses.md} animate-spin text-sky-600`} />
-      {message && <p className="text-xs font-medium text-slate-500">{message}</p>}
+    <div className={`py-12 flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 space-y-3 ${className}`}>
+      <Loader2 className={`${sizeClasses[size] || sizeClasses.md} animate-spin text-sky-600 dark:text-sky-400`} />
+      {message && <p className="text-xs font-medium text-slate-500 dark:text-slate-400">{message}</p>}
     </div>
   );
 }

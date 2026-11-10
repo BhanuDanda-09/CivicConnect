@@ -221,9 +221,9 @@ export default function AdminDashboard() {
       </div>
 
       {/* Date Filter Bar */}
-      <div className="bg-white rounded-2xl border border-slate-200/90 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 text-xs font-bold text-slate-700">
-          <Filter className="w-4 h-4 text-indigo-600" />
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/90 dark:border-slate-800 p-4 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 transition-colors">
+        <div className="flex items-center gap-2 text-xs font-bold text-slate-700 dark:text-slate-300">
+          <Filter className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
           <span>Analytics Time Horizon:</span>
         </div>
 
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
               className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                 period === opt.value
                   ? 'bg-indigo-600 text-white shadow-xs'
-                  : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
               }`}
             >
               {opt.label}
@@ -292,15 +292,15 @@ export default function AdminDashboard() {
 
       {/* Urgent Attention / Overdue Escalation Banner (if any) */}
       {pendingAttention.length > 0 && (
-        <div className="bg-amber-50 border border-amber-200/90 rounded-3xl p-5 shadow-xs space-y-3">
+        <div className="bg-amber-50 dark:bg-amber-950/40 border border-amber-200/90 dark:border-amber-800 rounded-3xl p-5 shadow-xs space-y-3 transition-colors">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+            <div className="flex items-center gap-2 text-amber-900 dark:text-amber-200 font-bold text-sm">
               <Flame className="w-4 h-4 text-red-500 animate-pulse" />
               <span>Priority Action Required: High Severity & Pending Grievances ({pendingAttention.length})</span>
             </div>
             <Link
               to="/admin/complaints?priority=EMERGENCY"
-              className="text-xs font-bold text-amber-700 hover:text-amber-800 inline-flex items-center gap-1"
+              className="text-xs font-bold text-amber-700 dark:text-amber-300 hover:text-amber-800 dark:hover:text-amber-200 inline-flex items-center gap-1"
             >
               <span>View In Queue</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -311,26 +311,26 @@ export default function AdminDashboard() {
             {pendingAttention.map((item) => (
               <div
                 key={item.id || item.complaintId}
-                className="bg-white p-3.5 rounded-2xl border border-amber-200/80 shadow-xs flex flex-col justify-between space-y-2"
+                className="bg-white dark:bg-slate-900 p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-900/50 shadow-xs flex flex-col justify-between space-y-2"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-[10px] font-bold text-slate-500">
+                  <span className="font-mono text-[10px] font-bold text-slate-500 dark:text-slate-400">
                     {item.complaintId}
                   </span>
                   <span
                     className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
                       item.priority === 'EMERGENCY'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-orange-100 text-orange-700'
+                        ? 'bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300'
+                        : 'bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300'
                     }`}
                   >
                     {item.priority}
                   </span>
                 </div>
-                <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{item.title}</h4>
-                <div className="flex items-center justify-between text-[11px] text-slate-500">
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white line-clamp-1">{item.title}</h4>
+                <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
                   <span>{item.ward}</span>
-                  <span className="text-[10px] text-amber-600 font-medium">{item.status}</span>
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400 font-medium">{item.status}</span>
                 </div>
               </div>
             ))}
@@ -340,15 +340,15 @@ export default function AdminDashboard() {
 
       {/* Monthly Volume & Trajectory Area Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-8 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-8 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900">
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">
                 Grievance Volume & Resolution Trajectory
               </h3>
-              <p className="text-xs text-slate-400">Monthly reports filed vs. verified resolutions</p>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Monthly reports filed vs. verified resolutions</p>
             </div>
-            <span className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-xs font-semibold">
+            <span className="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-semibold border border-transparent dark:border-slate-700">
               SLA Resolution: {summary.resolutionRate || 0}%
             </span>
           </div>
@@ -366,7 +366,7 @@ export default function AdminDashboard() {
                     <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
                   </linearGradient>
                 </defs>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.2} />
                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={11} />
                 <YAxis stroke="#94a3b8" fontSize={11} />
                 <Tooltip
@@ -403,10 +403,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* Status Distribution Donut Chart */}
-        <div className="lg:col-span-4 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs flex flex-col justify-between space-y-4">
+        <div className="lg:col-span-4 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs flex flex-col justify-between space-y-4 transition-colors">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Grievance Status Ratio</h3>
-            <p className="text-xs text-slate-400">Current state across municipal pipeline</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Grievance Status Ratio</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Current state across municipal pipeline</p>
           </div>
 
           <div className="h-56 relative">
@@ -441,22 +441,22 @@ export default function AdminDashboard() {
               </PieChart>
             </ResponsiveContainer>
             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-              <span className="text-2xl font-black text-slate-900">{summary.total || 0}</span>
-              <span className="text-[10px] text-slate-400 uppercase font-semibold">Total</span>
+              <span className="text-2xl font-black text-slate-900 dark:text-white">{summary.total || 0}</span>
+              <span className="text-[10px] text-slate-400 dark:text-slate-500 uppercase font-semibold">Total</span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-100">
+          <div className="grid grid-cols-2 gap-2 text-[11px] pt-2 border-t border-slate-100 dark:border-slate-800">
             {statusData.slice(0, 4).map((s) => (
               <div key={s.status} className="flex items-center justify-between">
-                <span className="flex items-center gap-1.5 text-slate-600 truncate">
+                <span className="flex items-center gap-1.5 text-slate-600 dark:text-slate-400 truncate">
                   <span
                     className="w-2 h-2 rounded-full shrink-0"
                     style={{ backgroundColor: STATUS_COLORS[s.status] || '#64748b' }}
                   ></span>
                   <span className="capitalize">{s.status.toLowerCase().replace('_', ' ')}</span>
                 </span>
-                <span className="font-bold text-slate-900">{s.count}</span>
+                <span className="font-bold text-slate-900 dark:text-white">{s.count}</span>
               </div>
             ))}
           </div>
@@ -466,15 +466,15 @@ export default function AdminDashboard() {
       {/* Ward Comparison & Category Breakdown */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Ward-wise Analysis */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-base font-bold text-slate-900">Ward Grievance Load & Resolution</h3>
-              <p className="text-xs text-slate-400">Total complaints vs. resolved per municipal ward</p>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Ward Grievance Load & Resolution</h3>
+              <p className="text-xs text-slate-400 dark:text-slate-500">Total complaints vs. resolved per municipal ward</p>
             </div>
             <Link
               to="/admin/analytics"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1"
             >
               <span>Full Analytics</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -484,7 +484,7 @@ export default function AdminDashboard() {
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={wardData.slice(0, 6)} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.2} />
                 <XAxis
                   dataKey="ward"
                   stroke="#94a3b8"
@@ -510,10 +510,10 @@ export default function AdminDashboard() {
         </div>
 
         {/* Category Breakdown */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
           <div>
-            <h3 className="text-base font-bold text-slate-900">Department / Category Volume</h3>
-            <p className="text-xs text-slate-400">Grievances categorized by infrastructure type</p>
+            <h3 className="text-base font-bold text-slate-900 dark:text-white">Department / Category Volume</h3>
+            <p className="text-xs text-slate-400 dark:text-slate-500">Grievances categorized by infrastructure type</p>
           </div>
 
           <div className="h-64">
@@ -523,12 +523,12 @@ export default function AdminDashboard() {
                 data={categoryData.slice(0, 6)}
                 margin={{ top: 5, right: 20, left: 20, bottom: 5 }}
               >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#94a3b8" strokeOpacity={0.2} horizontal={false} />
                 <XAxis type="number" stroke="#94a3b8" fontSize={10} />
                 <YAxis
                   dataKey="category"
                   type="category"
-                  stroke="#64748b"
+                  stroke="#94a3b8"
                   fontSize={10}
                   tickFormatter={(val) => val.replace('_', ' ')}
                 />
@@ -564,15 +564,15 @@ export default function AdminDashboard() {
       {/* Field Worker Workload Monitor & Recent Complaints Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Field Worker Table */}
-        <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <HardHat className="w-5 h-5 text-amber-500" />
-              <h3 className="text-base font-bold text-slate-900">Field Crew Workload</h3>
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Field Crew Workload</h3>
             </div>
             <Link
               to="/admin/workers"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1"
             >
               <span>Manage All</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -583,15 +583,15 @@ export default function AdminDashboard() {
             {workers.map((w) => (
               <div
                 key={w.id}
-                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100 hover:bg-slate-100/80 transition-colors"
+                className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-slate-950/60 border border-slate-100 dark:border-slate-800 hover:bg-slate-100/80 dark:hover:bg-slate-800/50 transition-colors"
               >
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 font-bold flex items-center justify-center text-xs">
+                  <div className="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-400 font-bold flex items-center justify-center text-xs">
                     {w.name ? w.name.charAt(0) : 'W'}
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold text-slate-900">{w.name}</h4>
-                    <p className="text-[10px] text-slate-500">{w.trade || 'Field Works'}</p>
+                    <h4 className="text-xs font-bold text-slate-900 dark:text-white">{w.name}</h4>
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400">{w.trade || 'Field Works'}</p>
                   </div>
                 </div>
 
@@ -599,13 +599,13 @@ export default function AdminDashboard() {
                   <span
                     className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
                       w.status === 'Available'
-                        ? 'bg-emerald-100 text-emerald-700'
-                        : 'bg-amber-100 text-amber-700'
+                        ? 'bg-emerald-100 dark:bg-emerald-950/70 text-emerald-700 dark:text-emerald-300'
+                        : 'bg-amber-100 dark:bg-amber-950/70 text-amber-700 dark:text-amber-300'
                     }`}
                   >
                     {w.status || 'Active'}
                   </span>
-                  <p className="text-[10px] text-slate-400 mt-0.5">
+                  <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">
                     {w.activeTasks ?? w.assignedTasks ?? 0} Active / {w.completedTasks ?? 0} Done
                   </p>
                 </div>
@@ -615,15 +615,15 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent Complaints Feed */}
-        <div className="lg:col-span-7 bg-white rounded-3xl border border-slate-200/90 p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-7 bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 shadow-xs space-y-4 transition-colors">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <FileText className="w-5 h-5 text-sky-600" />
-              <h3 className="text-base font-bold text-slate-900">Recent Complaints Feed</h3>
+              <FileText className="w-5 h-5 text-sky-600 dark:text-sky-400" />
+              <h3 className="text-base font-bold text-slate-900 dark:text-white">Recent Complaints Feed</h3>
             </div>
             <Link
               to="/admin/complaints"
-              className="text-xs font-bold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
+              className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 flex items-center gap-1"
             >
               <span>Full List</span>
               <ArrowRight className="w-3.5 h-3.5" />
@@ -633,7 +633,7 @@ export default function AdminDashboard() {
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-slate-100 text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+                <tr className="border-b border-slate-100 dark:border-slate-800 text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <th className="py-2.5 px-3">Complaint</th>
                   <th className="py-2.5 px-3">Ward</th>
                   <th className="py-2.5 px-3">Priority</th>
@@ -641,36 +641,36 @@ export default function AdminDashboard() {
                   <th className="py-2.5 px-3 text-right">Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 text-xs">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800 text-xs">
                 {recentComplaints.slice(0, 6).map((c) => (
-                  <tr key={c.id || c.complaintId} className="hover:bg-slate-50/80 transition-colors">
+                  <tr key={c.id || c.complaintId} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/50 transition-colors">
                     <td className="py-3 px-3">
-                      <div className="font-bold text-slate-900 line-clamp-1">{c.title}</div>
-                      <div className="font-mono text-[10px] text-slate-400">{c.complaintId}</div>
+                      <div className="font-bold text-slate-900 dark:text-white line-clamp-1">{c.title}</div>
+                      <div className="font-mono text-[10px] text-slate-400 dark:text-slate-500">{c.complaintId}</div>
                     </td>
-                    <td className="py-3 px-3 text-slate-600 text-[11px]">{c.ward}</td>
+                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300 text-[11px]">{c.ward}</td>
                     <td className="py-3 px-3">
                       <span
                         className={`text-[9px] font-bold px-2 py-0.5 rounded-md ${
                           c.priority === 'EMERGENCY'
-                            ? 'bg-red-100 text-red-700'
+                            ? 'bg-red-100 dark:bg-red-950/70 text-red-700 dark:text-red-300'
                             : c.priority === 'HIGH'
-                            ? 'bg-orange-100 text-orange-700'
-                            : 'bg-sky-100 text-sky-700'
+                            ? 'bg-orange-100 dark:bg-orange-950/70 text-orange-700 dark:text-orange-300'
+                            : 'bg-sky-100 dark:bg-sky-950/70 text-sky-700 dark:text-sky-300'
                         }`}
                       >
                         {c.priority}
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <span className="text-[10px] font-semibold text-slate-700">
+                      <span className="text-[10px] font-semibold text-slate-700 dark:text-slate-300">
                         {c.status}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right">
                       <Link
                         to="/admin/complaints"
-                        className="text-xs font-bold text-indigo-600 hover:text-indigo-800"
+                        className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-800"
                       >
                         Inspect
                       </Link>

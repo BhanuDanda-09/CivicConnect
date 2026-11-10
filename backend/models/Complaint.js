@@ -61,6 +61,26 @@ const complaintSchema = new mongoose.Schema(
       required: [true, 'Location address is required'],
       trim: true,
     },
+    state: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    district: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    city: {
+      type: String,
+      trim: true,
+      default: '',
+    },
+    pincode: {
+      type: String,
+      trim: true,
+      default: '',
+    },
     latitude: {
       type: Number,
       min: [-90, 'Latitude must be between -90 and 90'],

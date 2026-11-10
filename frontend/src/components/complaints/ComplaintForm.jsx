@@ -1,9 +1,15 @@
 import React, { useState } from 'react';
 import { COMPLAINT_CATEGORIES, CITY_WARDS, PRIORITY_LEVELS } from '../../utils/constants';
+import {
+  INDIAN_STATES_AND_UT,
+  INDIAN_DISTRICTS_BY_STATE,
+  validateIndianPinCode,
+  formatFullIndianAddress,
+} from '../../utils/indianGeoData';
 import { useAuth } from '../../hooks/useAuth';
 import MapPicker from '../common/MapPicker';
 import Button from '../common/Button';
-import { UploadCloud, X, AlertCircle, CheckCircle2, MapPin } from 'lucide-react';
+import { UploadCloud, X, AlertCircle, CheckCircle2, MapPin, Building, Home as HomeIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
@@ -12,7 +18,6 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     const auth = useAuth();
     user = auth?.user;
   } catch (err) {
-    // Graceful fallback when rendered without AuthProvider in standalone component tests
     user = null;
   }
 
@@ -20,7 +25,13 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     title: '',
     category: 'pothole',
     ward: CITY_WARDS[0],
-    location: '',
+    state: user?.state || 'Telangana',
+    district: user?.district || 'Hyderabad',
+    city: user?.city || 'Hyderabad',
+    street: '',
+    landmark: '',
+    pincode: user?.pincode || '',
+    location: user?.address || '',
     priority: 'MEDIUM',
     description: '',
     coordinates: { lat: 17.3850, lng: 78.4867 },
@@ -30,6 +41,19 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
   const [errors, setErrors] = useState({});
 
+  // Get dynamic district list for selected state
+  const availableDistricts = INDIAN_DISTRICTS_BY_STATE[formData.state] || [];
+
+  const handleStateChange = (e) => {
+    const newState = e.target.value;
+    const districts = INDIAN_DISTRICTS_BY_STATE[newState] || [];
+    setFormData((prev) => ({
+      ...prev,
+      state: newState,
+      district: districts[0] || '',
+    }));
+  };
+
   const validate = () => {
     const errs = {};
     if (!formData.title.trim()) {
@@ -38,8 +62,16 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       errs.title = 'Title must be at least 5 characters long';
     }
 
-    if (!formData.location.trim()) {
-      errs.location = 'Specific street address or landmark is required';
+    if (!formData.street.trim() && !formData.location.trim()) {
+      errs.street = 'Specific street address or landmark location is required';
+    }
+
+    if (!formData.state) {
+      errs.state = 'State / UT selection is required';
+    }
+
+    if (formData.pincode && !validateIndianPinCode(formData.pincode)) {
+      errs.pincode = 'Valid 6-digit Indian Postal PIN Code is required (e.g. 500001)';
     }
 
     if (!formData.description.trim()) {
@@ -75,6 +107,20 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     setFormData((prev) => ({ ...prev, imageFile: null, imagePreview: null }));
   };
 
+  const handleUseProfileAddress = () => {
+    if (!user) return;
+    setFormData((prev) => ({
+      ...prev,
+      street: user.address || prev.street,
+      state: user.state || prev.state,
+      district: user.district || prev.district,
+      city: user.city || prev.city,
+      pincode: user.pincode || prev.pincode,
+      location: user.address || prev.location,
+    }));
+    toast.success('Address populated from your citizen profile!');
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!validate()) {
@@ -84,15 +130,32 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
     const selectedCategory = COMPLAINT_CATEGORIES.find((c) => c.id === formData.category);
 
+    // Build standard formatted Indian civic location string
+    const fullLocation = formatFullIndianAddress({
+      street: formData.street || formData.location,
+      landmark: formData.landmark,
+      city: formData.city,
+      district: formData.district,
+      state: formData.state,
+      pincode: formData.pincode,
+    }) || formData.location || formData.street;
+
     const submissionPayload = {
       title: formData.title,
       category: formData.category,
       categoryLabel: selectedCategory ? selectedCategory.label : formData.category,
       ward: formData.ward,
-      location: formData.location,
+      state: formData.state,
+      district: formData.district,
+      city: formData.city,
+      landmark: formData.landmark,
+      pincode: formData.pincode,
+      location: fullLocation,
       priority: formData.priority,
       description: formData.description,
       coordinates: formData.coordinates,
+      latitude: formData.coordinates.lat,
+      longitude: formData.coordinates.lng,
       imageFile: formData.imageFile,
       imageUrl:
         formData.imagePreview ||
@@ -106,7 +169,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Issue Title <span className="text-rose-500">*</span>
         </label>
         <input
@@ -114,10 +177,10 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
           placeholder="e.g., Deep asphalt pothole causing traffic jam near Metro station"
           value={formData.title}
           onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-          className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${
+          className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all ${
             errors.title
               ? 'border-rose-400 focus:ring-rose-500/20'
-              : 'border-slate-300 focus:border-sky-500 focus:ring-sky-500/20'
+              : 'border-slate-300 dark:border-slate-700 focus:border-sky-500 focus:ring-sky-500/20'
           }`}
         />
         {errors.title && (
@@ -132,16 +195,16 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Category */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             Category <span className="text-rose-500">*</span>
           </label>
           <select
             value={formData.category}
             onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
           >
             {COMPLAINT_CATEGORIES.map((cat) => (
-              <option key={cat.id} value={cat.id}>
+              <option key={cat.id} value={cat.id} className="dark:bg-slate-900">
                 {cat.label}
               </option>
             ))}
@@ -150,16 +213,16 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
         {/* Municipal Ward */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
             Municipal Ward <span className="text-rose-500">*</span>
           </label>
           <select
             value={formData.ward}
             onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
-            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            className="w-full px-3.5 py-2.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
           >
             {CITY_WARDS.map((w) => (
-              <option key={w} value={w}>
+              <option key={w} value={w} className="dark:bg-slate-900">
                 {w}
               </option>
             ))}
@@ -167,49 +230,142 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
         </div>
       </div>
 
-      {/* Street Address / Landmark */}
-      <div>
-        <div className="flex items-center justify-between mb-1.5">
-          <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider">
-            Street Address / Nearest Landmark <span className="text-rose-500">*</span>
-          </label>
+      {/* Indian Geographic Address Section */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200 dark:border-slate-800 pb-3">
+          <div className="flex items-center gap-2">
+            <Building className="w-4 h-4 text-sky-600 dark:text-sky-400" />
+            <h3 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+              Indian Municipal Location & Address Details
+            </h3>
+          </div>
           {user?.address && (
             <button
               type="button"
-              onClick={() => {
-                setFormData((prev) => ({ ...prev, location: user.address }));
-                toast.success('Address populated from your citizen profile!');
-              }}
-              className="text-[11px] font-bold text-sky-600 hover:text-sky-700 inline-flex items-center gap-1 cursor-pointer bg-sky-50 px-2 py-0.5 rounded-lg"
+              onClick={handleUseProfileAddress}
+              className="text-[11px] font-bold text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 inline-flex items-center gap-1 cursor-pointer bg-sky-100/70 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 px-2.5 py-1 rounded-lg transition-colors"
             >
-              <MapPin className="w-3 h-3" />
-              <span>Use My Registered Address</span>
+              <MapPin className="w-3.5 h-3.5" />
+              <span>Use My Registered Profile Address</span>
             </button>
           )}
         </div>
-        <input
-          type="text"
-          placeholder="e.g., Opposite Bank of India, 4th Cross Road, Shivaji Nagar"
-          value={formData.location}
-          onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-          className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${
-            errors.location
-              ? 'border-rose-400 focus:ring-rose-500/20'
-              : 'border-slate-300 focus:border-sky-500 focus:ring-sky-500/20'
-          }`}
-        />
-        {errors.location && (
-          <p className="mt-1 text-xs text-rose-500 flex items-center gap-1">
-            <AlertCircle className="w-3.5 h-3.5" />
-            <span>{errors.location}</span>
-          </p>
-        )}
+
+        {/* State & District Selectors */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              State / Union Territory <span className="text-rose-500">*</span>
+            </label>
+            <select
+              value={formData.state}
+              onChange={handleStateChange}
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            >
+              {INDIAN_STATES_AND_UT.map((st) => (
+                <option key={st} value={st} className="dark:bg-slate-900">
+                  {st}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              District
+            </label>
+            <select
+              value={formData.district}
+              onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            >
+              {availableDistricts.length > 0 ? (
+                availableDistricts.map((d) => (
+                  <option key={d} value={d} className="dark:bg-slate-900">
+                    {d}
+                  </option>
+                ))
+              ) : (
+                <option value={formData.district || 'General'}>{formData.district || 'General'}</option>
+              )}
+            </select>
+          </div>
+        </div>
+
+        {/* City & PIN Code */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              City / Town / Locality
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Hyderabad, Secunderabad, Pune"
+              value={formData.city}
+              onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            />
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              PIN Code (6 Digits)
+            </label>
+            <input
+              type="text"
+              maxLength={6}
+              placeholder="e.g., 500001"
+              value={formData.pincode}
+              onChange={(e) => setFormData({ ...formData, pincode: e.target.value.replace(/\D/g, '') })}
+              className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 ${
+                errors.pincode
+                  ? 'border-rose-400 focus:ring-rose-500/20'
+                  : 'border-slate-300 dark:border-slate-700 focus:border-sky-500 focus:ring-sky-500/20'
+              }`}
+            />
+            {errors.pincode && <p className="mt-1 text-xs text-rose-500">{errors.pincode}</p>}
+          </div>
+        </div>
+
+        {/* Street & Landmark */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              Street / Area / Road Name <span className="text-rose-500">*</span>
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., 4th Cross Road, Shivaji Nagar"
+              value={formData.street}
+              onChange={(e) => setFormData({ ...formData, street: e.target.value, location: e.target.value })}
+              className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 ${
+                errors.street
+                  ? 'border-rose-400 focus:ring-rose-500/20'
+                  : 'border-slate-300 dark:border-slate-700 focus:border-sky-500 focus:ring-sky-500/20'
+              }`}
+            />
+            {errors.street && <p className="mt-1 text-xs text-rose-500">{errors.street}</p>}
+          </div>
+
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              Nearest Landmark
+            </label>
+            <input
+              type="text"
+              placeholder="e.g., Opposite State Bank of India ATM"
+              value={formData.landmark}
+              onChange={(e) => setFormData({ ...formData, landmark: e.target.value })}
+              className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
+            />
+          </div>
+        </div>
       </div>
 
       {/* Map Location Picker */}
-      <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-200">
-        <label className="block text-xs font-bold text-slate-800 uppercase tracking-wider mb-2">
-          Pin Location on OpenStreetMap (Optional but Recommended)
+      <div className="bg-slate-50/80 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
+        <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">
+          Pin Location on OpenStreetMap (High Precision Geotagging)
         </label>
         <MapPicker
           initialLat={formData.coordinates.lat}
@@ -221,7 +377,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
       {/* Priority Level */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Perceived Urgency / Priority
         </label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -230,10 +386,10 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
               key={lvl}
               type="button"
               onClick={() => setFormData({ ...formData, priority: lvl })}
-              className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all ${
+              className={`py-2 px-3 text-xs font-bold rounded-xl border text-center transition-all cursor-pointer ${
                 formData.priority === lvl
-                  ? 'bg-slate-900 text-white border-slate-900 shadow-xs'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  ? 'bg-slate-900 dark:bg-sky-600 text-white border-slate-900 dark:border-sky-600 shadow-xs'
+                  : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
               }`}
             >
               {PRIORITY_LEVELS[lvl].label}
@@ -244,12 +400,11 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
       {/* Photo Upload with Live Preview */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Evidence Photograph (PNG, JPG, JPEG)
         </label>
-
         {formData.imagePreview ? (
-          <div className="relative rounded-2xl overflow-hidden border border-slate-200 max-h-64 bg-slate-100 flex items-center justify-center group">
+          <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 max-h-64 bg-slate-100 dark:bg-slate-800 flex items-center justify-center group">
             <img
               src={formData.imagePreview}
               alt="Complaint Evidence Preview"
@@ -258,7 +413,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
             <button
               type="button"
               onClick={removeImage}
-              className="absolute top-3 right-3 p-1.5 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors"
+              className="absolute top-3 right-3 p-1.5 bg-slate-900/80 hover:bg-rose-600 text-white rounded-full transition-colors cursor-pointer"
               title="Remove image"
             >
               <X className="w-4 h-4" />
@@ -268,12 +423,12 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
             </div>
           </div>
         ) : (
-          <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl cursor-pointer bg-slate-50/50 hover:bg-sky-50/30 transition-colors">
-            <UploadCloud className="w-8 h-8 text-slate-400 mb-2" />
-            <p className="text-xs font-semibold text-slate-700">
+          <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-sky-500 rounded-2xl cursor-pointer bg-slate-50/50 dark:bg-slate-900/40 hover:bg-sky-50/30 dark:hover:bg-sky-950/20 transition-colors">
+            <UploadCloud className="w-8 h-8 text-slate-400 dark:text-slate-500 mb-2" />
+            <p className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               Click to upload photo or drag & drop here
             </p>
-            <p className="text-[11px] text-slate-400 mt-0.5">JPEG, PNG up to 5MB</p>
+            <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">JPEG, PNG up to 5MB</p>
             <input
               type="file"
               accept="image/*"
@@ -286,7 +441,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
 
       {/* Detailed Description */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+        <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
           Detailed Description <span className="text-rose-500">*</span>
         </label>
         <textarea
@@ -294,10 +449,10 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
           placeholder="Describe how long the issue has persisted, how severely it affects residents or traffic, and any key hazards..."
           value={formData.description}
           onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-          className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-white focus:outline-none focus:ring-2 transition-all ${
+          className={`w-full px-4 py-2.5 text-sm rounded-xl border bg-white dark:bg-slate-900 text-slate-900 dark:text-white focus:outline-none focus:ring-2 transition-all ${
             errors.description
               ? 'border-rose-400 focus:ring-rose-500/20'
-              : 'border-slate-300 focus:border-sky-500 focus:ring-sky-500/20'
+              : 'border-slate-300 dark:border-slate-700 focus:border-sky-500 focus:ring-sky-500/20'
           }`}
         />
         {errors.description && (
@@ -319,11 +474,10 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
         >
           Submit Complaint to Municipal Desk
         </Button>
-        <p className="text-center text-[11px] text-slate-400 mt-2">
+        <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">
           By submitting, you certify that the provided information and photograph accurately represent the civic problem.
         </p>
       </div>
     </form>
   );
 }
-

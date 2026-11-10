@@ -193,7 +193,7 @@ export default function TaskDetails() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center text-xs font-semibold text-slate-500 hover:text-slate-800 transition-colors self-start"
+          className="inline-flex items-center text-xs font-semibold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors self-start"
         >
           <ArrowLeft className="w-3.5 h-3.5 mr-1" />
           <span>Back to Task Registry</span>
@@ -208,34 +208,34 @@ export default function TaskDetails() {
       </div>
 
       {/* Main Task Card */}
-      <div className="bg-white rounded-3xl border border-slate-200/90 p-6 sm:p-8 shadow-xs space-y-6">
+      <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-6 sm:p-8 shadow-xs space-y-6">
         <div>
           <span className="font-mono text-xs font-bold text-slate-400">
             Work Order #{task.id}
           </span>
-          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 mt-1 leading-snug">
+          <h1 className="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white mt-1 leading-snug">
             {task.title}
           </h1>
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
             Category: <strong>{task.categoryLabel || task.category}</strong> • Ward: <strong>{task.ward}</strong>
           </p>
         </div>
 
         {/* Location & Contact Info */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-            <MapPin className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 flex items-start gap-3">
+            <MapPin className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-slate-900">Task Site Location</p>
-              <p className="text-slate-600 mt-0.5">{task.location}</p>
+              <p className="font-bold text-slate-900 dark:text-white">Task Site Location</p>
+              <p className="text-slate-600 dark:text-slate-300 mt-0.5">{task.location}</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 flex items-start gap-3">
-            <Calendar className="w-5 h-5 text-indigo-600 shrink-0 mt-0.5" />
+          <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-700 flex items-start gap-3">
+            <Calendar className="w-5 h-5 text-indigo-600 dark:text-indigo-400 shrink-0 mt-0.5" />
             <div>
-              <p className="font-bold text-slate-900">Assigned Timeline</p>
-              <p className="text-slate-600 mt-0.5">
+              <p className="font-bold text-slate-900 dark:text-white">Assigned Timeline</p>
+              <p className="text-slate-600 dark:text-slate-300 mt-0.5">
                 Reported: {formatDate(task.createdAt)} • Updated: {formatDate(task.updatedAt)}
               </p>
             </div>
@@ -244,10 +244,10 @@ export default function TaskDetails() {
 
         {/* Description */}
         <div className="space-y-1.5">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Issue Description
           </h3>
-          <p className="text-sm text-slate-700 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-100">
+          <p className="text-sm text-slate-700 dark:text-slate-200 leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-4 rounded-2xl border border-slate-100 dark:border-slate-700">
             {task.description}
           </p>
         </div>
@@ -255,16 +255,16 @@ export default function TaskDetails() {
         {/* Map Location & GPS Navigation */}
         <div className="space-y-2">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
               On-Site Navigation Coordinates
             </h3>
             <a
               href={`https://www.google.com/maps/dir/?api=1&destination=${task.coordinates?.lat || 18.5204},${task.coordinates?.lng || 73.8567}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-xl border border-sky-200 transition-colors w-fit"
+              className="inline-flex items-center gap-1.5 text-xs font-bold text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 transition-colors w-fit"
             >
-              <Navigation className="w-3.5 h-3.5 text-sky-600" />
+              <Navigation className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400" />
               <span>Open Turn-by-Turn GPS Directions</span>
             </a>
           </div>
@@ -278,15 +278,15 @@ export default function TaskDetails() {
 
         {/* Evidence Photos */}
         <div className="space-y-3">
-          <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
             Photographic Evidence Comparison
           </h3>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {/* Before Photo */}
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700">Initial Problem Photo (Before)</span>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 h-56 bg-slate-100">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Initial Problem Photo (Before)</span>
+              <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 h-56 bg-slate-100 dark:bg-slate-800">
                 {task.imageUrl ? (
                   <img
                     src={task.imageUrl}
@@ -303,8 +303,8 @@ export default function TaskDetails() {
 
             {/* After Photo */}
             <div className="space-y-1.5">
-              <span className="text-xs font-bold text-slate-700">Resolution Completion Photo (After)</span>
-              <div className="rounded-2xl overflow-hidden border border-slate-200 h-56 bg-slate-100">
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Resolution Completion Photo (After)</span>
+              <div className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 h-56 bg-slate-100 dark:bg-slate-800">
                 {task.completionImageUrl ? (
                   <img
                     src={task.completionImageUrl}
@@ -323,18 +323,18 @@ export default function TaskDetails() {
         </div>
 
         {/* Worker Status Update Controls */}
-        <div className="pt-6 border-t border-slate-100 space-y-6">
-          <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
-            <Wrench className="w-5 h-5 text-amber-600" />
+        <div className="pt-6 border-t border-slate-100 dark:border-slate-800 space-y-6">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Wrench className="w-5 h-5 text-amber-600 dark:text-amber-400" />
             <span>Update Task Status & Upload Proof</span>
           </h3>
 
           {task.status === 'ASSIGNED' && (
-            <div className="p-5 rounded-2xl bg-amber-50 border border-amber-200 space-y-3">
-              <p className="text-xs font-bold text-amber-900">
+            <div className="p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/60 space-y-3">
+              <p className="text-xs font-bold text-amber-900 dark:text-amber-200">
                 Ready to commence work on site?
               </p>
-              <p className="text-xs text-amber-800">
+              <p className="text-xs text-amber-800 dark:text-amber-300">
                 Marking this task as "In Progress" notifies municipal dispatch and the citizen that repairs have started.
               </p>
               <Button
@@ -350,18 +350,18 @@ export default function TaskDetails() {
           )}
 
           {task.status === 'IN_PROGRESS' && (
-            <form onSubmit={handleCompleteWork} className="space-y-4 bg-slate-50 p-6 rounded-2xl border border-slate-200">
-              <p className="text-xs font-bold text-slate-900">
+            <form onSubmit={handleCompleteWork} className="space-y-4 bg-slate-50 dark:bg-slate-800/60 p-6 rounded-2xl border border-slate-200 dark:border-slate-700">
+              <p className="text-xs font-bold text-slate-900 dark:text-white">
                 Complete Work Order & Upload Photographic Proof
               </p>
 
               {/* Upload Completion Proof */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
                   Resolution Photo Evidence
                 </label>
                 {completionImagePreview ? (
-                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 h-48 bg-slate-900 max-w-sm">
+                  <div className="relative rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 h-48 bg-slate-900 max-w-sm">
                     <img
                       src={completionImagePreview}
                       alt="Proof Preview"
@@ -376,9 +376,9 @@ export default function TaskDetails() {
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 hover:border-amber-500 rounded-2xl cursor-pointer bg-white transition-colors max-w-sm">
+                  <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-slate-300 dark:border-slate-700 hover:border-amber-500 rounded-2xl cursor-pointer bg-white dark:bg-slate-800 transition-colors max-w-sm">
                     <UploadCloud className="w-8 h-8 text-slate-400 mb-1" />
-                    <span className="text-xs font-semibold text-slate-700">Upload completion photo</span>
+                    <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">Upload completion photo</span>
                     <input type="file" accept="image/*" onChange={handleImageChange} className="hidden" />
                   </label>
                 )}
@@ -386,7 +386,7 @@ export default function TaskDetails() {
 
               {/* Notes */}
               <div>
-                <label className="block text-xs font-bold text-slate-700 uppercase mb-1.5">
+                <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase mb-1.5">
                   Remediation Summary & Notes
                 </label>
                 <textarea
@@ -394,7 +394,7 @@ export default function TaskDetails() {
                   placeholder="e.g., Pothole filled with cold mix bitumen, rolled flat. Debris cleared from roadway."
                   value={completionNotes}
                   onChange={(e) => setCompletionNotes(e.target.value)}
-                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
+                  className="w-full px-4 py-2.5 text-xs rounded-xl border border-slate-300 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
                 />
               </div>
 
@@ -411,11 +411,11 @@ export default function TaskDetails() {
           )}
 
           {isResolved && (
-            <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center space-x-3 text-xs text-emerald-900">
-              <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
+            <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-900/60 flex items-center space-x-3 text-xs text-emerald-900 dark:text-emerald-200">
+              <CheckCircle2 className="w-6 h-6 text-emerald-600 dark:text-emerald-400 shrink-0" />
               <div>
                 <p className="font-bold">Work Successfully Completed & Closed</p>
-                <p className="text-[11px] text-emerald-800">
+                <p className="text-[11px] text-emerald-800 dark:text-emerald-300">
                   This work order is closed. Resolution proof has been submitted to municipal archives and the citizen has been prompted for feedback.
                 </p>
               </div>

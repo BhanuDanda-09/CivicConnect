@@ -114,9 +114,9 @@ export default function MapPicker({
   return (
     <div className="space-y-2">
       {/* Controls Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600">
-        <span className="flex items-center gap-1.5 font-bold text-slate-700">
-          <MapPin className="w-4 h-4 text-sky-600 shrink-0" />
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs text-slate-600 dark:text-slate-300">
+        <span className="flex items-center gap-1.5 font-bold text-slate-700 dark:text-slate-200">
+          <MapPin className="w-4 h-4 text-sky-600 dark:text-sky-400 shrink-0" />
           {readOnly
             ? 'Pinned Incident Location (OpenStreetMap India)'
             : 'Click on the map to pin exact problem coordinates:'}
@@ -128,7 +128,7 @@ export default function MapPicker({
               type="button"
               onClick={handleGetCurrentLocation}
               disabled={isLocating}
-              className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 hover:text-sky-800 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-xl border border-sky-200 transition-colors cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 dark:text-sky-300 hover:text-sky-800 dark:hover:text-sky-200 bg-sky-50 dark:bg-sky-950/60 hover:bg-sky-100 dark:hover:bg-sky-900/60 px-3 py-1.5 rounded-xl border border-sky-200 dark:border-sky-800 transition-colors cursor-pointer disabled:opacity-50"
             >
               <Crosshair className={`w-3.5 h-3.5 ${isLocating ? 'animate-spin' : ''}`} />
               <span>{isLocating ? 'Acquiring GPS...' : 'Use My Current GPS'}</span>
@@ -138,16 +138,16 @@ export default function MapPicker({
       </div>
 
       {locationNotice && (
-        <div className="text-[11px] text-sky-700 bg-sky-50 px-3 py-1 rounded-lg border border-sky-100 flex items-center gap-1.5">
-          <Navigation className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+        <div className="text-[11px] text-sky-700 dark:text-sky-300 bg-sky-50 dark:bg-sky-950/60 px-3 py-1 rounded-lg border border-sky-100 dark:border-sky-800 flex items-center gap-1.5">
+          <Navigation className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 shrink-0" />
           <span>{locationNotice}</span>
         </div>
       )}
 
       {/* Quick City Presets (for fast navigation across India) */}
       {!readOnly && (
-        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-slate-500">
-          <span className="font-semibold text-slate-600">Quick City Focus:</span>
+        <div className="flex flex-wrap items-center gap-1.5 pt-1 text-[11px] text-slate-500 dark:text-slate-400">
+          <span className="font-semibold text-slate-600 dark:text-slate-300">Quick City Focus:</span>
           {INDIAN_CITY_PRESETS.map((city) => (
             <button
               key={city.name}
@@ -156,7 +156,7 @@ export default function MapPicker({
               className={`px-2 py-0.5 rounded-md text-[10px] font-semibold border transition-colors cursor-pointer ${
                 Math.abs(position.lat - city.lat) < 0.1 && Math.abs(position.lng - city.lng) < 0.1
                   ? 'bg-sky-600 text-white border-sky-600 font-bold'
-                  : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'
+                  : 'bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-700'
               }`}
             >
               {city.name}
@@ -167,7 +167,7 @@ export default function MapPicker({
 
       {/* Leaflet Map Canvas */}
       <div
-        className="rounded-2xl overflow-hidden border border-slate-200 shadow-inner relative z-10"
+        className="rounded-2xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-inner relative z-10"
         style={{ height }}
       >
         <MapContainer
@@ -194,12 +194,12 @@ export default function MapPicker({
       </div>
 
       {/* Coordinates readout */}
-      <div className="flex items-center justify-between text-[11px] text-slate-500 font-mono bg-slate-50 px-3.5 py-1.5 rounded-xl border border-slate-100">
+      <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 font-mono bg-slate-50 dark:bg-slate-900/80 px-3.5 py-1.5 rounded-xl border border-slate-100 dark:border-slate-800">
         <span className="flex items-center gap-1">
-          <Compass className="w-3.5 h-3.5 text-slate-400" />
-          <span>Latitude: <strong>{Number(position.lat).toFixed(6)}° N</strong></span>
+          <Compass className="w-3.5 h-3.5 text-slate-400 dark:text-slate-500" />
+          <span>Latitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lat).toFixed(6)}° N</strong></span>
         </span>
-        <span>Longitude: <strong>{Number(position.lng).toFixed(6)}° E</strong></span>
+        <span>Longitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lng).toFixed(6)}° E</strong></span>
       </div>
     </div>
   );

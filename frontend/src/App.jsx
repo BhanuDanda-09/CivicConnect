@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
@@ -72,9 +73,10 @@ function ProtectedRoute({ children, allowedRoles }) {
 export default function App() {
   return (
     <ErrorBoundary>
-      <AuthProvider>
-        <SocketProvider>
-          <BrowserRouter>
+      <ThemeProvider>
+        <AuthProvider>
+          <SocketProvider>
+            <BrowserRouter>
         {/* Toast Notification Container */}
         <Toaster
           position="top-right"
@@ -172,6 +174,7 @@ export default function App() {
       </BrowserRouter>
     </SocketProvider>
   </AuthProvider>
+</ThemeProvider>
 </ErrorBoundary>
   );
 }
