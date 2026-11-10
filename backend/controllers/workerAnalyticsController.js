@@ -108,13 +108,13 @@ const getWorkerTaskLocations = asyncHandler(async (req, res) => {
   }
 
   const tasks = await Complaint.find(filter)
-    .select('complaintId title category priority status ward location latitude longitude locationGeo createdAt citizen')
+    .select('complaintId title category priority status ward state district city location country latitude longitude locationGeo createdAt citizen')
     .populate('citizen', 'fullName mobileNumber')
     .sort({ priority: 1, createdAt: -1 });
 
   const locations = tasks.map((t) => {
-    const lat = t.latitude || (t.locationGeo?.coordinates ? t.locationGeo.coordinates[1] : 18.5204);
-    const lng = t.longitude || (t.locationGeo?.coordinates ? t.locationGeo.coordinates[0] : 73.8567);
+    const lat = t.latitude || (t.locationGeo?.coordinates ? t.locationGeo.coordinates[1] : 20.5937);
+    const lng = t.longitude || (t.locationGeo?.coordinates ? t.locationGeo.coordinates[0] : 78.9629);
 
     return {
       id: t._id.toString(),
@@ -124,6 +124,10 @@ const getWorkerTaskLocations = asyncHandler(async (req, res) => {
       priority: t.priority,
       status: t.status,
       ward: t.ward,
+      state: t.state || '',
+      district: t.district || '',
+      city: t.city || '',
+      country: t.country || 'India',
       address: t.location,
       lat,
       lng,

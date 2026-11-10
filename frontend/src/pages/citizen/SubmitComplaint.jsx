@@ -25,6 +25,7 @@ export default function SubmitComplaint() {
       formData.append('location', data.location);
       formData.append('ward', data.ward);
       formData.append('priority', data.priority || 'MEDIUM');
+      formData.append('country', data.country || 'India');
 
       if (data.state) formData.append('state', data.state);
       if (data.district) formData.append('district', data.district);

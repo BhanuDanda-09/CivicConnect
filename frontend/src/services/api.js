@@ -189,4 +189,12 @@ export const feedbackAPI = {
   getAll: (params) => api.get('/feedback', { params }),
 };
 
+// ------------------------------------------------------------------------------
+// India-Wide Geospatial & Geocoding API
+// ------------------------------------------------------------------------------
+export const geoAPI = {
+  search: (query, limit = 8) => api.get('/geo/search', { params: { q: query, limit } }),
+  reverse: (lat, lng) => api.get('/geo/reverse', { params: { lat, lng } }),
+};
+
 export default api;

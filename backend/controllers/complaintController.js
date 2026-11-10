@@ -55,6 +55,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     category,
     categoryLabel,
     location,
+    country,
     state,
     district,
     city,
@@ -88,8 +89,11 @@ const createComplaint = asyncHandler(async (req, res) => {
   // Generate unique complaint ID: CC-YYYY-XXXX
   const complaintId = await Complaint.generateComplaintId();
 
-  const latNum = latitude !== undefined && latitude !== '' ? Number(latitude) : 18.5204;
-  const lngNum = longitude !== undefined && longitude !== '' ? Number(longitude) : 73.8567;
+  // Validate and parse numerical coordinates (Leaflet lat/lng to GeoJSON [lng, lat])
+  const parsedLat = parseFloat(latitude);
+  const parsedLng = parseFloat(longitude);
+  const latNum = !isNaN(parsedLat) && parsedLat >= -90 && parsedLat <= 90 ? parsedLat : 20.5937;
+  const lngNum = !isNaN(parsedLng) && parsedLng >= -180 && parsedLng <= 180 ? parsedLng : 78.9629;
 
   // Create new complaint document in MongoDB
   const complaint = new Complaint({
@@ -99,6 +103,7 @@ const createComplaint = asyncHandler(async (req, res) => {
     category,
     categoryLabel: categoryLabel || category,
     location,
+    country: country || 'India',
     state: state || '',
     district: district || '',
     city: city || '',

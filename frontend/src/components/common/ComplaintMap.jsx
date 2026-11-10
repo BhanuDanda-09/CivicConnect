@@ -7,8 +7,9 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { MapPin, Navigation, ExternalLink, Filter, Compass } from 'lucide-react';
+import { MapPin, Navigation, ExternalLink, Filter, Compass, Globe2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { INDIAN_STATES_AND_UT, STATE_CENTER_COORDINATES } from '../../utils/indianGeoData';
 
 // Priority-based colored markers using custom SVG DivIcons
 const createMarkerIcon = (priority = 'MEDIUM') => {
@@ -86,11 +87,12 @@ export default function ComplaintMap({
   center = INDIA_DEFAULT_CENTER,
   zoom = 5,
   title = 'Geospatial Incident Map',
-  subtitle = 'Real-time GPS distribution of reported civic issues across municipal wards',
+  subtitle = 'Real-time GPS distribution of reported civic issues across municipal wards and states',
   role = 'admin',
 }) {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [priorityFilter, setPriorityFilter] = useState('ALL');
+  const [stateFilter, setStateFilter] = useState('ALL');
 
   const markerIcons = useMemo(
     () => ({
@@ -118,7 +120,7 @@ export default function ComplaintMap({
       .filter(Boolean);
   }, [locations]);
 
-  // Apply optional interactive status and priority filters
+  // Apply interactive status, priority, and state filters
   const filteredLocations = useMemo(() => {
     return parsedLocations.filter((loc) => {
       const matchStatus =
@@ -129,24 +131,36 @@ export default function ComplaintMap({
 
       const matchPriority = priorityFilter === 'ALL' || loc.priority === priorityFilter;
 
-      return matchStatus && matchPriority;
-    });
-  }, [parsedLocations, statusFilter, priorityFilter]);
+      const matchState =
+        stateFilter === 'ALL' ||
+        (loc.state && loc.state.toLowerCase() === stateFilter.toLowerCase()) ||
+        (loc.address && loc.address.toLowerCase().includes(stateFilter.toLowerCase()));
 
-  // Calculate dynamic map center: focuses on points or defaults to India center
+      return matchStatus && matchPriority && matchState;
+    });
+  }, [parsedLocations, statusFilter, priorityFilter, stateFilter]);
+
+  // Calculate dynamic map center: focuses on state, points, or defaults to India center
   const mapCenter = useMemo(() => {
+    if (stateFilter !== 'ALL' && STATE_CENTER_COORDINATES[stateFilter]) {
+      const sc = STATE_CENTER_COORDINATES[stateFilter];
+      return [sc.lat, sc.lng];
+    }
     if (filteredLocations.length > 0) {
       const first = filteredLocations[0];
       return [first.resolvedLat, first.resolvedLng];
     }
     return center;
-  }, [filteredLocations, center]);
+  }, [filteredLocations, center, stateFilter]);
 
   const mapZoom = useMemo(() => {
+    if (stateFilter !== 'ALL' && STATE_CENTER_COORDINATES[stateFilter]) {
+      return STATE_CENTER_COORDINATES[stateFilter].zoom || 7;
+    }
     if (filteredLocations.length === 1) return 14;
-    if (filteredLocations.length > 1) return 12;
+    if (filteredLocations.length > 1) return 8;
     return zoom;
-  }, [filteredLocations, zoom]);
+  }, [filteredLocations, zoom, stateFilter]);
 
   return (
     <div className="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200/90 dark:border-slate-800 p-5 sm:p-6 shadow-xs space-y-4 transition-colors">
@@ -171,6 +185,20 @@ export default function ComplaintMap({
 
         {/* Quick Filters */}
         <div className="flex flex-wrap items-center gap-2 text-xs">
+          {/* Pan-India State Filter */}
+          <select
+            value={stateFilter}
+            onChange={(e) => setStateFilter(e.target.value)}
+            className="px-2.5 py-1 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-semibold focus:outline-none"
+          >
+            <option value="ALL" className="dark:bg-slate-900">All India (National)</option>
+            {INDIAN_STATES_AND_UT.map((st) => (
+              <option key={st} value={st} className="dark:bg-slate-900">
+                {st}
+              </option>
+            ))}
+          </select>
+
           <div className="flex items-center gap-1 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-transparent dark:border-slate-700">
             {[
               { id: 'ALL', label: 'All' },
@@ -281,6 +309,13 @@ export default function ComplaintMap({
                     <p className="text-[11px] text-slate-500 line-clamp-2">
                       {loc.address || loc.location || loc.ward}
                     </p>
+
+                    {(loc.state || loc.district) && (
+                      <div className="flex flex-wrap items-center gap-1 text-[10px] pt-0.5">
+                        {loc.state && <span className="bg-sky-50 text-sky-700 font-semibold px-1.5 py-0.5 rounded">{loc.state}</span>}
+                        {loc.district && <span className="bg-indigo-50 text-indigo-700 font-semibold px-1.5 py-0.5 rounded">{loc.district}</span>}
+                      </div>
+                    )}
 
                     <div className="text-[10px] text-slate-500 flex items-center justify-between pt-1 border-t border-slate-100">
                       <span>Status: <strong className="text-slate-700">{loc.status}</strong></span>

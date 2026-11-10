@@ -25,6 +25,7 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
     title: '',
     category: 'pothole',
     ward: CITY_WARDS[0],
+    country: 'India',
     state: user?.state || 'Telangana',
     district: user?.district || 'Hyderabad',
     city: user?.city || 'Hyderabad',
@@ -52,6 +53,24 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       state: newState,
       district: districts[0] || '',
     }));
+  };
+
+  // Callback when user selects or drags marker on the interactive India map
+  const handleMapLocationSelect = (loc) => {
+    if (!loc) return;
+    setFormData((prev) => {
+      const updated = {
+        ...prev,
+        coordinates: { lat: loc.lat, lng: loc.lng },
+      };
+      if (loc.state) updated.state = loc.state;
+      if (loc.district) updated.district = loc.district;
+      if (loc.city) updated.city = loc.city;
+      if (loc.street) updated.street = loc.street;
+      if (loc.pincode) updated.pincode = loc.pincode;
+      if (loc.formattedAddress) updated.location = loc.formattedAddress;
+      return updated;
+    });
   };
 
   const validate = () => {
@@ -145,9 +164,11 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       category: formData.category,
       categoryLabel: selectedCategory ? selectedCategory.label : formData.category,
       ward: formData.ward,
+      country: 'India',
       state: formData.state,
       district: formData.district,
       city: formData.city,
+      street: formData.street,
       landmark: formData.landmark,
       pincode: formData.pincode,
       location: fullLocation,
@@ -251,8 +272,18 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
           )}
         </div>
 
-        {/* State & District Selectors */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+        {/* Cascading Location Hierarchy: Country (Fixed) -> State -> District */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+          <div>
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
+              Country <span className="text-slate-400 font-normal">(National Portal)</span>
+            </label>
+            <div className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-semibold flex items-center gap-2">
+              <span className="text-base leading-none">🇮🇳</span>
+              <span>India</span>
+            </div>
+          </div>
+
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
               State / Union Territory <span className="text-rose-500">*</span>
@@ -292,15 +323,15 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
           </div>
         </div>
 
-        {/* City & PIN Code */}
+        {/* City / Town / Village & PIN Code */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              City / Town / Locality
+              City / Town / Village
             </label>
             <input
               type="text"
-              placeholder="e.g., Hyderabad, Secunderabad, Pune"
+              placeholder="e.g., Hyderabad, Vijayawada, Warangal, Pune, Rampur"
               value={formData.city}
               onChange={(e) => setFormData({ ...formData, city: e.target.value })}
               className="w-full px-3.5 py-2 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500"
@@ -331,11 +362,11 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1.5">
-              Street / Area / Road Name <span className="text-rose-500">*</span>
+              Locality / Street / Road Name <span className="text-rose-500">*</span>
             </label>
             <input
               type="text"
-              placeholder="e.g., 4th Cross Road, Shivaji Nagar"
+              placeholder="e.g., 4th Cross Road, Shivaji Nagar, Sector 5"
               value={formData.street}
               onChange={(e) => setFormData({ ...formData, street: e.target.value, location: e.target.value })}
               className={`w-full px-3.5 py-2 text-sm rounded-xl border bg-white dark:bg-slate-900 text-slate-800 dark:text-white focus:outline-none focus:ring-2 ${
@@ -365,13 +396,13 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
       {/* Map Location Picker */}
       <div className="bg-slate-50/80 dark:bg-slate-900/60 p-4 rounded-2xl border border-slate-200 dark:border-slate-800">
         <label className="block text-xs font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider mb-2">
-          Pin Location on OpenStreetMap (High Precision Geotagging)
+          Pin Location on OpenStreetMap (Pan-India Interactive Geotagging)
         </label>
         <MapPicker
           initialLat={formData.coordinates.lat}
           initialLng={formData.coordinates.lng}
-          onLocationSelect={(coords) => setFormData((prev) => ({ ...prev, coordinates: coords }))}
-          height="240px"
+          onLocationSelect={handleMapLocationSelect}
+          height="320px"
         />
       </div>
 

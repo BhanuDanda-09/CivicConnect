@@ -61,6 +61,11 @@ const complaintSchema = new mongoose.Schema(
       required: [true, 'Location address is required'],
       trim: true,
     },
+    country: {
+      type: String,
+      trim: true,
+      default: 'India',
+    },
     state: {
       type: String,
       trim: true,

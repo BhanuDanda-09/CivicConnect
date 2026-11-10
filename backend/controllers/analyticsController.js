@@ -423,24 +423,27 @@ const getWardAnalytics = asyncHandler(async (req, res) => {
  * @access  Private (Admin only)
  */
 const getComplaintLocations = asyncHandler(async (req, res) => {
-  const { status, category, priority, ward } = req.query;
+  const { status, category, priority, ward, state, district, city } = req.query;
 
   const filter = {};
   if (status) filter.status = status;
   if (category) filter.category = category;
   if (priority) filter.priority = priority;
   if (ward) filter.ward = ward;
+  if (state && state !== 'ALL') filter.state = new RegExp(`^${state.trim()}$`, 'i');
+  if (district && district !== 'ALL') filter.district = new RegExp(`^${district.trim()}$`, 'i');
+  if (city && city !== 'ALL') filter.city = new RegExp(`^${city.trim()}$`, 'i');
 
   const complaints = await Complaint.find(filter)
-    .select('complaintId title category priority status ward location latitude longitude locationGeo createdAt citizen assignedWorker')
+    .select('complaintId title category priority status ward state district city country location latitude longitude locationGeo createdAt citizen assignedWorker')
     .populate('citizen', 'fullName mobileNumber')
     .populate('assignedWorker', 'fullName trade')
     .sort({ createdAt: -1 })
-    .limit(200);
+    .limit(300);
 
   const locations = complaints.map((c) => {
-    const lat = c.latitude || (c.locationGeo?.coordinates ? c.locationGeo.coordinates[1] : 18.5204);
-    const lng = c.longitude || (c.locationGeo?.coordinates ? c.locationGeo.coordinates[0] : 73.8567);
+    const lat = c.latitude || (c.locationGeo?.coordinates ? c.locationGeo.coordinates[1] : 20.5937);
+    const lng = c.longitude || (c.locationGeo?.coordinates ? c.locationGeo.coordinates[0] : 78.9629);
 
     return {
       id: c._id.toString(),
@@ -450,6 +453,10 @@ const getComplaintLocations = asyncHandler(async (req, res) => {
       priority: c.priority,
       status: c.status,
       ward: c.ward,
+      state: c.state || '',
+      district: c.district || '',
+      city: c.city || '',
+      country: c.country || 'India',
       address: c.location,
       lat,
       lng,

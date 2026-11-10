@@ -16,6 +16,7 @@ const adminWorkerRoutes = require('./adminWorkerRoutes');
 const adminUserRoutes = require('./adminUserRoutes');
 const notificationRoutes = require('./notificationRoutes');
 const feedbackRoutes = require('./feedbackRoutes');
+const geoRoutes = require('./geoRoutes');
 
 // Active API Routes
 router.use('/health', healthRoutes);
@@ -29,6 +30,7 @@ router.use('/workers/complaints', workerComplaintRoutes);
 router.use('/workers/analytics', workerAnalyticsRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/feedback', feedbackRoutes);
+router.use('/geo', geoRoutes);
 
 // Root /api information endpoint
 router.get('/', (req, res) => {
