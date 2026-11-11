@@ -8,6 +8,7 @@ const ComplaintHistory = require('../models/ComplaintHistory');
 const { uploadMultipleFiles } = require('../services/cloudinaryService');
 const { createAndDispatchNotification } = require('./notificationController');
 const { emitToRole } = require('../services/socketService');
+const { classifyComplaintText, detectNearbyDuplicates } = require('../services/aiCivicService');
 const ApiError = require('../utils/ApiError');
 const asyncHandler = require('../utils/asyncHandler');
 
@@ -95,13 +96,32 @@ const createComplaint = asyncHandler(async (req, res) => {
   const latNum = !isNaN(parsedLat) && parsedLat >= -90 && parsedLat <= 90 ? parsedLat : 20.5937;
   const lngNum = !isNaN(parsedLng) && parsedLng >= -180 && parsedLng <= 180 ? parsedLng : 78.9629;
 
+  // Automatic AI Civic Intelligence & Hazard Detection
+  const aiAnalysis = classifyComplaintText({
+    title,
+    description,
+    location,
+  });
+
+  const resolvedPriority =
+    priority || (aiAnalysis.safetyHazard ? 'URGENT' : aiAnalysis.priority) || 'MEDIUM';
+
+  // Check potential nearby duplicates
+  const detectedDuplicates = await detectNearbyDuplicates({
+    title,
+    description,
+    category,
+    latitude: latNum,
+    longitude: lngNum,
+  });
+
   // Create new complaint document in MongoDB
   const complaint = new Complaint({
     complaintId,
     title,
     description,
     category,
-    categoryLabel: categoryLabel || category,
+    categoryLabel: categoryLabel || aiAnalysis.categoryLabel || category,
     location,
     country: country || 'India',
     state: state || '',
@@ -116,11 +136,26 @@ const createComplaint = asyncHandler(async (req, res) => {
     },
     ward,
     landmark: landmark || '',
-    priority: priority || 'MEDIUM',
+    priority: resolvedPriority,
     status: 'SUBMITTED',
     citizen: req.user._id, // Enforce authenticated citizen ownership
     images,
     imageDetails,
+    assetId: req.body.assetId ? req.body.assetId.trim().toUpperCase() : '',
+    aiClassification: {
+      confidence: aiAnalysis.confidence,
+      suggestedCategory: aiAnalysis.category,
+      suggestedPriority: aiAnalysis.priority,
+      department: aiAnalysis.department,
+      safetyHazard: aiAnalysis.safetyHazard,
+      keywords: aiAnalysis.keywords,
+      explanation: aiAnalysis.explanation,
+    },
+    possibleDuplicates: detectedDuplicates.map((d) => ({
+      complaintId: d.complaintId,
+      similarityScore: d.similarityScore,
+      reason: d.reason,
+    })),
   });
 
   await complaint.save();

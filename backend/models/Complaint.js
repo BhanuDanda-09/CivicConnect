@@ -196,6 +196,68 @@ const complaintSchema = new mongoose.Schema(
       ref: 'Feedback',
       default: null,
     },
+    // SLA & Service-Level Management
+    slaHours: {
+      type: Number,
+      default: 72, // Default 3 days
+    },
+    slaDeadline: {
+      type: Date,
+      default: null,
+      index: true,
+    },
+    isEscalated: {
+      type: Boolean,
+      default: false,
+      index: true,
+    },
+    escalationReason: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    // Public Infrastructure Asset Reference (QR / Asset Tag)
+    assetId: {
+      type: String,
+      default: '',
+      trim: true,
+      index: true,
+    },
+    // Community Awareness & Upvotes
+    isPublic: {
+      type: Boolean,
+      default: true,
+      index: true,
+    },
+    communityUpvotes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    upvoteCount: {
+      type: Number,
+      default: 0,
+      index: true,
+    },
+    // AI Classification & Safety Intelligence
+    aiClassification: {
+      confidence: { type: Number, default: 0.9 },
+      suggestedCategory: { type: String, default: '' },
+      suggestedPriority: { type: String, default: '' },
+      department: { type: String, default: '' },
+      safetyHazard: { type: Boolean, default: false },
+      keywords: [{ type: String }],
+      explanation: { type: String, default: '' },
+    },
+    // Detected Duplicate & Related Incident Links
+    possibleDuplicates: [
+      {
+        complaintId: { type: String },
+        similarityScore: { type: Number },
+        reason: { type: String },
+      },
+    ],
   },
   {
     timestamps: true,
@@ -208,7 +270,7 @@ const complaintSchema = new mongoose.Schema(
 complaintSchema.index({ locationGeo: '2dsphere' });
 complaintSchema.index({ createdAt: -1 });
 
-// Pre-save hook: Sync GeoJSON coordinates with latitude & longitude fields
+// Pre-save hook: Sync GeoJSON coordinates & compute SLA deadlines
 complaintSchema.pre('save', function (next) {
   if (this.longitude !== undefined && this.latitude !== undefined) {
     this.locationGeo = {
@@ -216,6 +278,35 @@ complaintSchema.pre('save', function (next) {
       coordinates: [Number(this.longitude), Number(this.latitude)],
     };
   }
+
+  // Calculate SLA Deadline if not already established
+  if (!this.slaDeadline) {
+    let hours = 120; // Default: 5 days
+    const prio = (this.priority || '').toUpperCase();
+    if (prio === 'URGENT') hours = 24;
+    else if (prio === 'HIGH') hours = 48;
+    else if (prio === 'MEDIUM') hours = 120;
+    else if (prio === 'LOW') hours = 240;
+
+    this.slaHours = hours;
+    const baseTime = this.createdAt ? new Date(this.createdAt) : new Date();
+    this.slaDeadline = new Date(baseTime.getTime() + hours * 60 * 60 * 1000);
+  }
+
+  // Check if overdue
+  if (this.slaDeadline && this.status !== 'RESOLVED' && this.status !== 'REJECTED') {
+    if (new Date() > new Date(this.slaDeadline)) {
+      this.isEscalated = true;
+      if (!this.escalationReason) {
+        this.escalationReason = `SLA breached: unresolved after ${this.slaHours} hours`;
+      }
+    }
+  }
+
+  if (Array.isArray(this.communityUpvotes)) {
+    this.upvoteCount = this.communityUpvotes.length;
+  }
+
   next();
 });
 

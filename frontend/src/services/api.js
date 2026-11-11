@@ -197,4 +197,33 @@ export const geoAPI = {
   reverse: (lat, lng) => api.get('/geo/reverse', { params: { lat, lng } }),
 };
 
+// ------------------------------------------------------------------------------
+// AI Civic Intelligence & Assistant API
+// ------------------------------------------------------------------------------
+export const aiAPI = {
+  classify: (data) => api.post('/ai/classify', data),
+  checkDuplicates: (data) => api.post('/ai/check-duplicates', data),
+  assistant: (data) => api.post('/ai/assistant', data),
+  getHotspots: () => api.get('/ai/hotspots'),
+  getEscalations: () => api.get('/ai/escalations'),
+};
+
+// ------------------------------------------------------------------------------
+// Public Civic Infrastructure Asset API (QR Reporting)
+// ------------------------------------------------------------------------------
+export const assetAPI = {
+  getById: (assetId) => api.get(`/assets/${assetId}`),
+  getAll: (params) => api.get('/assets', { params }),
+  create: (data) => api.post('/assets', data),
+};
+
+// ------------------------------------------------------------------------------
+// Community Feed & Public Transparency API
+// ------------------------------------------------------------------------------
+export const communityAPI = {
+  getFeed: (params) => api.get('/community/feed', { params }),
+  toggleUpvote: (complaintId) => api.post(`/community/${complaintId}/upvote`),
+  getTransparency: () => api.get('/community/transparency'),
+};
+
 export default api;

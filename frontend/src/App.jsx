@@ -3,7 +3,9 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuthContext } from './context/AuthContext';
 import { SocketProvider } from './context/SocketContext';
+import { LanguageProvider } from './context/LanguageContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
+import AIAssistantModal from './components/common/AIAssistantModal';
 import { Toaster } from 'react-hot-toast';
 
 // Layouts
@@ -17,6 +19,10 @@ import Home from './pages/public/Home';
 import About from './pages/public/About';
 import Contact from './pages/public/Contact';
 import TrackComplaint from './pages/public/TrackComplaint';
+import CommunityBoard from './pages/public/CommunityBoard';
+import Transparency from './pages/public/Transparency';
+import HelpCenter from './pages/public/HelpCenter';
+import AssetReport from './pages/public/AssetReport';
 import NotFound from './pages/public/NotFound';
 import Unauthorized from './pages/public/Unauthorized';
 
@@ -73,108 +79,118 @@ function ProtectedRoute({ children, allowedRoles }) {
 export default function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider>
-        <AuthProvider>
-          <SocketProvider>
-            <BrowserRouter>
-        {/* Toast Notification Container */}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            duration: 3500,
-            style: {
-              background: '#0f172a',
-              color: '#fff',
-              fontSize: '12px',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
-            },
-            success: {
-              iconTheme: {
-                primary: '#10b981',
-                secondary: '#ffffff',
-              },
-            },
-            error: {
-              iconTheme: {
-                primary: '#f43f5e',
-                secondary: '#ffffff',
-              },
-            },
-          }}
-        />
+      <LanguageProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <SocketProvider>
+              <BrowserRouter>
+                {/* Toast Notification Container */}
+                <Toaster
+                  position="top-right"
+                  toastOptions={{
+                    duration: 3500,
+                    style: {
+                      background: '#0f172a',
+                      color: '#fff',
+                      fontSize: '12px',
+                      borderRadius: '12px',
+                      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+                    },
+                    success: {
+                      iconTheme: {
+                        primary: '#10b981',
+                        secondary: '#ffffff',
+                      },
+                    },
+                    error: {
+                      iconTheme: {
+                        primary: '#f43f5e',
+                        secondary: '#ffffff',
+                      },
+                    },
+                  }}
+                />
 
-        <Routes>
-          {/* Public Website Routes */}
-          <Route element={<PublicLayout />}>
-            <Route path="/" element={<Home />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/track" element={<TrackComplaint />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/forgot-password" element={<ForgotPassword />} />
-            <Route path="/unauthorized" element={<Unauthorized />} />
-          </Route>
+                <Routes>
+                  {/* Public Website Routes */}
+                  <Route element={<PublicLayout />}>
+                    <Route path="/" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/contact" element={<Contact />} />
+                    <Route path="/track" element={<TrackComplaint />} />
+                    <Route path="/community" element={<CommunityBoard />} />
+                    <Route path="/transparency" element={<Transparency />} />
+                    <Route path="/help" element={<HelpCenter />} />
+                    <Route path="/report/asset/:assetId" element={<AssetReport />} />
+                    <Route path="/assets" element={<AssetReport />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/register" element={<Register />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/unauthorized" element={<Unauthorized />} />
+                  </Route>
 
-          {/* Citizen Protected Routes */}
-          <Route
-            path="/citizen"
-            element={
-              <ProtectedRoute allowedRoles={['citizen', 'admin']}>
-                <CitizenLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/citizen/dashboard" replace />} />
-            <Route path="dashboard" element={<CitizenDashboard />} />
-            <Route path="submit-complaint" element={<SubmitComplaint />} />
-            <Route path="complaints" element={<MyComplaints />} />
-            <Route path="complaints/:id" element={<ComplaintDetails />} />
-            <Route path="feedback" element={<Feedback />} />
-          </Route>
+                  {/* Citizen Protected Routes */}
+                  <Route
+                    path="/citizen"
+                    element={
+                      <ProtectedRoute allowedRoles={['citizen', 'admin']}>
+                        <CitizenLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/citizen/dashboard" replace />} />
+                    <Route path="dashboard" element={<CitizenDashboard />} />
+                    <Route path="submit-complaint" element={<SubmitComplaint />} />
+                    <Route path="complaints" element={<MyComplaints />} />
+                    <Route path="complaints/:id" element={<ComplaintDetails />} />
+                    <Route path="feedback" element={<Feedback />} />
+                  </Route>
 
-          {/* Municipal Admin Protected Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute allowedRoles={['admin']}>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/admin/dashboard" replace />} />
-            <Route path="dashboard" element={<AdminDashboard />} />
-            <Route path="complaints" element={<ManageComplaints />} />
-            <Route path="workers" element={<ManageWorkers />} />
-            <Route path="users" element={<ManageUsers />} />
-            <Route path="analytics" element={<Analytics />} />
-          </Route>
+                  {/* Municipal Admin Protected Routes */}
+                  <Route
+                    path="/admin"
+                    element={
+                      <ProtectedRoute allowedRoles={['admin']}>
+                        <AdminLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                    <Route path="dashboard" element={<AdminDashboard />} />
+                    <Route path="complaints" element={<ManageComplaints />} />
+                    <Route path="workers" element={<ManageWorkers />} />
+                    <Route path="users" element={<ManageUsers />} />
+                    <Route path="analytics" element={<Analytics />} />
+                  </Route>
 
-          {/* Field Worker Protected Routes */}
-          <Route
-            path="/worker"
-            element={
-              <ProtectedRoute allowedRoles={['worker', 'admin']}>
-                <WorkerLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<Navigate to="/worker/dashboard" replace />} />
-            <Route path="dashboard" element={<WorkerDashboard />} />
-            <Route path="tasks" element={<AssignedTasks />} />
-            <Route path="tasks/:id" element={<TaskDetails />} />
-          </Route>
+                  {/* Field Worker Protected Routes */}
+                  <Route
+                    path="/worker"
+                    element={
+                      <ProtectedRoute allowedRoles={['worker', 'admin']}>
+                        <WorkerLayout />
+                      </ProtectedRoute>
+                    }
+                  >
+                    <Route index element={<Navigate to="/worker/dashboard" replace />} />
+                    <Route path="dashboard" element={<WorkerDashboard />} />
+                    <Route path="tasks" element={<AssignedTasks />} />
+                    <Route path="tasks/:id" element={<TaskDetails />} />
+                  </Route>
 
-          {/* Catch-All 404 Route */}
-          <Route element={<PublicLayout />}>
-            <Route path="*" element={<NotFound />} />
-          </Route>
-        </Routes>
-      </BrowserRouter>
-    </SocketProvider>
-  </AuthProvider>
-</ThemeProvider>
-</ErrorBoundary>
+                  {/* Catch-All 404 Route */}
+                  <Route element={<PublicLayout />}>
+                    <Route path="*" element={<NotFound />} />
+                  </Route>
+                </Routes>
+
+                {/* Global AI Civic Assistant Floating Drawer */}
+                <AIAssistantModal />
+              </BrowserRouter>
+            </SocketProvider>
+          </AuthProvider>
+        </ThemeProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
   );
 }

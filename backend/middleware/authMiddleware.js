@@ -56,6 +56,37 @@ const protect = asyncHandler(async (req, res, next) => {
   }
 });
 
+/**
+ * Optional Auth: Attaches user to req.user if a valid token exists, but doesn't block unauthenticated requests
+ */
+const optionalAuth = async (req, res, next) => {
+  let token;
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  } else if (req.cookies && req.cookies.token) {
+    token = req.cookies.token;
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const decoded = verifyToken(token);
+    const currentUser = await User.findById(decoded.id);
+    if (currentUser && currentUser.isActive) {
+      req.user = currentUser;
+    }
+  } catch (err) {
+    // Graceful fallback without failing the request
+  }
+  next();
+};
+
+const { authorize } = require('./roleMiddleware');
+
 module.exports = {
   protect,
+  optionalAuth,
+  authorize,
 };

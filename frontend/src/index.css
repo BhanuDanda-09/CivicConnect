@@ -11,3 +11,21 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
 
+/* Accessibility: Text Scaling */
+html.text-scale-large {
+  font-size: 115%;
+}
+
+/* Accessibility: High Contrast Mode */
+html.high-contrast {
+  filter: contrast(125%);
+}
+
+html.high-contrast input,
+html.high-contrast select,
+html.high-contrast textarea,
+html.high-contrast button {
+  border-width: 2px !important;
+}
+
+

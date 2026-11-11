@@ -17,6 +17,9 @@ const adminUserRoutes = require('./adminUserRoutes');
 const notificationRoutes = require('./notificationRoutes');
 const feedbackRoutes = require('./feedbackRoutes');
 const geoRoutes = require('./geoRoutes');
+const aiRoutes = require('./aiRoutes');
+const assetRoutes = require('./assetRoutes');
+const communityRoutes = require('./communityRoutes');
 
 // Active API Routes
 router.use('/health', healthRoutes);
@@ -31,6 +34,9 @@ router.use('/workers/analytics', workerAnalyticsRoutes);
 router.use('/notifications', notificationRoutes);
 router.use('/feedback', feedbackRoutes);
 router.use('/geo', geoRoutes);
+router.use('/ai', aiRoutes);
+router.use('/assets', assetRoutes);
+router.use('/community', communityRoutes);
 
 // Root /api information endpoint
 router.get('/', (req, res) => {
@@ -94,6 +100,23 @@ router.get('/', (req, res) => {
       geo: {
         search: 'GET /api/geo/search?q=:query',
         reverse: 'GET /api/geo/reverse?lat=:lat&lng=:lng',
+      },
+      aiIntelligence: {
+        classify: 'POST /api/ai/classify',
+        checkDuplicates: 'POST /api/ai/check-duplicates',
+        assistant: 'POST /api/ai/assistant',
+        hotspots: 'GET /api/ai/hotspots',
+        escalations: 'GET /api/ai/escalations (Admin)',
+      },
+      assets: {
+        lookup: 'GET /api/assets/:assetId',
+        list: 'GET /api/assets',
+        create: 'POST /api/assets (Admin)',
+      },
+      community: {
+        feed: 'GET /api/community/feed',
+        upvote: 'POST /api/community/:complaintId/upvote (Protected)',
+        transparency: 'GET /api/community/transparency',
       },
     },
   });

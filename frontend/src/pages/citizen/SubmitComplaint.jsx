@@ -32,6 +32,7 @@ export default function SubmitComplaint() {
       if (data.city) formData.append('city', data.city);
       if (data.pincode) formData.append('pincode', data.pincode);
       if (data.landmark) formData.append('landmark', data.landmark);
+      if (data.assetId) formData.append('assetId', data.assetId);
 
       if (data.coordinates) {
         formData.append('latitude', data.coordinates.lat);

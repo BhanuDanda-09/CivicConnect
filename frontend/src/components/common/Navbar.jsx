@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { APP_NAME } from '../../utils/constants';
 import ThemeToggle from './ThemeToggle';
+import AccessibilityToolbar from './AccessibilityToolbar';
 import {
   Menu,
   X,
@@ -82,7 +83,37 @@ export default function Navbar() {
                     : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
                 }`}
               >
-                Track Complaint
+                Track Status
+              </Link>
+              <Link
+                to="/community"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/community')
+                    ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                Community
+              </Link>
+              <Link
+                to="/transparency"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/transparency')
+                    ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                Transparency
+              </Link>
+              <Link
+                to="/help"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  isActive('/help')
+                    ? 'text-sky-600 dark:text-sky-400 bg-sky-50 dark:bg-sky-950/60 font-semibold'
+                    : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                Help Desk
               </Link>
               <Link
                 to="/about"
@@ -109,6 +140,9 @@ export default function Navbar() {
 
           {/* Right Header: Role Switcher & User Actions */}
           <div className="hidden md:flex md:items-center md:space-x-3">
+            {/* Accessibility & Language Toolbar */}
+            <AccessibilityToolbar />
+
             {/* Theme Toggle Button */}
             <ThemeToggle size="sm" />
 
@@ -249,6 +283,27 @@ export default function Navbar() {
               className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             >
               Track Complaint
+            </Link>
+            <Link
+              to="/community"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Community Board
+            </Link>
+            <Link
+              to="/transparency"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Public Transparency
+            </Link>
+            <Link
+              to="/help"
+              onClick={() => setMobileMenuOpen(false)}
+              className="px-3 py-2 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+            >
+              Help Desk
             </Link>
             <Link
               to="/about"
