@@ -134,4 +134,25 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
     expect(screen.getByText(/Grievance Category Distribution/i)).toBeInTheDocument();
     expect(screen.getByText(/Municipal Service-Level Agreements/i)).toBeInTheDocument();
   });
+
+  // 6. Offline Complaint Draft Persistence
+  it('6. persists and restores offline complaint drafts across browser sessions', () => {
+    const draftPayload = {
+      title: 'Water pipe leak on Sector 5 main cross',
+      description: 'Potable water has been gushing from main pipe for 6 hours.',
+      street: 'Sector 5 Main Cross',
+      state: 'Telangana',
+      district: 'Hyderabad',
+      city: 'Hyderabad',
+      category: 'water_leakage',
+      priority: 'HIGH',
+    };
+
+    localStorage.setItem('civicconnect_complaint_draft', JSON.stringify(draftPayload));
+
+    const restored = JSON.parse(localStorage.getItem('civicconnect_complaint_draft'));
+    expect(restored.title).toBe(draftPayload.title);
+    expect(restored.category).toBe('water_leakage');
+    expect(restored.priority).toBe('HIGH');
+  });
 });

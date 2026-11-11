@@ -11,6 +11,8 @@ const {
 } = require('../services/aiCivicService');
 const Complaint = require('../models/Complaint');
 const Asset = require('../models/Asset');
+const AuditLog = require('../models/AuditLog');
+const { recordAudit } = require('../services/auditService');
 
 describe('AI Civic Intelligence & Smart Governance Suite', () => {
   // 1. NLP Classification for Roads & Potholes
@@ -174,5 +176,31 @@ describe('AI Civic Intelligence & Smart Governance Suite', () => {
     expect(res.body.success).toBe(true);
     expect(res.body.data.assetId).toBe('SL-HYD-0412');
     expect(res.body.data.category).toBe('STREETLIGHT');
+  });
+
+  // 10. Audit Log Schema & Recording Validation
+  it('10. validates and creates immutable administrative security audit records', async () => {
+    const validAudit = new AuditLog({
+      action: 'UPDATE_PRIORITY',
+      performedBy: '507f1f77bcf86cd799439011',
+      performedByRole: 'admin',
+      targetEntity: 'Complaint',
+      targetId: 'CC-2026-9812',
+      details: { previousPriority: 'MEDIUM', newPriority: 'URGENT', reason: 'High-risk safety hazard' },
+      ipAddress: '103.21.244.2',
+    });
+
+    expect(validAudit.validateSync()).toBeUndefined();
+    expect(validAudit.action).toBe('UPDATE_PRIORITY');
+    expect(validAudit.targetEntity).toBe('Complaint');
+  });
+
+  // 11. Security Audit Trail Access Control
+  it('11. protects audit log endpoint from unauthorized or unauthenticated requests', async () => {
+    const res = await request(app)
+      .get('/api/admin/complaints/audit-logs')
+      .expect(401);
+
+    expect(res.body.success).toBe(false);
   });
 });

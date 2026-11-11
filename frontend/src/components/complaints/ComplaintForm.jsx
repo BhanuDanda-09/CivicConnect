@@ -68,6 +68,70 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAnalyzingAI, setIsAnalyzingAI] = useState(false);
   const [nearbyDuplicates, setNearbyDuplicates] = useState([]);
+  const [isDraftRestored, setIsDraftRestored] = useState(false);
+
+  // Restore offline draft on mount if available (unless preloaded from QR asset)
+  useEffect(() => {
+    if (assetPreload.assetId) return;
+    try {
+      const savedDraft = localStorage.getItem('civicconnect_complaint_draft');
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        if (parsed && (parsed.title || parsed.description || parsed.street)) {
+          setFormData((prev) => ({
+            ...prev,
+            ...parsed,
+            imageFile: null,
+            imagePreview: null,
+          }));
+          setIsDraftRestored(true);
+        }
+      }
+    } catch (e) {
+      console.warn('Draft restoration notice:', e);
+    }
+  }, []);
+
+  // Debounced auto-save of complaint draft
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (formData.title.trim() || formData.description.trim() || formData.street.trim()) {
+        try {
+          const draftPayload = {
+            ...formData,
+            imageFile: null,
+            imagePreview: null,
+            savedAt: new Date().toISOString(),
+          };
+          localStorage.setItem('civicconnect_complaint_draft', JSON.stringify(draftPayload));
+        } catch (e) {}
+      }
+    }, 1000);
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  const handleDiscardDraft = () => {
+    try {
+      localStorage.removeItem('civicconnect_complaint_draft');
+      setIsDraftRestored(false);
+      toast.success('Offline draft discarded.');
+    } catch (e) {}
+  };
+
+  const handleSaveDraftManually = () => {
+    try {
+      const draftPayload = {
+        ...formData,
+        imageFile: null,
+        imagePreview: null,
+        savedAt: new Date().toISOString(),
+      };
+      localStorage.setItem('civicconnect_complaint_draft', JSON.stringify(draftPayload));
+      toast.success('Complaint progress saved locally as offline draft!');
+    } catch (e) {
+      toast.error('Unable to save draft locally.');
+    }
+  };
 
   // Voice Input Hooks
   const titleVoice = useVoiceInput({
@@ -288,11 +352,32 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
         'https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?auto=format&fit=crop&w=800&q=80',
     };
 
+    try {
+      localStorage.removeItem('civicconnect_complaint_draft');
+      setIsDraftRestored(false);
+    } catch (e) {}
+
     onSubmit(submissionPayload);
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Offline Draft Restored Banner */}
+      {isDraftRestored && (
+        <div className="flex items-center justify-between p-3.5 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 rounded-2xl text-xs text-amber-900 dark:text-amber-200">
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>Restored an in-progress complaint draft from your device cache.</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleDiscardDraft}
+            className="text-amber-700 dark:text-amber-300 font-bold hover:underline cursor-pointer ml-3 shrink-0"
+          >
+            Discard
+          </button>
+        </div>
+      )}
       {/* Scanned QR Asset Notice (if applicable) */}
       {formData.assetId && (
         <div className="flex items-center gap-2.5 p-3.5 bg-sky-50 dark:bg-sky-950/60 border border-sky-200 dark:border-sky-800 rounded-2xl text-xs text-sky-800 dark:text-sky-300">
@@ -692,17 +777,26 @@ export default function ComplaintForm({ onSubmit, isSubmitting = false }) {
         )}
       </div>
 
-      {/* Submit CTA */}
+      {/* Submit CTA & Offline Draft Button */}
       <div className="pt-2">
-        <Button
-          type="submit"
-          variant="accent"
-          size="lg"
-          isLoading={isSubmitting}
-          className="w-full"
-        >
-          Submit Complaint to Municipal Desk
-        </Button>
+        <div className="flex flex-col sm:flex-row items-center gap-3">
+          <Button
+            type="submit"
+            variant="accent"
+            size="lg"
+            isLoading={isSubmitting}
+            className="w-full sm:flex-1"
+          >
+            Submit Complaint to Municipal Desk
+          </Button>
+          <button
+            type="button"
+            onClick={handleSaveDraftManually}
+            className="w-full sm:w-auto px-5 py-3 rounded-xl border border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-bold text-slate-700 dark:text-slate-300 transition-colors cursor-pointer"
+          >
+            Save Draft Locally
+          </button>
+        </div>
         <p className="text-center text-[11px] text-slate-400 dark:text-slate-500 mt-2">
           By submitting, you certify that the provided information and photograph accurately represent the civic problem.
         </p>

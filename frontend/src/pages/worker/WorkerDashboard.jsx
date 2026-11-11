@@ -31,6 +31,7 @@ import {
   Star,
   ExternalLink,
   Navigation,
+  Route,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -41,6 +42,7 @@ export default function WorkerDashboard() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filterTab, setFilterTab] = useState('ALL');
+  const [showRoutePlan, setShowRoutePlan] = useState(false);
 
   const [metrics, setMetrics] = useState({
     totalAssigned: 0,
@@ -151,6 +153,33 @@ export default function WorkerDashboard() {
     return true;
   });
 
+  // Prioritized Route Stops for active field orders with GPS coordinates
+  const activeGeoTasks = tasks
+    .filter((t) => t.status !== 'RESOLVED' && t.status !== 'CITIZEN_FEEDBACK')
+    .map((t) => {
+      const lat = t.latitude || t.coordinates?.lat;
+      const lng = t.longitude || t.coordinates?.lng;
+      return { ...t, lat, lng };
+    })
+    .filter((t) => typeof t.lat === 'number' && typeof t.lng === 'number');
+
+  const priorityWeight = { EMERGENCY: 4, URGENT: 4, HIGH: 3, MEDIUM: 2, LOW: 1 };
+  const sortedRouteStops = [...activeGeoTasks].sort(
+    (a, b) => (priorityWeight[b.priority] || 1) - (priorityWeight[a.priority] || 1)
+  );
+
+  const googleMapsRouteUrl =
+    sortedRouteStops.length > 0
+      ? `https://www.google.com/maps/dir/?api=1&destination=${sortedRouteStops[sortedRouteStops.length - 1].lat},${sortedRouteStops[sortedRouteStops.length - 1].lng}${
+          sortedRouteStops.length > 1
+            ? `&waypoints=${sortedRouteStops
+                .slice(0, -1)
+                .map((s) => `${s.lat},${s.lng}`)
+                .join('|')}`
+            : ''
+        }`
+      : null;
+
   return (
     <div className="space-y-8 pb-10">
       {/* Worker Banner & Profile Summary */}
@@ -192,6 +221,15 @@ export default function WorkerDashboard() {
           >
             <RefreshCw className={`w-4 h-4 ${refreshing ? 'animate-spin text-amber-400' : ''}`} />
           </button>
+          {sortedRouteStops.length > 0 && (
+            <button
+              onClick={() => setShowRoutePlan(!showRoutePlan)}
+              className="inline-flex items-center gap-2 px-4 py-3 rounded-xl font-bold text-xs bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 transition-all active:scale-95 cursor-pointer"
+            >
+              <Route className="w-4 h-4" />
+              <span>{showRoutePlan ? 'Hide Route' : `Route Plan (${sortedRouteStops.length})`}</span>
+            </button>
+          )}
           <Link
             to="/worker/tasks"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-bold text-xs bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-lg shadow-amber-500/20 transition-all active:scale-95"
@@ -233,6 +271,63 @@ export default function WorkerDashboard() {
           subtitle="Emergency & High priority"
         />
       </div>
+
+      {/* Optional Route Optimization Suggestions */}
+      {showRoutePlan && sortedRouteStops.length > 0 && (
+        <div className="bg-slate-900 border border-indigo-500/30 rounded-3xl p-6 text-white shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-800">
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold text-indigo-400">
+                <Route className="w-4 h-4" />
+                <span>On-Demand Field Dispatch Route Suggestions</span>
+              </div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Multi-stop sequence prioritized by hazard severity & beat proximity. No continuous tracking.
+              </p>
+            </div>
+            {googleMapsRouteUrl && (
+              <a
+                href={googleMapsRouteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold bg-indigo-500 hover:bg-indigo-400 text-white transition-all shrink-0"
+              >
+                <Navigation className="w-3.5 h-3.5" />
+                <span>Open Multi-Stop Directions</span>
+              </a>
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 pt-1">
+            {sortedRouteStops.map((stop, idx) => (
+              <div
+                key={stop.id || stop._id}
+                className="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700/80 flex items-start gap-3"
+              >
+                <span className="w-6 h-6 rounded-full bg-indigo-600/40 text-indigo-300 border border-indigo-500/40 font-black text-xs flex items-center justify-center shrink-0">
+                  {idx + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1">
+                    <span className="font-mono text-[10px] text-slate-400">{stop.complaintId || stop.id}</span>
+                    <span
+                      className={`text-[9px] font-bold px-1.5 py-0.2 rounded ${
+                        stop.priority === 'EMERGENCY' || stop.priority === 'URGENT'
+                          ? 'bg-rose-500/20 text-rose-300'
+                          : 'bg-indigo-500/20 text-indigo-300'
+                      }`}
+                    >
+                      {stop.priority}
+                    </span>
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-200 truncate mt-0.5">{stop.title}</h4>
+                  <p className="text-[11px] text-slate-400 truncate mt-0.5">{stop.location || stop.ward}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Geospatial Task Map */}
       <ComplaintMap

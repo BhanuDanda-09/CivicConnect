@@ -12,6 +12,7 @@ const {
   assignWorker,
   changePriority,
   getAdminStats,
+  getAuditLogs,
 } = require('../controllers/adminComplaintController');
 
 const { protect } = require('../middleware/authMiddleware');
@@ -30,6 +31,7 @@ router.use(authorize('admin'));
 // Listing & aggregated stats
 router.get('/', getAllComplaints);
 router.get('/stats', getAdminStats);
+router.get('/audit-logs', getAuditLogs);
 
 // Status transition and assignment actions
 router.patch('/:id/verify', validateMongoIdParam('id'), verifyComplaint);

@@ -24,7 +24,7 @@ const notificationSchema = new mongoose.Schema(
     },
     type: {
       type: String,
-      enum: ['STATUS_UPDATE', 'ASSIGNMENT', 'VERIFICATION', 'FEEDBACK_REQUEST', 'SYSTEM'],
+      enum: ['STATUS_UPDATE', 'ASSIGNMENT', 'VERIFICATION', 'FEEDBACK_REQUEST', 'SYSTEM', 'ESCALATION'],
       default: 'STATUS_UPDATE',
     },
     isRead: {

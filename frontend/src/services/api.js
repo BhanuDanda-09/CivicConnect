@@ -124,6 +124,7 @@ export const adminComplaintAPI = {
   reject: (id, data) => api.patch(`/admin/complaints/${id}/reject`, data),
   assign: (id, data) => api.patch(`/admin/complaints/${id}/assign`, data),
   changePriority: (id, data) => api.patch(`/admin/complaints/${id}/priority`, data),
+  getAuditLogs: (params) => api.get('/admin/complaints/audit-logs', { params }),
 };
 
 // ------------------------------------------------------------------------------

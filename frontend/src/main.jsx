@@ -9,3 +9,17 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   </React.StrictMode>,
 );
 
+// Register PWA Service Worker for offline capability & fast asset caching
+if ('serviceWorker' in navigator && import.meta.env.PROD) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/sw.js')
+      .then((reg) => {
+        console.log('[CivicConnect PWA] Service worker registered successfully:', reg.scope);
+      })
+      .catch((err) => {
+        console.warn('[CivicConnect PWA] Service worker registration error:', err);
+      });
+  });
+}
+

@@ -6,6 +6,7 @@ import { SocketProvider } from './context/SocketContext';
 import { LanguageProvider } from './context/LanguageContext';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import AIAssistantModal from './components/common/AIAssistantModal';
+import OfflineBanner from './components/common/OfflineBanner';
 import { Toaster } from 'react-hot-toast';
 
 // Layouts
@@ -186,6 +187,9 @@ export default function App() {
 
                 {/* Global AI Civic Assistant Floating Drawer */}
                 <AIAssistantModal />
+
+                {/* Offline PWA Connectivity Indicator */}
+                <OfflineBanner />
               </BrowserRouter>
             </SocketProvider>
           </AuthProvider>

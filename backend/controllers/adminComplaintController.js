@@ -6,6 +6,8 @@ const mongoose = require('mongoose');
 const Complaint = require('../models/Complaint');
 const ComplaintHistory = require('../models/ComplaintHistory');
 const User = require('../models/User');
+const AuditLog = require('../models/AuditLog');
+const { recordAudit } = require('../services/auditService');
 const { createAndDispatchNotification } = require('./notificationController');
 const { emitToUser, emitToRole } = require('../services/socketService');
 const ApiError = require('../utils/ApiError');
@@ -120,6 +122,16 @@ const verifyComplaint = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
+  // System Security Audit Trail
+  await recordAudit({
+    action: 'VERIFY_COMPLAINT',
+    performedBy: req.user,
+    targetEntity: 'Complaint',
+    targetId: complaint.complaintId || complaint._id,
+    details: { previousStatus, newStatus: 'VERIFIED', remarks },
+    req,
+  });
+
   // Real-time dispatch to citizen and administrators
   await createAndDispatchNotification({
     recipient: complaint.citizen,
@@ -181,6 +193,16 @@ const rejectComplaint = asyncHandler(async (req, res) => {
     changedBy: req.user._id,
     remarks: rejectionReason.trim(),
     timestamp: new Date(),
+  });
+
+  // System Security Audit Trail
+  await recordAudit({
+    action: 'REJECT_COMPLAINT',
+    performedBy: req.user,
+    targetEntity: 'Complaint',
+    targetId: complaint.complaintId || complaint._id,
+    details: { previousStatus, newStatus: 'REJECTED', rejectionReason: rejectionReason.trim() },
+    req,
   });
 
   // Real-time dispatch to citizen
@@ -264,6 +286,21 @@ const assignWorker = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
+  // System Security Audit Trail
+  await recordAudit({
+    action: 'ASSIGN_WORKER',
+    performedBy: req.user,
+    targetEntity: 'Complaint',
+    targetId: complaint.complaintId || complaint._id,
+    details: {
+      workerId: worker._id,
+      workerName: worker.fullName,
+      priority: complaint.priority,
+      remarks,
+    },
+    req,
+  });
+
   // Real-time dispatch to assigned field worker and citizen
   await Promise.all([
     createAndDispatchNotification({
@@ -336,6 +373,16 @@ const changePriority = asyncHandler(async (req, res) => {
     timestamp: new Date(),
   });
 
+  // System Security Audit Trail
+  await recordAudit({
+    action: 'UPDATE_PRIORITY',
+    performedBy: req.user,
+    targetEntity: 'Complaint',
+    targetId: complaint.complaintId || complaint._id,
+    details: { previousPriority, newPriority: priority, remarks },
+    req,
+  });
+
   res.status(200).json({
     success: true,
     message: `Complaint #${complaint.complaintId} priority changed to ${priority}.`,
@@ -385,6 +432,50 @@ const getAdminStats = asyncHandler(async (req, res) => {
   });
 });
 
+/**
+ * @desc    Get immutable system audit trail for security and governance oversight
+ * @route   GET /api/admin/complaints/audit-logs
+ * @access  Private (Admin only)
+ */
+const getAuditLogs = asyncHandler(async (req, res) => {
+  const { page = 1, limit = 20, action, targetEntity } = req.query;
+  const filter = {};
+  if (action) filter.action = action;
+  if (targetEntity) filter.targetEntity = targetEntity;
+
+  const pageNum = Math.max(1, parseInt(page, 10));
+  const limitNum = Math.max(1, Math.min(100, parseInt(limit, 10)));
+  const skip = (pageNum - 1) * limitNum;
+
+  // Guard against unestablished DB connections in test mode
+  if (mongoose.connection.readyState !== 1) {
+    return res.status(200).json({
+      success: true,
+      total: 0,
+      page: pageNum,
+      totalPages: 1,
+      data: [],
+    });
+  }
+
+  const [logs, total] = await Promise.all([
+    AuditLog.find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum)
+      .populate('performedBy', 'fullName email role'),
+    AuditLog.countDocuments(filter),
+  ]);
+
+  res.status(200).json({
+    success: true,
+    total,
+    page: pageNum,
+    totalPages: Math.ceil(total / limitNum) || 1,
+    data: logs,
+  });
+});
+
 module.exports = {
   getAllComplaints,
   verifyComplaint,
@@ -392,5 +483,6 @@ module.exports = {
   assignWorker,
   changePriority,
   getAdminStats,
+  getAuditLogs,
 };
 
