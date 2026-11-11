@@ -107,6 +107,73 @@ const INDIA_MACRO_REGIONS = [
   { name: 'Port Blair & Islands', lat: 11.6234, lng: 92.7265, zoom: 12 },
 ];
 
+// Direct OSM Nominatim Fallback Client (when backend proxy is cold-starting or offline)
+async function fetchDirectNominatimSearch(query, limit = 8) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&countrycodes=in&format=json&addressdetails=1&limit=${limit}`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const items = await res.json();
+    if (!Array.isArray(items) || items.length === 0) return null;
+    return items.map((item) => {
+      const addr = item.address || {};
+      const city = addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || '';
+      const district = addr.state_district || addr.district || addr.county || city;
+      const state = addr.state || '';
+      const pincode = addr.postcode || '';
+      const street = [addr.road, addr.neighbourhood, addr.suburb].filter(Boolean).join(', ');
+
+      return {
+        id: item.place_id || `${item.lat}_${item.lon}`,
+        name: item.name || city || item.display_name?.split(',')[0] || query,
+        displayName: item.display_name,
+        latitude: parseFloat(item.lat),
+        longitude: parseFloat(item.lon),
+        type: item.type || 'place',
+        address: {
+          country: 'India',
+          state,
+          district,
+          city,
+          street,
+          pincode,
+          formattedAddress: item.display_name,
+        },
+      };
+    });
+  } catch {
+    return null;
+  }
+}
+
+async function fetchDirectNominatimReverse(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&addressdetails=1`;
+    const res = await fetch(url);
+    if (!res.ok) return null;
+    const item = await res.json();
+    if (!item || !item.address) return null;
+    const addr = item.address || {};
+    const city = addr.city || addr.town || addr.village || addr.suburb || addr.municipality || addr.county || '';
+    const district = addr.state_district || addr.district || addr.county || city;
+    const state = addr.state || '';
+    const pincode = addr.postcode || '';
+    const street = [addr.road, addr.neighbourhood, addr.suburb].filter(Boolean).join(', ');
+
+    return {
+      country: 'India',
+      state,
+      district,
+      city,
+      street,
+      pincode,
+      formattedAddress: item.display_name || '',
+    };
+  } catch {
+    return null;
+  }
+}
+
 export default function MapPicker({
   initialLat,
   initialLng,
@@ -203,10 +270,25 @@ export default function MapPicker({
           return;
         }
       } catch (err) {
-        console.warn('Reverse geocoding notice; using offline Indian geo reference:', err.message);
+        console.warn('Backend proxy reverse geocoding notice:', err.message);
       }
 
-      // Offline fallback: find nearest Indian city/district
+      // Step 2: Direct OpenStreetMap Nominatim reverse geocode fallback
+      const directResolved = await fetchDirectNominatimReverse(lat, lng);
+      if (directResolved) {
+        setAddressDetails(directResolved);
+        if (onLocationSelect) {
+          onLocationSelect({
+            lat,
+            lng,
+            ...directResolved,
+          });
+        }
+        setIsReverseGeocoding(false);
+        return;
+      }
+
+      // Step 3: Offline fallback: find nearest Indian city/district
       const nearest = findNearestIndianLocation(lat, lng);
       const fallbackAddress = {
         country: 'India',
@@ -259,6 +341,7 @@ export default function MapPicker({
     setIsDropdownOpen(true);
 
     searchTimeoutRef.current = setTimeout(async () => {
+      // Step 1: Try backend proxy
       try {
         const res = await geoAPI.search(val.trim(), 8);
         if (res.data?.success && Array.isArray(res.data.data) && res.data.data.length > 0) {
@@ -267,10 +350,18 @@ export default function MapPicker({
           return;
         }
       } catch (err) {
-        console.warn('Backend geocoding search notice; trying local database:', err.message);
+        console.warn('Backend geocoding search notice:', err.message);
       }
 
-      // Local offline fallback
+      // Step 2: Try direct OSM Nominatim forward search
+      const directMatches = await fetchDirectNominatimSearch(val.trim(), 8);
+      if (directMatches && directMatches.length > 0) {
+        setSearchResults(directMatches);
+        setIsSearching(false);
+        return;
+      }
+
+      // Step 3: Local offline fallback
       const localMatches = searchLocalIndianPlaces(val.trim());
       setSearchResults(localMatches);
       setIsSearching(false);
@@ -571,9 +662,9 @@ export default function MapPicker({
         <div className="flex items-center justify-between text-[11px] font-mono text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-200/60 dark:border-slate-800">
           <span className="flex items-center gap-1">
             <Compass className="w-3.5 h-3.5 text-slate-400" />
-            <span>Lat: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lat).toFixed(6)}° N</strong></span>
+            <span>Latitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lat).toFixed(6)}° N</strong></span>
           </span>
-          <span>Lng: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lng).toFixed(6)}° E</strong></span>
+          <span>Longitude: <strong className="text-slate-800 dark:text-slate-200">{Number(position.lng).toFixed(6)}° E</strong></span>
         </div>
       </div>
     </div>

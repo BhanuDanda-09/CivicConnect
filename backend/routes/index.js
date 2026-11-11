@@ -91,6 +91,10 @@ router.get('/', (req, res) => {
         markRead: 'PATCH /api/notifications/:id/read',
         markAllRead: 'PATCH /api/notifications/read-all',
       },
+      geo: {
+        search: 'GET /api/geo/search?q=:query',
+        reverse: 'GET /api/geo/reverse?lat=:lat&lng=:lng',
+      },
     },
   });
 });
