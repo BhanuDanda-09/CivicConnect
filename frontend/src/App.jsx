@@ -45,6 +45,8 @@ import ManageComplaints from './pages/admin/ManageComplaints';
 import ManageWorkers from './pages/admin/ManageWorkers';
 import ManageUsers from './pages/admin/ManageUsers';
 import Analytics from './pages/admin/Analytics';
+import AuditLogs from './pages/admin/AuditLogs';
+import ManageAssets from './pages/admin/ManageAssets';
 
 // Worker Pages
 import WorkerDashboard from './pages/worker/WorkerDashboard';
@@ -162,6 +164,8 @@ export default function App() {
                     <Route path="workers" element={<ManageWorkers />} />
                     <Route path="users" element={<ManageUsers />} />
                     <Route path="analytics" element={<Analytics />} />
+                    <Route path="audit-logs" element={<AuditLogs />} />
+                    <Route path="assets" element={<ManageAssets />} />
                   </Route>
 
                   {/* Field Worker Protected Routes */}

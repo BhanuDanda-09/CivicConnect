@@ -12,6 +12,8 @@ import AccessibilityToolbar from '../components/common/AccessibilityToolbar';
 import AIAssistantModal from '../components/common/AIAssistantModal';
 import CommunityBoard from '../pages/public/CommunityBoard';
 import Transparency from '../pages/public/Transparency';
+import AuditLogs from '../pages/admin/AuditLogs';
+import ManageAssets from '../pages/admin/ManageAssets';
 import { AuthProvider } from '../context/AuthContext';
 
 function LanguageConsumer() {
@@ -154,5 +156,35 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
     expect(restored.title).toBe(draftPayload.title);
     expect(restored.category).toBe('water_leakage');
     expect(restored.priority).toBe('HIGH');
+  });
+
+  // 7. Municipal Audit Trail Page
+  it('7. renders Administrative Audit Trail page with filter and security indicators', async () => {
+    render(
+      <BrowserRouter>
+        <LanguageProvider>
+          <AuditLogs />
+        </LanguageProvider>
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText(/System Audit Trail/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search by ticket ID, admin name, IP/i)).toBeInTheDocument();
+    expect(screen.getByText(/All Administrative Actions/i)).toBeInTheDocument();
+  });
+
+  // 8. Civic Asset Management & QR Tag Generation
+  it('8. renders Civic Asset Management page with asset registration and QR actions', async () => {
+    render(
+      <BrowserRouter>
+        <LanguageProvider>
+          <ManageAssets />
+        </LanguageProvider>
+      </BrowserRouter>
+    );
+
+    expect(screen.getByText(/Civic Asset Management/i)).toBeInTheDocument();
+    expect(screen.getByText(/Register Asset/i)).toBeInTheDocument();
+    expect(screen.getByPlaceholderText(/Search by Asset ID, name, ward/i)).toBeInTheDocument();
   });
 });

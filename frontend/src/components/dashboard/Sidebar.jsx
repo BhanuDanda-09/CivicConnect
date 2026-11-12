@@ -13,7 +13,8 @@ import {
   CheckCircle2,
   LogOut,
   ArrowLeft,
-  X
+  X,
+  QrCode,
 } from 'lucide-react';
 
 export default function Sidebar({ isOpen, onClose }) {
@@ -27,6 +28,8 @@ export default function Sidebar({ isOpen, onClose }) {
         { label: 'Manage Workers', path: '/admin/workers', icon: HardHat },
         { label: 'Manage Users', path: '/admin/users', icon: Users },
         { label: 'Civic Analytics', path: '/admin/analytics', icon: BarChart3 },
+        { label: 'Audit Trail', path: '/admin/audit-logs', icon: ShieldCheck },
+        { label: 'Civic Assets', path: '/admin/assets', icon: QrCode },
       ];
     }
     if (role === 'worker') {
