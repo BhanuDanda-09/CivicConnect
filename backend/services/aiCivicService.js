@@ -316,7 +316,7 @@ function answerCivicAssistantInquiry(userQuery = '', language = 'en') {
       title: 'CivicConnect Grievance Lifecycle',
       answer:
         'Every complaint progresses through transparent municipal milestones: 1. SUBMITTED (Citizen registers complaint) → 2. UNDER_VERIFICATION (Municipal admin reviews photos & ward) → 3. VERIFIED (Approved for repair) → 4. ASSIGNED (Dispatched to field crew) → 5. IN_PROGRESS (Ground repairs initiated) → 6. RESOLVED (Fix completed with proof photo) → 7. CITIZEN_FEEDBACK (You rate the quality of service).',
-      quickLinks: [{ label: 'Learn More in Help Center', url: '/help' }],
+      quickLinks: [{ label: 'Track Existing Grievance', url: '/track' }],
     };
   }
 
@@ -327,7 +327,7 @@ function answerCivicAssistantInquiry(userQuery = '', language = 'en') {
       title: 'Service-Level Agreements (SLA) & Resolution Timelines',
       answer:
         'CivicConnect enforces strict municipal resolution targets: Critical/Urgent Hazards (24 hours), High Priority (48 hours), Medium Priority (5 days), Low Priority (10 days). If a complaint breaches its SLA, it is automatically escalated to the Senior Zonal Commissioner.',
-      quickLinks: [{ label: 'View Public Transparency & SLAs', url: '/transparency' }],
+      quickLinks: [{ label: 'Track Existing Grievance', url: '/track' }],
     };
   }
 
@@ -362,7 +362,6 @@ function answerCivicAssistantInquiry(userQuery = '', language = 'en') {
     quickLinks: [
       { label: 'Submit a Complaint', url: '/citizen/submit-complaint' },
       { label: 'Track Existing Grievance', url: '/track' },
-      { label: 'Civic Knowledge Center', url: '/help' },
     ],
   };
 }

@@ -113,29 +113,38 @@ describe('AI Civic Intelligence & Smart Governance Suite', () => {
     expect(res.body.data.quickLinks).toBeInstanceOf(Array);
   });
 
-  // 8. Public Transparency Metrics: GET /api/community/transparency
-  it('8. provides public governance transparency statistics and SLA adherence rates', async () => {
-    jest.spyOn(Complaint, 'countDocuments').mockImplementation((filter) => {
-      if (filter && filter.status === 'RESOLVED') return Promise.resolve(25);
-      if (filter && filter.isEscalated) return Promise.resolve(3);
-      return Promise.resolve(30);
+  // 8. Public Community Feed: GET /api/community/feed
+  it('8. provides privacy-sanitized public community awareness feed', async () => {
+    jest.spyOn(Complaint, 'find').mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        skip: jest.fn().mockReturnValue({
+          limit: jest.fn().mockReturnValue({
+            lean: jest.fn().mockResolvedValue([
+              {
+                complaintId: 'CC-2026-0001',
+                title: 'Deep pothole on outer ring road',
+                category: 'pothole',
+                ward: 'Ward 4',
+                communityUpvotes: [],
+                upvoteCount: 5,
+                isPublic: true,
+              },
+            ]),
+          }),
+        }),
+      }),
     });
-
-    jest.spyOn(Complaint, 'aggregate').mockResolvedValue([
-      { category: 'pothole', count: 15 },
-      { category: 'water_leakage', count: 10 },
-      { category: 'drainage', count: 5 },
-    ]);
+    jest.spyOn(Complaint, 'countDocuments').mockResolvedValue(1);
 
     const res = await request(app)
-      .get('/api/community/transparency')
+      .get('/api/community/feed')
       .expect(200);
 
     expect(res.body.success).toBe(true);
-    expect(res.body.data.totalComplaints).toBe(30);
-    expect(res.body.data.resolvedComplaints).toBe(25);
-    expect(res.body.data.slaAdherenceRate).toBe(90);
-    expect(res.body.data.categoryStats).toBeInstanceOf(Array);
+    expect(res.body.data).toBeInstanceOf(Array);
+    expect(res.body.data.length).toBe(1);
+    expect(res.body.data[0].complaintId).toBe('CC-2026-0001');
+    expect(res.body.data[0].upvoteCount).toBe(5);
   });
 
   // 9. Civic Asset Model & Lookup: GET /api/assets/:assetId

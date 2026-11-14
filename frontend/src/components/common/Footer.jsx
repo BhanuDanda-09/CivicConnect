@@ -64,16 +64,6 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/transparency" className="hover:text-white transition-colors">
-                  Public Transparency & SLAs
-                </Link>
-              </li>
-              <li>
-                <Link to="/help" className="hover:text-white transition-colors">
-                  Civic Help Center & FAQs
-                </Link>
-              </li>
-              <li>
                 <Link to="/citizen/submit-complaint" className="hover:text-white transition-colors">
                   File a Complaint
                 </Link>

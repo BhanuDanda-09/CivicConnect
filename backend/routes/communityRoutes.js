@@ -9,7 +9,6 @@ const { protect, optionalAuth } = require('../middleware/authMiddleware');
 
 // Public Feed with optional authenticated user context (to show if current user upvoted)
 router.get('/feed', optionalAuth, communityController.getCommunityFeed);
-router.get('/transparency', communityController.getPublicTransparency);
 
 // Protected Community Action
 router.post('/:complaintId/upvote', protect, communityController.toggleUpvote);

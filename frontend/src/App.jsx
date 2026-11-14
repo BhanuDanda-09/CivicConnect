@@ -21,8 +21,6 @@ import About from './pages/public/About';
 import Contact from './pages/public/Contact';
 import TrackComplaint from './pages/public/TrackComplaint';
 import CommunityBoard from './pages/public/CommunityBoard';
-import Transparency from './pages/public/Transparency';
-import HelpCenter from './pages/public/HelpCenter';
 import AssetReport from './pages/public/AssetReport';
 import NotFound from './pages/public/NotFound';
 import Unauthorized from './pages/public/Unauthorized';
@@ -45,6 +43,7 @@ import ManageComplaints from './pages/admin/ManageComplaints';
 import ManageWorkers from './pages/admin/ManageWorkers';
 import ManageUsers from './pages/admin/ManageUsers';
 import Analytics from './pages/admin/Analytics';
+import Departments from './pages/admin/Departments';
 import AuditLogs from './pages/admin/AuditLogs';
 import ManageAssets from './pages/admin/ManageAssets';
 
@@ -122,8 +121,6 @@ export default function App() {
                     <Route path="/contact" element={<Contact />} />
                     <Route path="/track" element={<TrackComplaint />} />
                     <Route path="/community" element={<CommunityBoard />} />
-                    <Route path="/transparency" element={<Transparency />} />
-                    <Route path="/help" element={<HelpCenter />} />
                     <Route path="/report/asset/:assetId" element={<AssetReport />} />
                     <Route path="/assets" element={<AssetReport />} />
                     <Route path="/login" element={<Login />} />
@@ -161,6 +158,7 @@ export default function App() {
                     <Route index element={<Navigate to="/admin/dashboard" replace />} />
                     <Route path="dashboard" element={<AdminDashboard />} />
                     <Route path="complaints" element={<ManageComplaints />} />
+                    <Route path="departments" element={<Departments />} />
                     <Route path="workers" element={<ManageWorkers />} />
                     <Route path="users" element={<ManageUsers />} />
                     <Route path="analytics" element={<Analytics />} />

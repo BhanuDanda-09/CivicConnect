@@ -15,11 +15,13 @@ export default function AccessibilityToolbar() {
     isHighContrast,
     toggleHighContrast,
     fontSizeScale,
-    toggleFontSize,
+    decreaseTextSize,
+    increaseTextSize,
+    resetTextSize,
   } = useLanguage();
 
   return (
-    <div className="flex items-center gap-1.5 text-xs text-slate-600 dark:text-slate-300">
+    <div className="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300">
       {/* 1. Indian Language Selector */}
       <div className="relative inline-flex items-center">
         <Globe className="w-3.5 h-3.5 text-sky-600 dark:text-sky-400 absolute left-2 pointer-events-none" />
@@ -37,21 +39,54 @@ export default function AccessibilityToolbar() {
         </select>
       </div>
 
-      {/* 2. Font Size Scaling Button */}
-      <button
-        type="button"
-        onClick={toggleFontSize}
-        aria-label="Toggle Font Scaling"
-        title="Toggle Font Size (A / A+)"
-        className={`px-2 py-1 text-[11px] font-bold rounded-lg border transition-colors cursor-pointer flex items-center gap-0.5 ${
-          fontSizeScale === 'large'
-            ? 'bg-sky-100 dark:bg-sky-950/60 text-sky-800 dark:text-sky-300 border-sky-300 dark:border-sky-700'
-            : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200'
-        }`}
+      {/* 2. Text Size Controls: A− (Decrease), A (Reset to Default), A+ (Increase) */}
+      <div
+        className="inline-flex items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 p-0.5"
+        role="group"
+        aria-label="Text size accessibility controls"
       >
-        <Type className="w-3 h-3" />
-        <span>{fontSizeScale === 'large' ? 'A+' : 'A'}</span>
-      </button>
+        <button
+          type="button"
+          onClick={decreaseTextSize}
+          disabled={fontSizeScale === 'small'}
+          aria-label="Decrease text size"
+          title="Decrease text size (A−)"
+          className={`px-1.5 py-0.5 text-[11px] font-bold rounded transition-colors cursor-pointer ${
+            fontSizeScale === 'small'
+              ? 'bg-sky-600 text-white shadow-xs'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
+          }`}
+        >
+          A−
+        </button>
+        <button
+          type="button"
+          onClick={resetTextSize}
+          aria-label="Reset text size to default"
+          title="Reset text size to default (A)"
+          className={`px-2 py-0.5 text-[11px] font-bold rounded transition-colors cursor-pointer ${
+            fontSizeScale === 'normal'
+              ? 'bg-slate-300 dark:bg-slate-600 text-slate-900 dark:text-white font-black'
+              : 'text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+          }`}
+        >
+          A
+        </button>
+        <button
+          type="button"
+          onClick={increaseTextSize}
+          disabled={fontSizeScale === 'large'}
+          aria-label="Increase text size"
+          title="Increase text size (A+)"
+          className={`px-1.5 py-0.5 text-[11px] font-bold rounded transition-colors cursor-pointer ${
+            fontSizeScale === 'large'
+              ? 'bg-sky-600 text-white shadow-xs'
+              : 'text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed'
+          }`}
+        >
+          A+
+        </button>
+      </div>
 
       {/* 3. High Contrast Mode Toggle */}
       <button

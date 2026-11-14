@@ -219,12 +219,11 @@ export const assetAPI = {
 };
 
 // ------------------------------------------------------------------------------
-// Community Feed & Public Transparency API
+// Community Feed API
 // ------------------------------------------------------------------------------
 export const communityAPI = {
   getFeed: (params) => api.get('/community/feed', { params }),
   toggleUpvote: (complaintId) => api.post(`/community/${complaintId}/upvote`),
-  getTransparency: () => api.get('/community/transparency'),
 };
 
 export default api;

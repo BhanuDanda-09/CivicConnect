@@ -37,10 +37,13 @@ export function LanguageProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem('civicconnect-font-scale', fontSizeScale);
-    if (fontSizeScale === 'large') {
+    document.documentElement.classList.remove('text-scale-small', 'text-scale-large', 'text-scale-normal');
+    if (fontSizeScale === 'small') {
+      document.documentElement.classList.add('text-scale-small');
+    } else if (fontSizeScale === 'large') {
       document.documentElement.classList.add('text-scale-large');
     } else {
-      document.documentElement.classList.remove('text-scale-large');
+      document.documentElement.classList.add('text-scale-normal');
     }
   }, [fontSizeScale]);
 
@@ -51,6 +54,18 @@ export function LanguageProvider({ children }) {
 
   const toggleHighContrast = () => setIsHighContrast((prev) => !prev);
   const toggleFontSize = () => setFontSizeScale((prev) => (prev === 'normal' ? 'large' : 'normal'));
+
+  const decreaseTextSize = () => {
+    setFontSizeScale((prev) => (prev === 'large' ? 'normal' : 'small'));
+  };
+
+  const increaseTextSize = () => {
+    setFontSizeScale((prev) => (prev === 'small' ? 'normal' : 'large'));
+  };
+
+  const resetTextSize = () => {
+    setFontSizeScale('normal');
+  };
 
   return (
     <LanguageContext.Provider
@@ -63,6 +78,9 @@ export function LanguageProvider({ children }) {
         toggleHighContrast,
         fontSizeScale,
         toggleFontSize,
+        decreaseTextSize,
+        increaseTextSize,
+        resetTextSize,
       }}
     >
       {children}

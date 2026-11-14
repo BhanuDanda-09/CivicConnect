@@ -12,8 +12,16 @@ body {
 }
 
 /* Accessibility: Text Scaling */
+html.text-scale-small {
+  font-size: 90%;
+}
+
+html.text-scale-normal {
+  font-size: 100%;
+}
+
 html.text-scale-large {
-  font-size: 115%;
+  font-size: 112%;
 }
 
 /* Accessibility: High Contrast Mode */

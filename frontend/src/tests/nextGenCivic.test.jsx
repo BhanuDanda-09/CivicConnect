@@ -10,15 +10,24 @@ import { BrowserRouter } from 'react-router-dom';
 import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import AccessibilityToolbar from '../components/common/AccessibilityToolbar';
 import AIAssistantModal from '../components/common/AIAssistantModal';
+import Navbar from '../components/common/Navbar';
 import CommunityBoard from '../pages/public/CommunityBoard';
-import Transparency from '../pages/public/Transparency';
 import AuditLogs from '../pages/admin/AuditLogs';
 import ManageAssets from '../pages/admin/ManageAssets';
 import { AuthProvider } from '../context/AuthContext';
 
 function LanguageConsumer() {
-  const { currentLang, setCurrentLang, t, fontSizeScale, toggleFontSize, isHighContrast, toggleHighContrast } =
-    useLanguage();
+  const {
+    currentLang,
+    setCurrentLang,
+    t,
+    fontSizeScale,
+    decreaseTextSize,
+    increaseTextSize,
+    resetTextSize,
+    isHighContrast,
+    toggleHighContrast,
+  } = useLanguage();
 
   return (
     <div>
@@ -28,7 +37,9 @@ function LanguageConsumer() {
       <span data-testid="high-contrast">{isHighContrast ? 'yes' : 'no'}</span>
       <button onClick={() => setCurrentLang('hi')}>Switch to Hindi</button>
       <button onClick={() => setCurrentLang('te')}>Switch to Telugu</button>
-      <button onClick={toggleFontSize}>Toggle Font</button>
+      <button onClick={decreaseTextSize}>Decrease Font</button>
+      <button onClick={increaseTextSize}>Increase Font</button>
+      <button onClick={resetTextSize}>Reset Font</button>
       <button onClick={toggleHighContrast}>Toggle Contrast</button>
     </div>
   );
@@ -62,8 +73,8 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
     expect(screen.getByTestId('translated-tagline').textContent).toContain('ఫిర్యాదు చేయండి');
   });
 
-  // 2. Accessibility Toolbar Controls
-  it('2. toggles high-contrast mode and font scaling accessibility preferences', () => {
+  // 2. Accessibility Toolbar Controls & Text Size Controls (A−, A, A+)
+  it('2. operates A−, A+, and Reset text size controls and persists in localStorage', () => {
     render(
       <LanguageProvider>
         <LanguageConsumer />
@@ -71,13 +82,23 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
       </LanguageProvider>
     );
 
-    // Initial state
+    // Initial default state is normal
     expect(screen.getByTestId('font-scale').textContent).toBe('normal');
-    expect(screen.getByTestId('high-contrast').textContent).toBe('no');
 
-    // Toggle font size
-    fireEvent.click(screen.getByText('Toggle Font'));
+    // Click A+ (Increase)
+    fireEvent.click(screen.getByTitle('Increase text size (A+)'));
     expect(screen.getByTestId('font-scale').textContent).toBe('large');
+    expect(localStorage.getItem('civicconnect-font-scale')).toBe('large');
+
+    // Click A (Reset to default)
+    fireEvent.click(screen.getByTitle('Reset text size to default (A)'));
+    expect(screen.getByTestId('font-scale').textContent).toBe('normal');
+    expect(localStorage.getItem('civicconnect-font-scale')).toBe('normal');
+
+    // Click A− (Decrease)
+    fireEvent.click(screen.getByTitle('Decrease text size (A−)'));
+    expect(screen.getByTestId('font-scale').textContent).toBe('small');
+    expect(localStorage.getItem('civicconnect-font-scale')).toBe('small');
 
     // Toggle high contrast
     fireEvent.click(screen.getByText('Toggle Contrast'));
@@ -121,20 +142,25 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
     expect(screen.getByText(/All States & UTs/i)).toBeInTheDocument();
   });
 
-  // 5. Public Transparency Portal
-  it('5. renders National Civic Transparency Portal with key governance metrics', async () => {
+  // 5. Redesigned Role-Based Navbar
+  it('5. renders redesigned role-based Navbar with authorized links', async () => {
     render(
       <BrowserRouter>
-        <LanguageProvider>
-          <Transparency />
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <Navbar />
+          </LanguageProvider>
+        </AuthProvider>
       </BrowserRouter>
     );
 
-    expect(screen.getByText(/National Civic Transparency Portal/i)).toBeInTheDocument();
-    expect(screen.getByText(/Export CSV Report/i)).toBeInTheDocument();
-    expect(screen.getByText(/Grievance Category Distribution/i)).toBeInTheDocument();
-    expect(screen.getByText(/Municipal Service-Level Agreements/i)).toBeInTheDocument();
+    expect(screen.getByText('Civic')).toBeInTheDocument();
+    expect(screen.getByText('Connect')).toBeInTheDocument();
+    expect(screen.getByText('Home')).toBeInTheDocument();
+    expect(screen.getByText('Report Complaint')).toBeInTheDocument();
+    expect(screen.getByText('Track Complaint')).toBeInTheDocument();
+    expect(screen.getByText('Log In')).toBeInTheDocument();
+    expect(screen.getByText('Register')).toBeInTheDocument();
   });
 
   // 6. Offline Complaint Draft Persistence

@@ -116,7 +116,6 @@ router.get('/', (req, res) => {
       community: {
         feed: 'GET /api/community/feed',
         upvote: 'POST /api/community/:complaintId/upvote (Protected)',
-        transparency: 'GET /api/community/transparency',
       },
     },
   });

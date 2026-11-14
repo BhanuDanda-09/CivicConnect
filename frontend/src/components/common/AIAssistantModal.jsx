@@ -75,7 +75,7 @@ export default function AIAssistantModal() {
           text: 'CivicConnect manages civic infrastructure issues. For life-threatening emergencies, please call 112 immediately. For municipal complaints, you can file a report through our citizen portal.',
           quickLinks: [
             { label: 'Submit Grievance', url: '/citizen/submit-complaint' },
-            { label: 'Help Center', url: '/help' },
+            { label: 'Track Grievance', url: '/track' },
           ],
         },
       ]);
