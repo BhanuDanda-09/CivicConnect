@@ -161,6 +161,11 @@ describe('CivicConnect Next-Generation Feature Test Suite', () => {
     expect(screen.getByText('Track Complaint')).toBeInTheDocument();
     expect(screen.getByText('Log In')).toBeInTheDocument();
     expect(screen.getByText('Register')).toBeInTheDocument();
+
+    // Verify the 3 accessibility controls (Language selector, Text size controls, Contrast toggle) are removed from Navbar
+    expect(screen.queryByLabelText('Select Portal Language')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Text size accessibility controls')).not.toBeInTheDocument();
+    expect(screen.queryByLabelText('Toggle High Contrast Display')).not.toBeInTheDocument();
   });
 
   // 6. Offline Complaint Draft Persistence

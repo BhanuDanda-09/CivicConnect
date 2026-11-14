@@ -7,7 +7,6 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import ThemeToggle from './ThemeToggle';
-import AccessibilityToolbar from './AccessibilityToolbar';
 import {
   Menu,
   X,
@@ -158,11 +157,8 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* 3. Right-Side Actions (Accessibility, Themes, Role & Profile) */}
+          {/* 3. Right-Side Actions (Theme, Role Switcher, Notifications & Profile) */}
           <div className="hidden md:flex items-center space-x-2.5">
-            {/* Accessibility & Font Scaling Toolbar (A−, A, A+) */}
-            <AccessibilityToolbar />
-
             {/* Dark / Light Mode Toggle */}
             <ThemeToggle size="sm" />
 
@@ -342,12 +338,6 @@ export default function Navbar() {
       {/* 5. Mobile Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-4 pt-3 pb-6 space-y-4 animate-in slide-in-from-top-2 duration-150 shadow-2xl">
-          {/* Accessibility Controls on Mobile */}
-          <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
-            <span className="text-[11px] font-bold text-slate-400 uppercase">Text & Language</span>
-            <AccessibilityToolbar />
-          </div>
-
           {/* Role-Specific Links on Mobile */}
           <div className="flex flex-col space-y-1">
             {navLinks.map((item) => {
