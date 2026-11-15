@@ -138,9 +138,11 @@ export function AuthProvider({ children }) {
       console.warn('Backend server unreachable; creating local demo citizen session:', err.message);
       const newUser = {
         id: `usr_c_${Date.now()}`,
-        name: registrationData.name,
+        name: registrationData.fullName || registrationData.name,
+        fullName: registrationData.fullName || registrationData.name,
         email: registrationData.email,
-        phone: registrationData.phone,
+        phone: registrationData.mobileNumber || registrationData.phone,
+        mobileNumber: registrationData.mobileNumber || registrationData.phone,
         address: registrationData.address,
         role: USER_ROLES.CITIZEN,
         avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80',

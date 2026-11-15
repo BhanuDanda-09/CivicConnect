@@ -141,8 +141,10 @@ export default function Register() {
     });
 
     const payload = {
+      fullName: formData.name.trim(),
       name: formData.name.trim(),
       email: formData.email.trim().toLowerCase(),
+      mobileNumber: `+91${cleanPhone}`,
       phone: `+91${cleanPhone}`,
       address: fullFormattedAddress,
       houseNumber: formData.houseNumber.trim(),

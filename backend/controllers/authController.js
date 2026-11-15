@@ -13,11 +13,11 @@ const { sendTokenResponse } = require('../utils/tokenUtils');
  * @access  Public
  */
 const register = asyncHandler(async (req, res) => {
+  const fullName = (req.body.fullName || req.body.name || '').trim();
+  const mobileNumber = (req.body.mobileNumber || req.body.phone || '').trim();
   const {
-    fullName,
     email,
     password,
-    mobileNumber,
     address,
     houseNumber,
     street,

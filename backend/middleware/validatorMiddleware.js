@@ -28,11 +28,17 @@ const handleValidationErrors = (req, res, next) => {
  */
 const validateRegister = [
   body('fullName')
-    .trim()
-    .notEmpty()
-    .withMessage('Full name is required')
-    .isLength({ min: 3, max: 100 })
-    .withMessage('Full name must be between 3 and 100 characters long'),
+    .custom((val, { req }) => {
+      const name = (val || req.body.name || '').toString().trim();
+      if (!name) {
+        throw new Error('Full name is required');
+      }
+      if (name.length < 3 || name.length > 100) {
+        throw new Error('Full name must be between 3 and 100 characters long');
+      }
+      req.body.fullName = name;
+      return true;
+    }),
 
   body('email')
     .trim()
@@ -49,16 +55,26 @@ const validateRegister = [
     .withMessage('Password must be at least 6 characters long'),
 
   body('mobileNumber')
-    .trim()
-    .notEmpty()
-    .withMessage('Mobile number is required')
-    .matches(/^\+?[0-9\s-]{10,15}$/)
-    .withMessage('Please provide a valid 10-15 digit mobile number'),
+    .custom((val, { req }) => {
+      const mobile = (val || req.body.phone || '').toString().trim();
+      if (!mobile) {
+        throw new Error('Mobile number is required');
+      }
+      if (!/^\+?[0-9\s-]{10,15}$/.test(mobile)) {
+        throw new Error('Please provide a valid 10-15 digit mobile number');
+      }
+      req.body.mobileNumber = mobile;
+      return true;
+    }),
 
   body('address')
-    .trim()
-    .notEmpty()
-    .withMessage('Residential address is required'),
+    .custom((val, { req }) => {
+      const addr = (val || req.body.street || '').toString().trim();
+      if (!addr) {
+        throw new Error('Residential address is required');
+      }
+      return true;
+    }),
 
   body('ward')
     .optional()
