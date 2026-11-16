@@ -8,7 +8,7 @@ import Register from '../pages/auth/Register';
 
 // Helper component to test AuthContext consumer
 function TestAuthConsumer() {
-  const { user, isAuthenticated, role, isAdmin, isWorker, isCitizen } = useAuthContext();
+  const { user, isAuthenticated, role, isAdmin, isWorker, isCitizen, switchDemoRole, logout } = useAuthContext();
   return (
     <div>
       <div data-testid="auth-status">{isAuthenticated ? 'logged-in' : 'logged-out'}</div>
@@ -16,6 +16,10 @@ function TestAuthConsumer() {
       <div data-testid="is-admin">{isAdmin ? 'yes' : 'no'}</div>
       <div data-testid="is-worker">{isWorker ? 'yes' : 'no'}</div>
       <div data-testid="is-citizen">{isCitizen ? 'yes' : 'no'}</div>
+      <button onClick={() => switchDemoRole('admin')}>Switch to Admin</button>
+      <button onClick={() => switchDemoRole('worker')}>Switch to Worker</button>
+      <button onClick={() => switchDemoRole('citizen')}>Switch to Citizen</button>
+      <button onClick={() => logout()}>Log Out</button>
     </div>
   );
 }
@@ -115,6 +119,49 @@ describe('Frontend Authentication & RBAC Suite', () => {
 
     await waitFor(() => {
       expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    });
+  });
+
+  it('switches demo personas (Admin, Worker, Citizen) and updates permissions & localStorage', async () => {
+    localStorage.clear();
+    render(
+      <AuthProvider>
+        <TestAuthConsumer />
+      </AuthProvider>
+    );
+
+    // Initial state
+    expect(screen.getByTestId('auth-status')).toHaveTextContent('logged-out');
+
+    // Switch to Admin
+    fireEvent.click(screen.getByText('Switch to Admin'));
+    expect(screen.getByTestId('auth-status')).toHaveTextContent('logged-in');
+    expect(screen.getByTestId('auth-role')).toHaveTextContent('admin');
+    expect(screen.getByTestId('is-admin')).toHaveTextContent('yes');
+    expect(screen.getByTestId('is-worker')).toHaveTextContent('no');
+    expect(screen.getByTestId('is-citizen')).toHaveTextContent('no');
+    expect(localStorage.getItem('civic_token')).toContain('demo_jwt_admin_');
+
+    // Switch to Worker
+    fireEvent.click(screen.getByText('Switch to Worker'));
+    expect(screen.getByTestId('auth-role')).toHaveTextContent('worker');
+    expect(screen.getByTestId('is-worker')).toHaveTextContent('yes');
+    expect(screen.getByTestId('is-admin')).toHaveTextContent('no');
+    expect(localStorage.getItem('civic_token')).toContain('demo_jwt_worker_');
+
+    // Switch to Citizen
+    fireEvent.click(screen.getByText('Switch to Citizen'));
+    expect(screen.getByTestId('auth-role')).toHaveTextContent('citizen');
+    expect(screen.getByTestId('is-citizen')).toHaveTextContent('yes');
+    expect(localStorage.getItem('civic_token')).toContain('demo_jwt_citizen_');
+
+    // Logout
+    fireEvent.click(screen.getByText('Log Out'));
+    await waitFor(() => {
+      expect(screen.getByTestId('auth-status')).toHaveTextContent('logged-out');
+      expect(screen.getByTestId('auth-role')).toHaveTextContent('none');
+      expect(localStorage.getItem('civic_token')).toBeNull();
+      expect(localStorage.getItem('civic_user')).toBeNull();
     });
   });
 });

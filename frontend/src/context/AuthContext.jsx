@@ -30,6 +30,7 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('civic_user');
       localStorage.removeItem('civic_demo_user');
       localStorage.removeItem('civic_token');
+      localStorage.removeItem('civic_demo_mode');
     }
   }, [user, token]);
 
@@ -161,9 +162,9 @@ export function AuthProvider({ children }) {
   // Switch demo persona directly from UI navbar or quick controls
   const switchDemoRole = useCallback((role) => {
     let selectedUser = DEMO_USERS.citizen;
-    if (role === USER_ROLES.ADMIN) {
+    if (role === USER_ROLES.ADMIN || role === 'admin') {
       selectedUser = DEMO_USERS.admin;
-    } else if (role === USER_ROLES.WORKER) {
+    } else if (role === USER_ROLES.WORKER || role === 'worker') {
       selectedUser = DEMO_USERS.worker;
     }
 
@@ -172,12 +173,16 @@ export function AuthProvider({ children }) {
     setToken(demoToken);
     localStorage.setItem('civic_user', JSON.stringify(selectedUser));
     localStorage.setItem('civic_token', demoToken);
+    localStorage.setItem('civic_demo_mode', 'true');
+    return selectedUser;
   }, []);
 
   // Logout handler
   const logout = async () => {
     try {
-      await authAPI.logout();
+      if (token && !token.startsWith('demo_jwt_')) {
+        await authAPI.logout();
+      }
     } catch (err) {
       // Ignore network errors on logout
     } finally {
@@ -186,8 +191,11 @@ export function AuthProvider({ children }) {
       localStorage.removeItem('civic_user');
       localStorage.removeItem('civic_demo_user');
       localStorage.removeItem('civic_token');
+      localStorage.removeItem('civic_demo_mode');
     }
   };
+
+  const isDemoMode = !!(token && token.startsWith('demo_jwt_')) || localStorage.getItem('civic_demo_mode') === 'true';
 
   const value = {
     user,
@@ -197,6 +205,7 @@ export function AuthProvider({ children }) {
     isAdmin: user?.role === USER_ROLES.ADMIN,
     isWorker: user?.role === USER_ROLES.WORKER,
     isCitizen: user?.role === USER_ROLES.CITIZEN,
+    isDemoMode,
     loading,
     login,
     register,

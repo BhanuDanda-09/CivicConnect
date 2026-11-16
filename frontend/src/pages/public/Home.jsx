@@ -1,5 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 import { COMPLAINT_CATEGORIES, APP_NAME, APP_TAGLINE } from '../../utils/constants';
 import {
   FileText,
@@ -18,6 +19,17 @@ import {
 } from 'lucide-react';
 
 export default function Home() {
+  const navigate = useNavigate();
+  const { user, isAuthenticated, switchDemoRole } = useAuth();
+
+  const handlePortalClick = (targetRole, targetPath) => {
+    // If not authenticated or not in the target role, switch demo persona seamlessly
+    if (!isAuthenticated || user?.role !== targetRole) {
+      switchDemoRole(targetRole);
+    }
+    navigate(targetPath);
+  };
+
   const stats = [
     { label: 'Complaints Resolved', value: '4,280+', change: '+12% this month', color: 'emerald' },
     { label: 'Active Grievances', value: '142', change: 'Current on-site tasks', color: 'sky' },
@@ -129,9 +141,10 @@ export default function Home() {
 
               {/* Role Quick Access Navigation Bar */}
               <div className="pt-4 grid grid-cols-1 sm:grid-cols-3 gap-2.5 text-left">
-                <Link
-                  to="/citizen/dashboard"
-                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition-all group"
+                <button
+                  type="button"
+                  onClick={() => handlePortalClick('citizen', '/citizen/dashboard')}
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-cyan-500/40 transition-all group text-left cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-xs font-bold text-cyan-400 mb-1">
                     <span>Citizen Portal</span>
@@ -140,11 +153,12 @@ export default function Home() {
                   <p className="text-[11px] text-slate-400 line-clamp-2">
                     Submit grievances with GPS & photo evidence
                   </p>
-                </Link>
+                </button>
 
-                <Link
-                  to="/worker/dashboard"
-                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-teal-500/40 transition-all group"
+                <button
+                  type="button"
+                  onClick={() => handlePortalClick('worker', '/worker/dashboard')}
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-teal-500/40 transition-all group text-left cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-xs font-bold text-teal-400 mb-1">
                     <span>Field Worker</span>
@@ -153,11 +167,12 @@ export default function Home() {
                   <p className="text-[11px] text-slate-400 line-clamp-2">
                     On-site GPS tasks, repair uploads & resolution
                   </p>
-                </Link>
+                </button>
 
-                <Link
-                  to="/admin/dashboard"
-                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/40 transition-all group"
+                <button
+                  type="button"
+                  onClick={() => handlePortalClick('admin', '/admin/dashboard')}
+                  className="p-3 rounded-xl bg-slate-800/50 hover:bg-slate-800 border border-slate-700/50 hover:border-indigo-500/40 transition-all group text-left cursor-pointer"
                 >
                   <div className="flex items-center justify-between text-xs font-bold text-indigo-400 mb-1">
                     <span>Municipal Admin</span>
@@ -166,7 +181,7 @@ export default function Home() {
                   <p className="text-[11px] text-slate-400 line-clamp-2">
                     Verification, crew assignment & ward analytics
                   </p>
-                </Link>
+                </button>
               </div>
             </div>
 

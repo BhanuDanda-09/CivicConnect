@@ -67,11 +67,24 @@ function ProtectedRoute({ children, allowedRoles }) {
     );
   }
 
-  if (!isAuthenticated) {
+  // Resolve active user from context or persistent storage to prevent race conditions during role transitions
+  const activeUser = user || (() => {
+    try {
+      const saved = localStorage.getItem('civic_user');
+      return saved ? JSON.parse(saved) : null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const activeAuth = isAuthenticated || !!activeUser;
+
+  if (!activeAuth) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+  const activeRole = activeUser?.role;
+  if (allowedRoles && !allowedRoles.includes(activeRole)) {
     return <Navigate to="/unauthorized" replace />;
   }
 

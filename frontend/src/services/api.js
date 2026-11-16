@@ -51,20 +51,26 @@ api.interceptors.response.use(
 
     // 2. Authentication Expiration / Invalid Token (401)
     if (status === 401) {
-      localStorage.removeItem('civic_token');
-      localStorage.removeItem('civic_user');
+      const currentToken = localStorage.getItem('civic_token');
+      const isDemoToken = currentToken && currentToken.startsWith('demo_jwt_');
 
-      const currentPath = window.location.pathname;
-      const isPublicRoute =
-        currentPath.includes('/login') ||
-        currentPath.includes('/register') ||
-        currentPath.includes('/about') ||
-        currentPath.includes('/contact') ||
-        currentPath.includes('/track') ||
-        currentPath === '/';
+      // Only purge credentials and redirect to /login for real production sessions
+      if (!isDemoToken) {
+        localStorage.removeItem('civic_token');
+        localStorage.removeItem('civic_user');
 
-      if (!isPublicRoute) {
-        window.location.href = '/login?sessionExpired=true';
+        const currentPath = window.location.pathname;
+        const isPublicRoute =
+          currentPath.includes('/login') ||
+          currentPath.includes('/register') ||
+          currentPath.includes('/about') ||
+          currentPath.includes('/contact') ||
+          currentPath.includes('/track') ||
+          currentPath === '/';
+
+        if (!isPublicRoute) {
+          window.location.href = '/login?sessionExpired=true';
+        }
       }
     }
 
